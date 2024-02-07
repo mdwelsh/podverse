@@ -1,0 +1,9 @@
+.pnp*
+.yarn*
+.vscode*
+*data*
+dist
+.next
+.docusaurus
+*build*
+packages/docs/docs/api

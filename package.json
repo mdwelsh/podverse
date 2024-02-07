@@ -1,0 +1,34 @@
+{
+  "name": "podverse-monorepo-root",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "yarn@3.6.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@types/prettier": "^2",
+    "eslint": "^8.42.0",
+    "eslint-import-resolver-node": "^0.3.7",
+    "eslint-import-resolver-typescript": "^3.5.5",
+    "eslint-plugin-import": "^2.27.5",
+    "prettier": "^2.8.8",
+    "turbo": "^1.10.7",
+    "typescript": "^5.1.3"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "format-for-turbo": "prettier --write .",
+    "format:check": "prettier . --check",
+    "format": "turbo format-for-turbo"
+  },
+  "volta": {
+    "node": "18.16.0",
+    "yarn": "3.6.0"
+  },
+  "prettier": {
+    "printWidth": 120,
+    "singleQuote": true
+  }
+}
