@@ -21,6 +21,7 @@ import {
 //import { Summarize } from './summary.js';
 import { dump, load } from 'js-yaml';
 import fs from 'fs';
+import { Inngest } from "inngest";
 
 /** Describes the configuration file YAML format. */
 interface PodcastConfig {
@@ -71,7 +72,7 @@ program
       const podcast = await Ingest({ supabase, podcastUrl });
       term('Ingested podcast: ').green(podcast.slug)(` (${podcast.Episodes?.length} episodes)\n`);
     } catch (err) {
-      term('Error ingesting podcast: ').red(JSON.stringify(err));
+      term('Error ingesting podcast: ').red(err);
     }
   });
 
@@ -110,7 +111,7 @@ program
         term('Ingested podcast: ').green(podcast.slug)(` (${podcast.Episodes?.length} episodes)\n`);
         created += 1;
       } catch (err) {
-        term('Error ingesting podcast: ').red(JSON.stringify(err));
+        term('Error ingesting podcast: ').red(err);
       }
     }
     term('Ingested podcasts from ').green(filename)(`: ${created} created, ${skipped} skipped.\n`);
@@ -159,6 +160,31 @@ program
       const newPodcast = await Ingest({ slug, supabase, podcastUrl: podcast.rssUrl, refresh: true });
       const diff = (newPodcast.Episodes?.length ?? 0) - (podcast.Episodes?.length ?? 0);
       term('Refreshed podcast: ').green(slug)(` (${newPodcast.Episodes?.length} episodes, ${diff} new)\n`);
+    }
+  });
+
+program
+  .command('process')
+  .description('Send Inngest event to start processing.')
+  .option('--dev', 'Use the local development Inngest environment.')
+  .action(async (opts) => {
+    try {
+      let eventKey: string | undefined = process.env.INNGEST_EVENT_KEY;
+      if (opts.dev) {
+        eventKey = undefined;
+      } else if (!eventKey) {
+        throw new Error('Missing INNGEST_EVENT_KEY environment variable.');
+      }
+      const inngest = new Inngest({ id: "podverse-app", eventKey });
+      await inngest.send({
+        name: "test/hello.world",
+        data: {
+          email: "testFromCLI@example.com",
+        },
+      });
+      term.green('Started processing.\n');
+    } catch (err) {
+      term('Error sending process event: ').red(err);
     }
   });
 

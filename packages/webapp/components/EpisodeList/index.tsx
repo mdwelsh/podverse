@@ -6,7 +6,7 @@ export async function EpisodeList() {
 
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full md:w-4/5 mx-auto">
-            {episodes.map(episode => <EpisodeCard episode={episode} />)}
+            {episodes.map((episode, index) => <EpisodeCard key={index} episode={episode} />)}
         </div>
     );
 
