@@ -14,6 +14,7 @@ export type Database = {
           audioUrl: string | null
           created_at: string
           description: string | null
+          guid: string | null
           id: number
           imageUrl: string | null
           podcast: number
@@ -28,6 +29,7 @@ export type Database = {
           audioUrl?: string | null
           created_at?: string
           description?: string | null
+          guid?: string | null
           id?: number
           imageUrl?: string | null
           podcast: number
@@ -42,6 +44,7 @@ export type Database = {
           audioUrl?: string | null
           created_at?: string
           description?: string | null
+          guid?: string | null
           id?: number
           imageUrl?: string | null
           podcast?: number

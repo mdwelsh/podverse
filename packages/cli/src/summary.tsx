@@ -3,7 +3,7 @@ import * as AI from 'ai-jsx';
 import { ChatCompletion, SystemMessage, UserMessage } from 'ai-jsx/core/completion';
 import { OpenAI } from 'ai-jsx/lib/openai';
 import terminal from 'terminal-kit';
-import { Podcast, Episode } from 'podverse-types';
+import { Podcast, Episode } from 'podverse-utils';
 const { terminal: term } = terminal;
 
 // Rough estimate.

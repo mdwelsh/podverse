@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Podcast } from 'podverse-types';
+import { Podcast } from 'podverse-utils';
 
 export function PodcastCard({ podcast } : { podcast : Podcast }) {
     return (

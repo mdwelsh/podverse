@@ -7,4 +7,4 @@ export type Episode = Tables<'Episodes'>;
 export type EpisodeWithPodcast = Omit<Episode, 'podcast'> & { podcast: Podcast };
 
 // A Podcast with a list of episodes.
-export type PodcastWithEpisodes = Podcast & { episodes: Episode[] };
+export type PodcastWithEpisodes = Podcast & { Episodes: Episode[] };
