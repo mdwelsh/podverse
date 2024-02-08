@@ -24,11 +24,14 @@
     "format": "turbo format-for-turbo"
   },
   "volta": {
-    "node": "18.16.0",
+    "node": "18.18.0",
     "yarn": "3.6.0"
   },
   "prettier": {
     "printWidth": 120,
     "singleQuote": true
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.3"
   }
 }
