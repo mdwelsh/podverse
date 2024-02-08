@@ -1,10 +1,15 @@
-import Link from "next/link"
+"use server";
 
+import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
 import { EpisodeList } from "@/components/EpisodeList"
 import { PodcastList } from "@/components/PodcastList"
 
-export default function HomePage() {
+// Use dynamic rendering, since we fetch live data.
+//export const dynamicParams = true;
+//export const revalidate = 60;
+
+export default async function HomePage() {
   return (
     <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
       <div className="flex max-w-[980px] flex-col items-start gap-2">

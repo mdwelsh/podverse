@@ -1,25 +1,31 @@
-"use server"
+"use server";
 
+import { cache } from 'react';
 import supabase from "./supabase"
-import { Episode, Podcast } from "podverse-types";
-
-// An Episode where the podcast field is replaced with the Podcast object itself.
-type EpisodeWithPodcast = Omit<Episode, 'podcast'> & { podcast: Podcast };
-
-export async function getPodcasts(): Promise<Podcast[]> {
+ 
+export const getPodcasts = cache(async () => {
   const { data, error } = await supabase.from("Podcasts").select("*");
   if (error) {
     console.log("error", error)
     throw error
   }
   return data
-}
+});
 
-export async function getEpisodesWithPodcast(): Promise<EpisodeWithPodcast[]> {
+export const getEpisodesWithPodcast = cache(async () => {
   const { data, error } = await supabase.from('Episodes').select("*, podcast (*)");
   if (error) {
     console.log("error", error)
     throw error
   }
   return data
-}
+});
+
+export const getLatestEpisodes = cache(async () => {
+  const { data, error } = await supabase.from('Episodes').select("*, podcast ( slug, title )").order("pubDate", { ascending: false }).limit(8);
+  if (error) {
+    console.log("error", error)
+    throw error
+  }
+  return data
+});

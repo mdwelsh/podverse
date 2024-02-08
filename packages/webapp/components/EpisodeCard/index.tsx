@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { EpisodeWithPodcast } from '@/lib/storage'
+import { EpisodeWithPodcast } from 'podverse-types';
 
 /** A card showing information about a given episode. */
 export function EpisodeCard({
@@ -9,10 +9,11 @@ export function EpisodeCard({
 }) {
   return (
     <Link href={`/podcasts/${episode.podcast.slug}/episodes/${episode.slug}`}>
-      <div className="hover:ring-4 hover:ring-primary flex flex-col w-48 gap-4 h-full p-4 mx-4 rounded-lg border bg-gray-700 dark:bg-gray-700 text-white dark:text-white">
+      <div className="hover:ring-4 hover:ring-primary flex flex-col w-40 md:w-48 gap-4 h-full p-4 mx-4 rounded-lg border bg-gray-700 dark:bg-gray-700 text-white dark:text-white">
         <div className="flex flex-col w-full">
-          <img src={episode.imageUrl} />
-          <p className="mb-2 text-sm">{episode.title}</p>
+          { episode.imageUrl && <img src={episode.imageUrl} /> }
+          <p className="mb-2 text-xs md:text-sm">{episode.title}</p>
+          { episode.podcast.title && <p className="text-xs">from <span className="text-primary">{episode.podcast.title}</span></p> }
         </div>
       </div>
     </Link>

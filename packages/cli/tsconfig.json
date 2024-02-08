@@ -7,11 +7,10 @@
     "skipLibCheck": true,
     "module": "node16",
     "moduleResolution": "nodenext",
-    "jsx": "react",
+    "jsx": "react-jsx",
+    "jsxImportSource": "ai-jsx",
     "esModuleInterop": true,
-    "outDir": "dist",
-    "declaration": true
+    "outDir": "dist"
   },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  "include": ["src"]
 }
