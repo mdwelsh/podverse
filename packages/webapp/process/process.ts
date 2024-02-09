@@ -20,7 +20,7 @@ export async function TranscribeEpisode(episodeId: number): Promise<string> {
     result.results?.channels[0].alternatives[0].paragraphs?.transcript ||
     result.results?.channels[0].alternatives[0].transcript ||
     '';
-  const transcriptUrl = await Upload(supabase, JSON.stringify(transcript, null, 2), 'transcripts', `${episodeId}.txt`);
+  const transcriptUrl = await Upload(supabase, transcript, 'transcripts', `${episodeId}.txt`);
 
   // Update Episode.
   episode.transcriptUrl = transcriptUrl;

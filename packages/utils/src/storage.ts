@@ -77,6 +77,28 @@ export async function GetEpisodeWithPodcast(supabase: SupabaseClient, episodeId:
   return data[0];
 }
 
+/** Return metadata for the given episode. */
+export async function GetEpisodeWithPodcastBySlug(
+  supabase: SupabaseClient,
+  podcastSlug: string,
+  episodeSlug: string,
+): Promise<EpisodeWithPodcast> {
+  const { data, error } = await supabase
+    .from('Episodes')
+    .select('*, podcast (*)')
+    .eq('podcast.slug', podcastSlug)
+    .eq('slug', episodeSlug)
+    .limit(1);
+  if (error) {
+    console.log('error', error);
+    throw error;
+  }
+  if (!data || data.length === 0) {
+    throw new Error(`Episode with slug ${podcastSlug}/${episodeSlug} not found.`);
+  }
+  return data[0];
+}
+
 /** Return metadata for the given podcast. */
 export async function GetPodcast(supabase: SupabaseClient, slug: string): Promise<Podcast> {
   const { data, error } = await supabase.from('Podcasts').select('*').eq('slug', slug).limit(1);
@@ -144,7 +166,7 @@ export async function SetEpisodes(supabase: SupabaseClient, episodes: Episode[])
     episodes.map((e) => {
       const { id, created_at, ...episodeData } = e;
       return episodeData;
-    })
+    }),
   );
   if (error) {
     throw error;
@@ -167,7 +189,7 @@ export async function Upload(
   supabase: SupabaseClient,
   data: string,
   bucket: string,
-  fileName: string
+  fileName: string,
 ): Promise<string> {
   const buf = Buffer.from(data, 'utf8');
   const { error } = await supabase.storage.from(bucket).upload(fileName, buf, { upsert: true });
