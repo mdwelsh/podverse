@@ -10,9 +10,10 @@ export const helloWorld = inngest.createFunction(
     console.log('test/hello.world event received', event);
     await step.sleep('wait-a-moment', '1s');
     return { event, body: 'Hello, World!' };
-  }
+  },
 );
 
+/** Scan for unprocessed episodes and fire off events to process them. */
 export const processEpisodes = inngest.createFunction(
   { id: 'process-episodes' },
   { event: 'process/episodes' },
@@ -39,11 +40,18 @@ export const processEpisodes = inngest.createFunction(
       event,
       body: `process/episodes - Sent transcribe events for ${data.length} episodes.`,
     };
-  }
+  },
 );
 
+/** Transcribe an episode. */
 export const transcribeEpisode = inngest.createFunction(
-  { id: 'process-transcribe' },
+  {
+    id: 'process-transcribe',
+    concurrency: {
+      // Limit number of concurrent calls to Deepgram to avoid hitting API limit.
+      limit: 4,
+    },
+  },
   { event: 'process/transcribe' },
   async ({ event, step }) => {
     const { episodeId } = event.data;
@@ -53,5 +61,5 @@ export const transcribeEpisode = inngest.createFunction(
       event,
       body: result,
     };
-  }
+  },
 );
