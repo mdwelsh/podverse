@@ -159,8 +159,10 @@ program
 program
   .command('process')
   .description('Send Inngest event to start processing.')
+  .argument('[podcastSlug]', 'Podcast to process.')
+  .option('--repeat', 'Repeat processing after first batch.')
   .option('--dev', 'Use the local development Inngest environment.')
-  .action(async (opts) => {
+  .action(async (podcastSlug: string, opts) => {
     try {
       let eventKey: string | undefined = process.env.INNGEST_EVENT_KEY;
       if (opts.dev) {
@@ -171,7 +173,10 @@ program
       const inngest = new Inngest({ id: 'podverse-app', eventKey });
       await inngest.send({
         name: 'process/episodes',
-        data: {},
+        data: {
+          podcastSlug: podcastSlug || undefined,
+          repeat: opts.repeat,
+        },
       });
       term.green('Started processing.\n');
     } catch (err) {
@@ -203,6 +208,34 @@ program
     } catch (err) {
       term('Error sending process event: ').red(err);
     }
+  });
+
+program
+  .command('cancel')
+  .description('Cancel Inngest function invocations.')
+  .argument('<functionId>', 'ID of the function to cancel.')
+  .action(async (functionId) => {
+    const signKey: string | undefined = process.env.INNGEST_SIGN_KEY;
+    if (!signKey) {
+      throw new Error('Missing INNGEST_SIGN_KEY environment variable.');
+    }
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const res = await fetch('https://api.inngest.com/v1/cancellations', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${signKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        app_id: 'podverse-app',
+        function_id: functionId,
+        started_after: yesterday,
+        started_before: tomorrow,
+      }),
+    });
+    const data = await res.json();
+    term.green(JSON.stringify(data));
   });
 
 // program
