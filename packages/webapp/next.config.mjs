@@ -1,4 +1,3 @@
-
 // https://github.com/livekit/client-sdk-js/issues/938#issuecomment-1814441537 explains a bug in nextjs
 
 /** @type {import('next').NextConfig} */
@@ -28,4 +27,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig
+export default nextConfig;

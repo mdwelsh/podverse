@@ -1,18 +1,17 @@
-export type SiteConfig = typeof siteConfig
+export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "Podverse",
-  description:
-    "This kinda sucks.",
+  name: 'Podverse',
+  description: 'This kinda sucks.',
   mainNav: [
     {
-      title: "Home",
-      href: "/",
+      title: 'Home',
+      href: '/',
     },
   ],
   links: {
-    twitter: "https://twitter.com/shadcn",
-    github: "https://github.com/shadcn/ui",
-    docs: "https://ui.shadcn.com",
+    twitter: 'https://twitter.com/shadcn',
+    github: 'https://github.com/shadcn/ui',
+    docs: 'https://ui.shadcn.com',
   },
-}
+};

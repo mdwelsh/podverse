@@ -10,18 +10,13 @@ import terminal from 'terminal-kit';
 const { terminal: term } = terminal;
 import { Ingest } from './podcast.js';
 import supabase from './supabase.js';
-import {
-  GetPodcast,
-  GetPodcasts,
-  GetPodcastWithEpisodes,
-  DeletePodcast,
-} from 'podverse-utils';
+import { GetPodcast, GetPodcasts, GetPodcastWithEpisodes, DeletePodcast } from 'podverse-utils';
 //import { ProcessPodcast } from './process.js';
 //import { IndexPodcast } from './corpus.js';
 //import { Summarize } from './summary.js';
 import { dump, load } from 'js-yaml';
 import fs from 'fs';
-import { Inngest } from "inngest";
+import { Inngest } from 'inngest';
 
 /** Describes the configuration file YAML format. */
 interface PodcastConfig {
@@ -35,7 +30,6 @@ interface ConfigFile {
 
 program.name('podverse-cli').version('0.0.1').description('CLI for managing Podverse state.');
 
-
 program
   .command('list')
   .description('List all podcasts in the Podverse app.')
@@ -44,7 +38,7 @@ program
     for (const podcast of podcasts) {
       term(podcast.slug + ': ')
         .green(podcast.title + ' ')
-        .blue(podcast.rssUrl + '\n')
+        .blue(podcast.rssUrl + '\n');
     }
   });
 
@@ -139,7 +133,6 @@ program
     term('Wrote config to ').green(filename);
   });
 
-
 program
   .command('refresh')
   .description('Refresh podcast episodes by adding new episodes from their RSS feeds.')
@@ -175,14 +168,38 @@ program
       } else if (!eventKey) {
         throw new Error('Missing INNGEST_EVENT_KEY environment variable.');
       }
-      const inngest = new Inngest({ id: "podverse-app", eventKey });
+      const inngest = new Inngest({ id: 'podverse-app', eventKey });
       await inngest.send({
-        name: "test/hello.world",
-        data: {
-          email: "testFromCLI@example.com",
-        },
+        name: 'process/episodes',
+        data: {},
       });
       term.green('Started processing.\n');
+    } catch (err) {
+      term('Error sending process event: ').red(err);
+    }
+  });
+
+program
+  .command('transcribe')
+  .description('Send Inngest event to transcribe episode.')
+  .argument('<episodeId>', 'ID of the episode to transcribe.')
+  .option('--dev', 'Use the local development Inngest environment.')
+  .action(async (episodeId, opts) => {
+    try {
+      let eventKey: string | undefined = process.env.INNGEST_EVENT_KEY;
+      if (opts.dev) {
+        eventKey = undefined;
+      } else if (!eventKey) {
+        throw new Error('Missing INNGEST_EVENT_KEY environment variable.');
+      }
+      const inngest = new Inngest({ id: 'podverse-app', eventKey });
+      await inngest.send({
+        name: 'process/transcribe',
+        data: {
+          episodeId: parseInt(episodeId),
+        },
+      });
+      term.green(`Started transcription for episode ${episodeId}.\n`);
     } catch (err) {
       term('Error sending process event: ').red(err);
     }

@@ -1,14 +1,14 @@
-import * as React from "react"
-import Link from "next/link"
-import Image from "next/image"
+import * as React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 
-import { NavItem } from "@/types/nav"
-import { siteConfig } from "@/config/site"
-import { cn } from "@/lib/utils"
-import { Icons } from "@/components/icons"
+import { NavItem } from '@/types/nav';
+import { siteConfig } from '@/config/site';
+import { cn } from '@/lib/utils';
+import { Icons } from '@/components/icons';
 
 interface MainNavProps {
-  items?: NavItem[]
+  items?: NavItem[];
 }
 
 export function MainNav({ items }: MainNavProps) {
@@ -27,8 +27,8 @@ export function MainNav({ items }: MainNavProps) {
                   key={index}
                   href={item.href}
                   className={cn(
-                    "flex items-center text-sm font-medium text-muted-foreground",
-                    item.disabled && "cursor-not-allowed opacity-80"
+                    'flex items-center text-sm font-medium text-muted-foreground',
+                    item.disabled && 'cursor-not-allowed opacity-80'
                   )}
                 >
                   {item.title}
@@ -38,5 +38,5 @@ export function MainNav({ items }: MainNavProps) {
         </nav>
       ) : null}
     </div>
-  )
+  );
 }

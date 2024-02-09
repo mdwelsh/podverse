@@ -48,6 +48,7 @@ async function readPodcastFeed(podcastUrl: string, podcastSlug?: string): Promis
       id: 0,
       created_at: '',
       podcast: 0,
+      modified_at: null,
       // This field should be populated in RSS feeds used by Apple Podcasts,
       // at least, but we have a fallback in case it is not.
       guid: entry.guid || entry.link || entry.audioUrl || null,
@@ -58,8 +59,10 @@ async function readPodcastFeed(podcastUrl: string, podcastSlug?: string): Promis
       imageUrl: entry.itunes?.image || null,
       pubDate: entry.pubDate || null,
       audioUrl: entry.enclosure?.url || null,
-      summaryUrl: null,
       transcriptUrl: null,
+      rawTranscriptUrl: null,
+      summaryUrl: null,
+      error: null,
     };
   });
 
@@ -120,8 +123,8 @@ export async function Ingest({
   await SetEpisodes(
     supabase,
     episodes.map((episode) => {
-      return { ...episode, podcast: podcastId }
-    }),
+      return { ...episode, podcast: podcastId };
+    })
   );
   return await GetPodcastWithEpisodes(supabase, slug || newPodcast.slug);
 }

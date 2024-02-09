@@ -1,9 +1,9 @@
-"use server";
+'use server';
 
-import Link from "next/link"
-import { buttonVariants } from "@/components/ui/button"
-import { EpisodeList } from "@/components/EpisodeList"
-import { PodcastList } from "@/components/PodcastList"
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
+import { EpisodeList } from '@/components/EpisodeList';
+import { PodcastList } from '@/components/PodcastList';
 
 // Use dynamic rendering, since we fetch live data.
 //export const dynamicParams = true;
@@ -17,25 +17,16 @@ export default async function HomePage() {
           AI superpowers for your podcast.
         </h1>
         <p className="max-w-[700px] text-lg text-muted-foreground">
-          Automatic episode transcripts, summaries, AI chat, and more.<br />
+          Automatic episode transcripts, summaries, AI chat, and more.
+          <br />
           Take your podcast to the next level.
         </p>
       </div>
       <div className="flex gap-4">
-        <Link
-          href="/signup"
-          target="_blank"
-          rel="noreferrer"
-          className={buttonVariants()}
-        >
+        <Link href="/signup" target="_blank" rel="noreferrer" className={buttonVariants()}>
           Sign up now
         </Link>
-        <Link
-          target="_blank"
-          rel="noreferrer"
-          href="/learn-more"
-          className={buttonVariants({ variant: "outline" })}
-        >
+        <Link target="_blank" rel="noreferrer" href="/learn-more" className={buttonVariants({ variant: 'outline' })}>
           Learn more
         </Link>
       </div>
@@ -48,5 +39,5 @@ export default async function HomePage() {
         <PodcastList />
       </div>
     </section>
-  )
+  );
 }

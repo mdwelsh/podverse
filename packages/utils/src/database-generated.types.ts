@@ -14,11 +14,14 @@ export type Database = {
           audioUrl: string | null
           created_at: string
           description: string | null
+          error: Json | null
           guid: string | null
           id: number
           imageUrl: string | null
+          modified_at: string | null
           podcast: number
           pubDate: string | null
+          rawTranscriptUrl: string | null
           slug: string
           summaryUrl: string | null
           title: string
@@ -29,11 +32,14 @@ export type Database = {
           audioUrl?: string | null
           created_at?: string
           description?: string | null
+          error?: Json | null
           guid?: string | null
           id?: number
           imageUrl?: string | null
+          modified_at?: string | null
           podcast: number
           pubDate?: string | null
+          rawTranscriptUrl?: string | null
           slug: string
           summaryUrl?: string | null
           title: string
@@ -44,11 +50,14 @@ export type Database = {
           audioUrl?: string | null
           created_at?: string
           description?: string | null
+          error?: Json | null
           guid?: string | null
           id?: number
           imageUrl?: string | null
+          modified_at?: string | null
           podcast?: number
           pubDate?: string | null
+          rawTranscriptUrl?: string | null
           slug?: string
           summaryUrl?: string | null
           title?: string

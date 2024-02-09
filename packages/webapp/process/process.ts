@@ -1,3 +1,35 @@
+import { GetEpisode, Upload, UpdateEpisode } from 'podverse-utils';
+
+import supabase from '../lib/supabase';
+import { Transcribe } from './transcribe';
+
+export async function TranscribeEpisode(episodeId: number): Promise<string> {
+  console.log(`Transcribing episode ${episodeId}`);
+  const episode = await GetEpisode(supabase, episodeId);
+  if (episode.transcriptUrl !== null) {
+    return `Episode ${episodeId} already transcribed.`;
+  }
+  if (episode.audioUrl === null) {
+    return `Episode ${episodeId} has no audio.`;
+  }
+  const result = await Transcribe(episode.audioUrl!);
+  const rawTranscriptUrl = await Upload(supabase, JSON.stringify(result, null, 2), 'transcripts', `${episodeId}.json`);
+
+  // Extract just the transcript text.
+  const transcript =
+    result.results?.channels[0].alternatives[0].paragraphs?.transcript ||
+    result.results?.channels[0].alternatives[0].transcript ||
+    '';
+  const transcriptUrl = await Upload(supabase, JSON.stringify(transcript, null, 2), 'transcripts', `${episodeId}.txt`);
+
+  // Update Episode.
+  episode.transcriptUrl = transcriptUrl;
+  episode.rawTranscriptUrl = rawTranscriptUrl;
+  await UpdateEpisode(supabase, episode);
+  console.log(`Done transcribing episode ${episodeId} - ${transcript.length} bytes.`);
+  return `Transcribed episode ${episodeId} (${transcript.length} bytes): ${transcriptUrl}`;
+}
+
 // import { config } from 'dotenv';
 // config();
 // import { Podcast, Episode } from 'podverse-types';

@@ -1,3 +1,3 @@
-import { Inngest } from "inngest";
+import { Inngest } from 'inngest';
 
-export const inngest = new Inngest({ id: "podverse-app" });
+export const inngest = new Inngest({ id: 'podverse-app' });
