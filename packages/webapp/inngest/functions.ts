@@ -14,7 +14,11 @@ export const processEpisodes = inngest.createFunction(
       `process/episodes - event ${runId} received for ${podcastSlug}, repeat is ${repeat}, attempt ${attempt}`
     );
     const episodes = (await step.run('fetch-episodes', async () => {
-      let query = supabase.from('Episodes').select('id').filter('transcriptUrl', 'is', 'null');
+      let query = supabase
+        .from('Episodes')
+        .select('id')
+        .filter('transcriptUrl', 'is', 'null')
+        .order('pubDate', { ascending: false });
       if (podcastSlug) {
         console.log(`process/episodes - Filtering by podcast ${podcastSlug}`);
         const { data, error } = await supabase.from('Podcasts').select('id').eq('slug', podcastSlug).limit(1);
