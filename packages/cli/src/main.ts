@@ -10,7 +10,7 @@ import terminal from 'terminal-kit';
 const { terminal: term } = terminal;
 import { Ingest } from './podcast.js';
 import supabase from './supabase.js';
-import { GetPodcast, GetPodcasts, GetPodcastWithEpisodes, DeletePodcast, Transcribe, Summarize } from 'podverse-utils';
+import { GetPodcast, GetPodcasts, GetPodcastWithEpisodes, DeletePodcast, Transcribe, Summarize, SpeakerID } from 'podverse-utils';
 import { dump, load } from 'js-yaml';
 import fs from 'fs';
 import { Inngest } from 'inngest';
@@ -257,6 +257,17 @@ program
     const text = await res.text();
     const result = await Summarize({ text });
     term('Summary:\n').green(result + '\n');
+  });
+
+program
+  .command('speakerid-url <url>')
+  .description('Identify the speakers in the transcript at the given URL.')
+  .action(async (url: string) => {
+    term(`Speaker ID for ${url}...`);
+    const res = await fetch(url);
+    const text = await res.text();
+    const result = await SpeakerID({ text });
+    term.green(result + '\n');
   });
 
 // program
