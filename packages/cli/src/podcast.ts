@@ -2,7 +2,6 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import {
   Episode,
   PodcastWithEpisodes,
-  GetPodcast,
   SetPodcast,
   SetEpisodes,
   GetPodcastWithEpisodes,

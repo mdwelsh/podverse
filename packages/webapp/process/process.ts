@@ -1,7 +1,7 @@
 import { GetEpisode, Upload, UpdateEpisode } from 'podverse-utils';
 
 import supabase from '../lib/supabase';
-import { Transcribe } from './transcribe';
+import { Transcribe } from 'podverse-utils';
 
 export async function TranscribeEpisode(episodeId: number): Promise<string> {
   console.log(`Transcribing episode ${episodeId}`);

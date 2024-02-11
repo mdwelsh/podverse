@@ -10,10 +10,7 @@ import terminal from 'terminal-kit';
 const { terminal: term } = terminal;
 import { Ingest } from './podcast.js';
 import supabase from './supabase.js';
-import { GetPodcast, GetPodcasts, GetPodcastWithEpisodes, DeletePodcast } from 'podverse-utils';
-//import { ProcessPodcast } from './process.js';
-//import { IndexPodcast } from './corpus.js';
-//import { Summarize } from './summary.js';
+import { GetPodcast, GetPodcasts, GetPodcastWithEpisodes, DeletePodcast, Transcribe, Summarize } from 'podverse-utils';
 import { dump, load } from 'js-yaml';
 import fs from 'fs';
 import { Inngest } from 'inngest';
@@ -238,6 +235,30 @@ program
     term.green(JSON.stringify(data));
   });
 
+program
+  .command('transcribe-url')
+  .description('Transcribe the given audio URL.')
+  .argument('<audioUrl>', 'URL of the audio to transcribe.')
+  .action(async (audioUrl, opts) => {
+    try {
+      const result = await Transcribe(audioUrl);
+      term(JSON.stringify(result, null, 4));
+    } catch (err) {
+      term('Error transcribing audio: ').red(err);
+    }
+  });
+
+program
+  .command('summarize-url <url>')
+  .description('Summarize the text content at the given URL.')
+  .action(async (url: string) => {
+    term(`Summarizing ${url}...`);
+    const res = await fetch(url);
+    const text = await res.text();
+    const result = await Summarize({ text });
+    term('Summary:\n').green(result + '\n');
+  });
+
 // program
 //   .command('process [podcast]')
 //   .description('Process the given podcast, or all podcasts if not specified.')
@@ -274,17 +295,6 @@ program
 //       await SetPodcast(indexed);
 //       term('Started indexing: ').green(`${podcastSlug}\n`);
 //     }
-//   });
-
-// program
-//   .command('summarize <url>')
-//   .description('Summarize the text content at the given URL.')
-//   .action(async (url: string) => {
-//     term(`Summarizing ${url}...`);
-//     const res = await fetch(url);
-//     const text = await res.text();
-//     const result = await Summarize(text);
-//     term('Summary:\n').green(result + '\n');
 //   });
 
 program.parse(process.argv);
