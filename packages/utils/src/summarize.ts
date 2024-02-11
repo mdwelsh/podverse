@@ -30,7 +30,6 @@ function makePrompt(text: string, podcast?: Podcast, episode?: Episode) {
   );
 }
 
-
 export async function Summarize({
   text,
   podcast,
@@ -64,7 +63,7 @@ export async function Summarize({
       console.log(`Generated ${chunks.length} chunks\n`);
     }
     const transcriptSummaries = await Promise.all(
-      chunks.map(async (chunk) => Summary({ openai, text: chunk, systemMessage })),
+      chunks.map(async (chunk) => Summary({ openai, text: chunk, systemMessage }))
     );
     const summarizedTranscript = rechunk(transcriptSummaries, maxTokenLen);
     text = summarizedTranscript.join('\n');
@@ -130,4 +129,3 @@ async function Summary({
   });
   return completion.choices[0].message.content || '';
 }
-

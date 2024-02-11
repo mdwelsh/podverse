@@ -1,11 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import {
-  Episode,
-  PodcastWithEpisodes,
-  SetPodcast,
-  SetEpisodes,
-  GetPodcastWithEpisodes,
-} from 'podverse-utils';
+import { Episode, PodcastWithEpisodes, SetPodcast, SetEpisodes, GetPodcastWithEpisodes } from 'podverse-utils';
 import slug from 'slug';
 import Parser from 'rss-parser';
 

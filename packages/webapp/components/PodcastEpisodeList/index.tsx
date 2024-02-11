@@ -47,9 +47,9 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
                 <PaginationPrevious isActive onClick={onPrevious} />
               </PaginationItem>
               {page > 1 && (
-              <PaginationItem>
-                <PaginationLink onClick={() => gotoPage(1)}>1</PaginationLink>
-              </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink onClick={() => gotoPage(1)}>1</PaginationLink>
+                </PaginationItem>
               )}
               {page > 2 && (
                 <PaginationItem>
@@ -57,17 +57,19 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
                 </PaginationItem>
               )}
               <PaginationItem>
-                <PaginationLink className="text-primary" onClick={() => gotoPage(page)}>{page}</PaginationLink>
+                <PaginationLink className="text-primary" onClick={() => gotoPage(page)}>
+                  {page}
+                </PaginationLink>
               </PaginationItem>
-              { page < numPages - 1 && (
+              {page < numPages - 1 && (
                 <PaginationItem>
                   <PaginationEllipsis />
                 </PaginationItem>
               )}
-              { page < numPages && (
-              <PaginationItem>
-                <PaginationLink onClick={() => gotoPage(numPages)}>{numPages}</PaginationLink>
-              </PaginationItem>
+              {page < numPages && (
+                <PaginationItem>
+                  <PaginationLink onClick={() => gotoPage(numPages)}>{numPages}</PaginationLink>
+                </PaginationItem>
               )}
               <PaginationItem>
                 <PaginationNext isActive onClick={onNext} />

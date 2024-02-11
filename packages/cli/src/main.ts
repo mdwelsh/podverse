@@ -10,7 +10,15 @@ import terminal from 'terminal-kit';
 const { terminal: term } = terminal;
 import { Ingest } from './podcast.js';
 import supabase from './supabase.js';
-import { GetPodcast, GetPodcasts, GetPodcastWithEpisodes, DeletePodcast, Transcribe, Summarize, SpeakerID } from 'podverse-utils';
+import {
+  GetPodcast,
+  GetPodcasts,
+  GetPodcastWithEpisodes,
+  DeletePodcast,
+  Transcribe,
+  Summarize,
+  SpeakerID,
+} from 'podverse-utils';
 import { dump, load } from 'js-yaml';
 import fs from 'fs';
 import { Inngest } from 'inngest';

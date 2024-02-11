@@ -1,7 +1,7 @@
-import { GetEpisode, Upload, UpdateEpisode } from 'podverse-utils';
+import { GetEpisode, Upload, UpdateEpisode, GetPodcastByID } from 'podverse-utils';
 
 import supabase from '../lib/supabase';
-import { Transcribe } from 'podverse-utils';
+import { Transcribe, Summarize, SpeakerID } from 'podverse-utils';
 
 export async function TranscribeEpisode(episodeId: number): Promise<string> {
   console.log(`Transcribing episode ${episodeId}`);
@@ -28,6 +28,45 @@ export async function TranscribeEpisode(episodeId: number): Promise<string> {
   await UpdateEpisode(supabase, episode);
   console.log(`Done transcribing episode ${episodeId} - ${transcript.length} bytes.`);
   return `Transcribed episode ${episodeId} (${transcript.length} bytes): ${transcriptUrl}`;
+}
+
+export async function SummarizeEpisode(episodeId: number): Promise<string> {
+  console.log(`Summarizing episode ${episodeId}`);
+  const episode = await GetEpisode(supabase, episodeId);
+  const podcast = await GetPodcastByID(supabase, episode.podcast.toString());
+  if (episode.summaryUrl !== null) {
+    return `Episode ${episodeId} already summarized.`;
+  }
+  if (episode.transcriptUrl === null) {
+    return `Episode ${episodeId} has no transcript.`;
+  }
+  const res = await fetch(episode.transcriptUrl);
+  const text = await res.text();
+  const summary = await Summarize({ text, episode, podcast });
+  const summaryUrl = await Upload(supabase, summary, 'summaries', `${episodeId}.txt`);
+
+  // Update Episode.
+  episode.summaryUrl = summaryUrl;
+  await UpdateEpisode(supabase, episode);
+  console.log(`Done summarizing episode ${episodeId} - ${summary.length} bytes.`);
+  return `Summarized episode ${episodeId} (${summary.length} bytes): ${summaryUrl}`;
+}
+
+export async function SpeakerIDEpisode(episodeId: number): Promise<string> {
+  console.log(`Speaker ID for episode ${episodeId}`);
+  const episode = await GetEpisode(supabase, episodeId);
+  const podcast = await GetPodcastByID(supabase, episode.podcast.toString());
+  if (episode.transcriptUrl === null) {
+    return `Episode ${episodeId} has no transcript.`;
+  }
+  const res = await fetch(episode.transcriptUrl);
+  const text = await res.text();
+  const summary = await SpeakerID({ text, episode, podcast });
+
+  // XXX MDW STOPPED HERE
+  // XXX MDW - Need to parse the response and write entries to the SpeakerMap DB.
+  console.log(`Done speaker ID for episode ${episodeId}`);
+  return `SpeakerID on episode ${episodeId} done`;
 }
 
 // import { config } from 'dotenv';

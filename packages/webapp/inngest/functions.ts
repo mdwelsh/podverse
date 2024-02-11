@@ -1,17 +1,6 @@
 import supabase from '../lib/supabase';
 import { inngest } from './client';
-import { TranscribeEpisode } from '../process/process';
-
-/** Used for testing only. */
-export const helloWorld = inngest.createFunction(
-  { id: 'hello-world' },
-  { event: 'test/hello.world' },
-  async ({ event, step }) => {
-    console.log('test/hello.world event received', event);
-    await step.sleep('wait-a-moment', '1s');
-    return { event, body: 'Hello, World!' };
-  },
-);
+import { TranscribeEpisode, SummarizeEpisode } from '../process/process';
 
 /** Scan for unprocessed episodes and fire off events to process them. */
 export const processEpisodes = inngest.createFunction(
@@ -22,17 +11,22 @@ export const processEpisodes = inngest.createFunction(
     const repeat = event.data.repeat === true;
 
     console.log(
-      `process/episodes - event ${runId} received for ${podcastSlug}, repeat is ${repeat}, attempt ${attempt}`,
+      `process/episodes - event ${runId} received for ${podcastSlug}, repeat is ${repeat}, attempt ${attempt}`
     );
-
     const episodes = (await step.run('fetch-episodes', async () => {
-      let query = supabase.from('Episodes').select('*, podcast(*)').is('transcriptUrl', null);
+      let query = supabase.from('Episodes').select('id').filter('transcriptUrl', 'is', 'null');
       if (podcastSlug) {
-        console.log(`process/episodes - Fetching episodes for podcast ${podcastSlug}`);
-        // XXX Not sure why this isn't working.
-        query = query.eq('podcast.slug', podcastSlug);
+        console.log(`process/episodes - Filtering by podcast ${podcastSlug}`);
+        const { data, error } = await supabase.from('Podcasts').select('id').eq('slug', podcastSlug).limit(1);
+        if (error) {
+          throw new Error('process/episodes - Error fetching podcast: ' + JSON.stringify(error));
+        }
+        if (data === null || data.length === 0) {
+          return { event, body: `Podcast ${podcastSlug} not found.` };
+        }
+        query = query.eq('podcast', data[0].id);
       }
-      const { data, error } = await query
+      const { data, error } = await query;
       if (error) {
         throw new Error('process/episodes - Error fetching episodes: ' + JSON.stringify(error));
       }
@@ -43,7 +37,7 @@ export const processEpisodes = inngest.createFunction(
 
       // To avoid slamming Deepgram, we only process 10 episodes at a time here, but rely on the
       // event being re-triggered in order to process all episodes.
-      const MAX_EPISODES = 3;
+      const MAX_EPISODES = 10;
       const episodes = data.slice(0, MAX_EPISODES);
       return episodes;
     })) as any[];
@@ -57,8 +51,8 @@ export const processEpisodes = inngest.createFunction(
           const result = await TranscribeEpisode(episode.id);
           console.log(`process/episodes substep - episode ${episode.id} - got result ${result}`);
           return result;
-        }),
-      ),
+        })
+      )
     );
 
     console.log(`process/episodes - Done transcribing, got ${transcribeResults.length} results`);
@@ -80,7 +74,7 @@ export const processEpisodes = inngest.createFunction(
       message: `process/episodes - Processed ${episodes.length} episodes.`,
       transcribeResults,
     };
-  },
+  }
 );
 
 /** Transcribe a single episode. */
@@ -101,5 +95,26 @@ export const transcribeEpisode = inngest.createFunction(
       event,
       body: result,
     };
+  }
+);
+
+/** Summarize a single episode. */
+export const summarizeEpisode = inngest.createFunction(
+  {
+    id: 'process-summarize',
+    concurrency: {
+      // Limit number of concurrent calls to avoid hitting API limits.
+      limit: 10,
+    },
   },
+  { event: 'process/summarize' },
+  async ({ event, step }) => {
+    const { episodeId } = event.data;
+    console.log(`process/summarize event received for episodeId ${episodeId}`, event);
+    const result = await SummarizeEpisode(episodeId);
+    return {
+      event,
+      body: result,
+    };
+  }
 );
