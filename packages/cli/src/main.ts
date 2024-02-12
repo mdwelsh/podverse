@@ -167,6 +167,7 @@ program
   .argument('[podcastSlug]', 'Podcast to process.')
   .option('--repeat', 'Repeat processing after first batch.')
   .option('--dev', 'Use the local development Inngest environment.')
+  .option('--stage <stage>', 'Which stage to initiate for processing.')
   .action(async (podcastSlug: string, opts) => {
     try {
       let eventKey: string | undefined = process.env.INNGEST_EVENT_KEY;
@@ -181,6 +182,7 @@ program
         data: {
           podcastSlug: podcastSlug || undefined,
           repeat: opts.repeat,
+          stage: opts.stage,
         },
       });
       term.green('Started processing.\n');

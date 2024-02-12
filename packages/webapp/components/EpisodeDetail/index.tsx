@@ -2,25 +2,39 @@ import Link from 'next/link';
 import supabase from '@/lib/supabase';
 import { Episode, EpisodeWithPodcast, GetEpisodeWithPodcastBySlug } from 'podverse-utils';
 import moment from 'moment';
+import { EpisodeIndicators } from '../Indicators';
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
+  const episodeWithoutPodcast = { ...episode, podcast: 0 };
+
   return (
     <div className="w-full flex flex-col gap-4">
       <div className="text-muted-foreground">
         From{' '}
         <Link href={`/podcast/${episode.podcast.slug}`}>
-          {' '}
-          <span className="text-primary">{episode.podcast.title}</span>
+          <span className="text-primary">
+            {episode.podcast.title}
+            <ArrowTopRightOnSquareIcon className="text-primary h-3 w-3 ml-1 inline align-super" />
+          </span>
         </Link>
       </div>
       <div className="w-full flex flex-row gap-4">
         <div className="w-[250px]">{episode.imageUrl && <img src={episode.imageUrl} />}</div>
         <div className="w-full flex flex-col gap-4">
-          <div className="text-xl font-bold text-primary">{episode.title}</div>
+          <div className="text-xl font-bold text-primary">
+            <Link href={episode.url || `/podcast/${episode.podcast.slug}/episode/${episode.slug}`}>
+              <span className="text-primary">
+                {episode.title}
+                <ArrowTopRightOnSquareIcon className="text-primary h-4 w-4 ml-1 inline align-super" />
+              </span>
+            </Link>
+          </div>
           <div className="text-sm">{episode.description}</div>
           <div className="text-sm text-muted-foreground">
             Published {moment(episode.pubDate).format('MMMM Do YYYY')}
           </div>
+          <EpisodeIndicators episode={episodeWithoutPodcast} />
         </div>
       </div>
     </div>
@@ -28,7 +42,29 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
 }
 
 async function EpisodeSummary({ episode }: { episode: EpisodeWithPodcast }) {
-  return <div className="w-full border mt-8">Summary</div>;
+  if (episode.summaryUrl === null) {
+    return (
+      <div className="w-full mt-8 flex flex-col gap-2">
+        <div>
+          <h1>Summary</h1>
+        </div>
+        <div className="w-full border p-4 text-xs overflow-y-auto h-full">
+          <div className="text-xs text-muted-foreground">Summary not available</div>
+        </div>
+      </div>
+    );
+  }
+
+  const res = await fetch(episode.summaryUrl);
+  const result = await res.text();
+  return (
+    <div className="w-full mt-8 flex flex-col gap-2">
+      <div>
+        <h1>Summary</h1>
+      </div>
+      <div className="w-full border p-4 text-xs overflow-y-auto">{result}</div>
+    </div>
+  );
 }
 
 function ParagraphView({ paragraph }: { paragraph: any }) {

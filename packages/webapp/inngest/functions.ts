@@ -8,58 +8,104 @@ export const processEpisodes = inngest.createFunction(
   { event: 'process/episodes' },
   async ({ event, step, runId, attempt }) => {
     const podcastSlug = event.data.podcastSlug;
+    const stage = event.data.stage;
     const repeat = event.data.repeat === true;
-
     console.log(
-      `process/episodes - event ${runId} received for ${podcastSlug}, repeat is ${repeat}, attempt ${attempt}`
+      `process/episodes - event ${runId} received for ${podcastSlug}, stage is ${stage}, repeat is ${repeat}, attempt ${attempt}`,
     );
-    const episodes = (await step.run('fetch-episodes', async () => {
-      let query = supabase
-        .from('Episodes')
-        .select('id')
-        .filter('transcriptUrl', 'is', 'null')
-        .order('pubDate', { ascending: false });
-      if (podcastSlug) {
-        console.log(`process/episodes - Filtering by podcast ${podcastSlug}`);
-        const { data, error } = await supabase.from('Podcasts').select('id').eq('slug', podcastSlug).limit(1);
-        if (error) {
-          throw new Error('process/episodes - Error fetching podcast: ' + JSON.stringify(error));
-        }
-        if (data === null || data.length === 0) {
-          return { event, body: `Podcast ${podcastSlug} not found.` };
-        }
-        query = query.eq('podcast', data[0].id);
-      }
-      const { data, error } = await query;
+
+    let podcastId: number | null = null;
+    if (podcastSlug) {
+      console.log(`process/episodes - Filtering by podcast ${podcastSlug}`);
+      const { data, error } = await supabase.from('Podcasts').select('id').eq('slug', podcastSlug).limit(1);
       if (error) {
-        throw new Error('process/episodes - Error fetching episodes: ' + JSON.stringify(error));
+        throw new Error('process/episodes - Error fetching podcast: ' + JSON.stringify(error));
       }
       if (data === null || data.length === 0) {
-        return { event, body: 'No episodes to process.' };
+        return { event, body: `Podcast ${podcastSlug} not found.` };
       }
-      console.log(`process/episodes - Found ${data.length} episodes to process.`);
+      podcastId = data[0].id;
+    }
 
-      // To avoid slamming Deepgram, we only process 10 episodes at a time here, but rely on the
-      // event being re-triggered in order to process all episodes.
-      const MAX_EPISODES = 10;
-      const episodes = data.slice(0, MAX_EPISODES);
-      return episodes;
-    })) as any[];
+    if (stage === undefined || stage === 'transcribe') {
+      const episodes = (await step.run('fetch-episodes-to-transcribe', async () => {
+        let query = supabase
+          .from('Episodes')
+          .select('id')
+          .filter('transcriptUrl', 'is', 'null')
+          .order('pubDate', { ascending: false });
+        if (podcastId) {
+          query = query.eq('podcast', podcastId);
+        }
+        const { data, error } = await query;
+        if (error) {
+          throw new Error('process/episodes - Error fetching episodes: ' + JSON.stringify(error));
+        }
+        if (data === null || data.length === 0) {
+          return { event, body: 'No episodes to transcribe.' };
+        }
+        console.log(`process/episodes - Found ${data.length} episodes to transcribe.`);
 
-    console.log(`process/episodes - Fetched ${episodes.length} episodes.`);
+        // To avoid slamming Deepgram, we only process 10 episodes at a time here, but rely on the
+        // event being re-triggered in order to process all episodes.
+        const MAX_EPISODES = 10;
+        const episodes = data.slice(0, MAX_EPISODES);
+        return episodes;
+      })) as any[];
 
-    const transcribeResults = await Promise.all(
-      episodes.map((episode) =>
-        step.run('transcribe-episode', async () => {
-          console.log(`process/episodes substep - Transcribing episode ${episode.id}`);
-          const result = await TranscribeEpisode(episode.id);
-          console.log(`process/episodes substep - episode ${episode.id} - got result ${result}`);
-          return result;
-        })
-      )
-    );
+      const transcribeResults = await Promise.all(
+        episodes.map((episode) =>
+          step.run('transcribe-episode', async () => {
+            console.log(`process/episodes substep - Transcribing episode ${episode.id}`);
+            const result = await TranscribeEpisode(episode.id);
+            console.log(`process/episodes substep - episode ${episode.id} - got result ${result}`);
+            return result;
+          }),
+        ),
+      );
 
-    console.log(`process/episodes - Done transcribing, got ${transcribeResults.length} results`);
+      console.log(`process/episodes - Done transcribing, got ${transcribeResults.length} results`);
+    }
+
+    if (stage === undefined || stage === 'summarize') {
+      const episodes = (await step.run('fetch-episodes-to-summarize', async () => {
+        let query = supabase
+          .from('Episodes')
+          .select('id')
+          .not('transcriptUrl', 'is', 'null')
+          .filter('summaryUrl', 'is', 'null')
+          .order('pubDate', { ascending: false });
+        if (podcastId) {
+          query = query.eq('podcast', podcastId);
+        }
+        const { data, error } = await query;
+        if (error) {
+          throw new Error('process/episodes - Error fetching episodes: ' + JSON.stringify(error));
+        }
+        if (data === null || data.length === 0) {
+          return { event, body: 'No episodes to summarize.' };
+        }
+        console.log(`process/episodes - Found ${data.length} episodes to summarize.`);
+
+        // Only summarize 10 episodes at once.
+        const MAX_EPISODES = 10;
+        const episodes = data.slice(0, MAX_EPISODES);
+        return episodes;
+      })) as any[];
+
+      const summarizeResults = await Promise.all(
+        episodes.map((episode) =>
+          step.run('summarize-episode', async () => {
+            console.log(`process/episodes substep - Summarizing episode ${episode.id}`);
+            const result = await SummarizeEpisode(episode.id);
+            console.log(`process/episodes substep - episode ${episode.id} - got result ${result}`);
+            return result;
+          }),
+        ),
+      );
+
+      console.log(`process/episodes - Done summarizing, got ${summarizeResults.length} results`);
+    }
 
     // Continue processing.
     if (repeat) {
@@ -69,16 +115,16 @@ export const processEpisodes = inngest.createFunction(
         data: {
           podcastSlug,
           repeat,
+          stage,
         },
       });
     }
 
-    console.log(`process/episodes - Done processing ${episodes.length} episodes.`);
+    console.log('process/episodes - Done.');
     return {
-      message: `process/episodes - Processed ${episodes.length} episodes.`,
-      transcribeResults,
+      message: 'process/episodes - Done.',
     };
-  }
+  },
 );
 
 /** Transcribe a single episode. */
@@ -99,7 +145,7 @@ export const transcribeEpisode = inngest.createFunction(
       event,
       body: result,
     };
-  }
+  },
 );
 
 /** Summarize a single episode. */
@@ -120,5 +166,5 @@ export const summarizeEpisode = inngest.createFunction(
       event,
       body: result,
     };
-  }
+  },
 );

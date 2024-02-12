@@ -21,7 +21,10 @@ export async function GetPodcastWithEpisodes(supabase: SupabaseClient, slug: str
   if (!data || data.length === 0) {
     throw new Error(`Podcast with slug ${slug} not found.`);
   }
-  return data[0];
+  const podcast = data[0];
+  // Sort the podcast.Episodes list by pubDate.
+  podcast.Episodes?.sort((a: Episode, b: Episode) => ((a.pubDate || 0) > (b.pubDate || 0) ? -1 : 1));
+  return podcast;
 }
 
 /** Return value of GetLatestEpisodes. */
@@ -81,7 +84,7 @@ export async function GetEpisodeWithPodcast(supabase: SupabaseClient, episodeId:
 export async function GetEpisodeWithPodcastBySlug(
   supabase: SupabaseClient,
   podcastSlug: string,
-  episodeSlug: string
+  episodeSlug: string,
 ): Promise<EpisodeWithPodcast> {
   const { data, error } = await supabase
     .from('Episodes')
@@ -179,7 +182,7 @@ export async function SetEpisodes(supabase: SupabaseClient, episodes: Episode[])
     episodes.map((e) => {
       const { id, created_at, ...episodeData } = e;
       return episodeData;
-    })
+    }),
   );
   if (error) {
     throw error;
@@ -202,7 +205,7 @@ export async function Upload(
   supabase: SupabaseClient,
   data: string,
   bucket: string,
-  fileName: string
+  fileName: string,
 ): Promise<string> {
   const buf = Buffer.from(data, 'utf8');
   const { error } = await supabase.storage.from(bucket).upload(fileName, buf, { upsert: true });

@@ -13,6 +13,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { EpisodeIndicators } from '../Indicators';
 
 export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWithEpisodes; episodes: Episode[] }) {
   const [page, setPage] = useState(1);
@@ -36,7 +37,7 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
   const episodesToShow = episodes.slice((page - 1) * ENTRIES_PER_PAGE, page * ENTRIES_PER_PAGE);
 
   return (
-    <div className="w-3/5 mt-8 h-[600px] flex flex-col gap-2">
+    <div className="w-3/5 mt-8 h-[800px] flex flex-col gap-2">
       <div className="w-full flex flex-row gap-2 items-center">
         <div>Episodes</div>
         <div className="flex-grow" />
@@ -98,6 +99,7 @@ function EpisodeStrip({ podcast, episode }: { podcast: PodcastWithEpisodes; epis
             <div className="text-xs text-muted-foreground">
               Published {moment(episode.pubDate).format('MMMM Do YYYY')}
             </div>
+            <EpisodeIndicators episode={episode} />
           </div>
         </div>
       </div>
