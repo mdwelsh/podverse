@@ -11,7 +11,9 @@ export async function Transcribe(audioUrl: string): Promise<any> {
   }
   const deepgram = createClient(DEEPGRAM_API_KEY);
 
-  // Follow redirects on audioUrl up to 10 redirects and return the final URL
+  // Deepgram has a limit on the number of redirects it will follow on external URLs.
+  // Unfortunately, some podcasts (like Radiolab) have audioUrls that exceed this limit.
+  // So, we chase the redirects here and pass the final URL to Deepgram.
   const MAX_REDIRECTS = 10;
   let finalUrl = audioUrl;
   for (let i = 0; i < MAX_REDIRECTS; i++) {
