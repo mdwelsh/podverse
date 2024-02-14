@@ -3,13 +3,17 @@
  */
 
 import { config } from 'dotenv';
-config();
+config({ debug: true});
+
+import { createClient } from '@supabase/supabase-js';
+const supabase = createClient(
+  process.env.SUPABASE_URL as string,
+  process.env.SUPABASE_API_KEY as string);
 
 import { program } from 'commander';
 import terminal from 'terminal-kit';
 const { terminal: term } = terminal;
 import { Ingest } from './podcast.js';
-import supabase from './supabase.js';
 import {
   GetPodcast,
   GetPodcasts,
@@ -19,7 +23,8 @@ import {
   Summarize,
   SpeakerID,
   ChunkText,
-  Embed
+  Embed,
+  VectorSearch
 } from 'podverse-utils';
 import { dump, load } from 'js-yaml';
 import fs from 'fs';
@@ -307,6 +312,18 @@ program
     term(`Embedding ${url}...`);
     const pageId = await Embed(supabase, url, { source: 'CLI' });
     term(`Embedded as page ID: ${pageId}\n`);
+  });
+
+program
+  .command('search')
+  .description('Perform a vector search for the given query.')
+  .argument('<query>', 'Search query.')
+  .action(async (query: string) => {
+    term('Performing vector search for: ').yellow(query);
+    const results = await VectorSearch(supabase, query);
+    for (const result of results) {
+      term.green(JSON.stringify(result, null, 2) + '\n\n');
+    }
   });
 
 

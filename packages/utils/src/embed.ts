@@ -79,6 +79,33 @@ export async function Embed(supabase: SupabaseClient, url: string, meta: object)
   return page.id;
 }
 
+/** Given the provided text, perform a vector search. */
+// XXX TODO(mdw): Type the response more accurately.
+export async function VectorSearch(supabase: SupabaseClient, input: string): Promise<object[]> {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('Missing OPENAI_API_KEY environment variable.');
+  }
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+  const embeddingResponse = await openai.embeddings.create({
+    model: 'text-embedding-ada-002',
+    input: input.trim().replace(/\s+/g, ' '),
+  });
+  const queryEmbedding = embeddingResponse.data[0].embedding;
+  const { data, error } = await supabase.rpc('match_page_sections', {
+    embedding: queryEmbedding,
+    match_threshold: 0.8,
+    match_count: 10,
+    min_content_length: 50,
+  });
+  if (error) {
+    console.log('Error performing lookup', error);
+    throw error;
+  }
+  return data;
+}
+
 // The following is adapted from:
 // https://github.com/run-llama/LlamaIndexTS/blob/main/packages/core/src/TextSplitter.ts
 // We don't import it directly because LlamaIndexTS has a bunch of dependencies (including things
