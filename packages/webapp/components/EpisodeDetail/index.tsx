@@ -4,6 +4,7 @@ import { Episode, EpisodeWithPodcast, GetEpisodeWithPodcastBySlug } from 'podver
 import moment from 'moment';
 import { EpisodeIndicators } from '../Indicators';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { Chat } from '@/components/Chat';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: 0 };
@@ -123,7 +124,7 @@ async function EpisodeTranscript({ episode }: { episode: EpisodeWithPodcast }) {
     );
   }
 
-  const res = await fetch(episode.rawTranscriptUrl);
+  const res = await fetch(episode.rawTranscriptUrl, { cache: 'no-store' });
   const result = await res.json();
   return (
     <div className="w-3/5 mt-8 h-[600px] flex flex-col gap-2">
@@ -142,7 +143,7 @@ async function EpisodeChat({ episode }: { episode: EpisodeWithPodcast }) {
         <h1>Chat</h1>
       </div>
       <div className="w-full border p-4 text-xs overflow-y-auto h-full">
-        <div className="text-xs text-muted-foreground">Coming soon</div>
+        <Chat />
       </div>
     </div>
   );

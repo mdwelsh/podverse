@@ -82,6 +82,7 @@ export async function Embed(supabase: SupabaseClient, url: string, meta: object)
 /** Given the provided text, perform a vector search. */
 // XXX TODO(mdw): Type the response more accurately.
 export async function VectorSearch(supabase: SupabaseClient, input: string): Promise<object[]> {
+  console.log(`VectorSearch with input: ${input}`);
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('Missing OPENAI_API_KEY environment variable.');
   }
@@ -162,8 +163,6 @@ export function cjkSentenceTokenizer(sentence: string): string[] {
   return slist.filter((s) => s.length > 0);
 }
 
-export const defaultParagraphSeparator = EOL + EOL + EOL;
-
 // In theory there's also Mac style \r only, but it's pre-OSX and I don't think
 // many documents will use it.
 
@@ -204,7 +203,7 @@ export class SentenceSplitter {
     const {
       chunkSize = DEFAULT_CHUNK_SIZE,
       chunkOverlap = DEFAULT_CHUNK_OVERLAP,
-      paragraphSeparator = defaultParagraphSeparator,
+      paragraphSeparator = '\n\n',
       chunkingTokenizerFn,
       splitLongSentences = false,
     } = options ?? {};
