@@ -18,6 +18,8 @@ import {
   Transcribe,
   Summarize,
   SpeakerID,
+  ChunkText,
+  Embed
 } from 'podverse-utils';
 import { dump, load } from 'js-yaml';
 import fs from 'fs';
@@ -259,8 +261,9 @@ program
   });
 
 program
-  .command('summarize-url <url>')
+  .command('summarize-url')
   .description('Summarize the text content at the given URL.')
+  .argument('<url>', 'URL of the text to summarize.')
   .action(async (url: string) => {
     term(`Summarizing ${url}...`);
     const res = await fetch(url);
@@ -272,6 +275,7 @@ program
 program
   .command('speakerid-url <url>')
   .description('Identify the speakers in the transcript at the given URL.')
+  .argument('<url>', 'URL of the text to identify.')
   .action(async (url: string) => {
     term(`Speaker ID for ${url}...`);
     const res = await fetch(url);
@@ -279,6 +283,32 @@ program
     const result = await SpeakerID({ text });
     term.green(result + '\n');
   });
+
+program
+  .command('chunk-url')
+  .description('Chunk the text content at the given URL.')
+  .argument('<url>', 'URL of the text to chunk.')
+  .action(async (url: string) => {
+    term(`Chunking ${url}...`);
+    const res = await fetch(url);
+    const text = await res.text();
+    const chunks = await ChunkText(text);
+    term(`Got ${chunks.length} chunks.\n`);
+    for (const chunk of chunks) {
+      term.green(chunk + '\n\n');
+    }
+  });
+
+program
+  .command('embed-url')
+  .description('Embed the text content at the given URL.')
+  .argument('<url>', 'URL of the text to embed.')
+  .action(async (url: string) => {
+    term(`Embedding ${url}...`);
+    const pageId = await Embed(supabase, url, { source: 'CLI' });
+    term(`Embedded as page ID: ${pageId}\n`);
+  });
+
 
 // program
 //   .command('process [podcast]')
