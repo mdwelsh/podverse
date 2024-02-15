@@ -2,11 +2,15 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: 'Podverse',
-  description: 'This kinda sucks.',
+  description: 'Take your podcast to the next level with AI superpowers.',
   mainNav: [
     {
       title: 'Home',
       href: '/',
+    },
+    {
+      title: 'About',
+      href: '/about',
     },
   ],
   links: {

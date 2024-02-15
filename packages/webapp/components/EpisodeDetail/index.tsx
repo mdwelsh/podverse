@@ -31,8 +31,8 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
               </span>
             </Link>
           </div>
-          <div className="text-sm">{episode.description}</div>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm font-[Inter]">{episode.description}</div>
+          <div className="text-sm text-muted-foreground font-[Inter]">
             Published {moment(episode.pubDate).format('MMMM Do YYYY')}
           </div>
           <EpisodeIndicators episode={episodeWithoutPodcast} />
@@ -50,7 +50,7 @@ async function EpisodeSummary({ episode }: { episode: EpisodeWithPodcast }) {
           <h1>Summary</h1>
         </div>
         <div className="w-full border p-4 text-xs overflow-y-auto h-full">
-          <div className="text-xs text-muted-foreground">Summary not available</div>
+          <div className="text-sm text-muted-foreground">Summary not available</div>
         </div>
       </div>
     );
@@ -63,7 +63,7 @@ async function EpisodeSummary({ episode }: { episode: EpisodeWithPodcast }) {
       <div>
         <h1>Summary</h1>
       </div>
-      <div className="w-full border p-4 text-xs overflow-y-auto">{result}</div>
+      <div className="w-full border p-4 text-sm overflow-y-auto font-[Inter]">{result}</div>
     </div>
   );
 }
@@ -90,7 +90,7 @@ function ParagraphView({ paragraph }: { paragraph: any }) {
         <div className="text-primary">Speaker {speaker}</div>
         <div className="text-muted-foreground">{startString}</div>
       </div>
-      <div className={`w-4/5 text-sm ${speakerColor}`}>
+      <div className={`w-4/5 text-base font-[Inter] ${speakerColor}`}>
         {sentences.map((sentence: any, index: number) => (
           <div key={index}>{sentence.text}</div>
         ))}

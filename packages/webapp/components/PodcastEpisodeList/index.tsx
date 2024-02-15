@@ -95,8 +95,8 @@ function EpisodeStrip({ podcast, episode }: { podcast: PodcastWithEpisodes; epis
         <div className="flex flex-row w-full h-full gap-4">
           <div className="w-1/5">{episode.imageUrl && <img src={episode.imageUrl} />}</div>
           <div className="w-4/5 text-wrap line-clamp-3 truncate flex flex-col gap-4">
-            <div className="text-sm">{episode.title}</div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-sm font-[Inter]">{episode.title}</div>
+            <div className="text-xs font-[Inter] text-muted-foreground">
               Published {moment(episode.pubDate).format('MMMM Do YYYY')}
             </div>
             <EpisodeIndicators episode={episode} />

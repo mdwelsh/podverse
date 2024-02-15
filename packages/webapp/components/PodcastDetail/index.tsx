@@ -16,8 +16,8 @@ async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
               <ArrowTopRightOnSquareIcon className="text-primary h-4 w-4 ml-1 inline align-super" />
             </Link>
           </div>
-          <div className="text-sm">{podcast.description}</div>
-          <div className="text-sm text-muted-foreground flex flex-row gap-4">
+          <div className="text-sm font-[Inter]">{podcast.description}</div>
+          <div className="font-[Inter] text-sm text-muted-foreground flex flex-row gap-4">
             <div>{podcast.Episodes.length} episodes</div>
             <div>{podcast.Episodes.filter((episode) => episode.transcriptUrl !== null).length} transcribed</div>
             <div>{podcast.Episodes.filter((episode) => episode.summaryUrl !== null).length} summarized</div>

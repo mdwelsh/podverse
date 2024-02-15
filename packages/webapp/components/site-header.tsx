@@ -1,10 +1,7 @@
-import Link from 'next/link';
-
 import { siteConfig } from '@/config/site';
-import { buttonVariants } from '@/components/ui/button';
-import { Icons } from '@/components/icons';
 import { MainNav } from '@/components/main-nav';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { SignupOrLogin } from '@/components/SignupOrLogin';
 
 export function SiteHeader() {
   return (
@@ -14,6 +11,7 @@ export function SiteHeader() {
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-1">
             <ThemeToggle />
+            <SignupOrLogin />
           </nav>
         </div>
       </div>

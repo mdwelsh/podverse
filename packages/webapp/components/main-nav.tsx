@@ -1,11 +1,9 @@
 import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-
 import { NavItem } from '@/types/nav';
 import { siteConfig } from '@/config/site';
 import { cn } from '@/lib/utils';
-import { Icons } from '@/components/icons';
 
 interface MainNavProps {
   items?: NavItem[];
@@ -15,7 +13,7 @@ export function MainNav({ items }: MainNavProps) {
   return (
     <div className="flex flex-row gap-10">
       <Link href="/" className="flex items-center">
-        <Image src="/podverse-logo.png" alt="Podverse" width={50} height={50} />
+        <Image src="/images/podverse-logo.png" alt="Podverse" width={50} height={50} />
         <span className="inline-block font-bold text-2xl text-primary ml-4">{siteConfig.name}</span>
       </Link>
       {items?.length ? (

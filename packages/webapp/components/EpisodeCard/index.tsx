@@ -13,7 +13,7 @@ export function EpisodeCard({ episode }: { episode: LatestEpisode }) {
             <div className="grow" />
           </div>
           <div className="text-wrap line-clamp-3 truncate">
-            <p className="mb-2 mt-2 text-xs md:text-sm">{episode.title}</p>
+            <p className="font-[Inter] mb-2 mt-2 text-xs md:text-sm">{episode.title}</p>
           </div>
           <div className="grow" />
           <div className="h-4">
