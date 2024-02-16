@@ -1,6 +1,6 @@
 import '@/styles/globals.css';
 import { Metadata } from 'next';
-
+import { ClerkProvider } from '@clerk/nextjs'
 import { siteConfig } from '@/config/site';
 import { fontSans } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
@@ -36,6 +36,7 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <>
+      <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <head />
         <body className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           </ThemeProvider>
         </body>
       </html>
+      </ClerkProvider>
     </>
   );
 }

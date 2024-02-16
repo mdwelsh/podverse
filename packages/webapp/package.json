@@ -15,6 +15,7 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache"
   },
   "dependencies": {
+    "@clerk/nextjs": "^4.29.7",
     "@deepgram/sdk": "^3.1.9",
     "@heroicons/react": "^2.1.1",
     "@radix-ui/react-slot": "^1.0.2",
