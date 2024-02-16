@@ -6,7 +6,7 @@ import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
 async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-4 font-mono">
       <div className="w-full flex flex-row gap-4">
         <div className="w-[250px]">{podcast.imageUrl && <img src={podcast.imageUrl} />}</div>
         <div className="w-full flex flex-col gap-4">
@@ -17,7 +17,7 @@ async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
             </Link>
           </div>
           <div className="text-sm font-[Inter]">{podcast.description}</div>
-          <div className="font-[Inter] text-sm text-muted-foreground flex flex-row gap-4">
+          <div className="text-sm text-muted-foreground flex flex-row gap-4 font-mono">
             <div>{podcast.Episodes.length} episodes</div>
             <div>{podcast.Episodes.filter((episode) => episode.transcriptUrl !== null).length} transcribed</div>
             <div>{podcast.Episodes.filter((episode) => episode.summaryUrl !== null).length} summarized</div>

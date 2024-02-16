@@ -14,10 +14,10 @@ export function MainNav({ items }: MainNavProps) {
     <div className="flex flex-row gap-10">
       <Link href="/" className="flex items-center">
         <Image src="/images/podverse-logo.png" alt="Podverse" width={50} height={50} />
-        <span className="inline-block font-bold text-2xl text-primary ml-4">{siteConfig.name}</span>
+        <span className="font-mono inline-block font-bold text-2xl text-primary ml-4">Podverse</span>
       </Link>
       {items?.length ? (
-        <nav className="flex gap-6">
+        <nav className="flex gap-6 font-mono">
           {items?.map(
             (item, index) =>
               item.href && (

@@ -2,7 +2,7 @@ export default function PrivacyPage() {
   return (
     <div className="font-[Inter] text-sm w-3/5 mx-auto mt-6 flex flex-col gap-4">
       <div className="font-mono text-primary text-xl">Privacy Policy</div>
-      <div>Last updated March 24, 2023</div>
+      <div>Last updated February 15, 2024</div>
       <div>
         Ziggylabs (“Ziggylabs,” “we,” “our,” and/or “us”) values the privacy of individuals who use our website and
         related services (collectively, our “Services”). This privacy policy (the “Privacy Policy”) explains how we

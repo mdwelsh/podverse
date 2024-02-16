@@ -4,12 +4,10 @@ export function SignupOrLogin() {
   return (
     <>
       <SignedIn>
-        {/* Mount the UserButton component */}
         <UserButton afterSignOutUrl="/" />
       </SignedIn>
       <SignedOut>
-        {/* Signed out users get sign in button */}
-        <SignInButton className="text-black text-sm p-3 bg-primary border rounded-lg" />
+        <SignInButton className="text-black font-mono text-sm p-3 bg-primary border rounded-lg" />
       </SignedOut>
     </>
   );

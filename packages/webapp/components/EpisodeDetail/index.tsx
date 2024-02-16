@@ -10,7 +10,7 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: 0 };
 
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-4 font-mono">
       <div className="text-muted-foreground">
         From{' '}
         <Link href={`/podcast/${episode.podcast.slug}`}>
@@ -31,8 +31,8 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
               </span>
             </Link>
           </div>
-          <div className="text-sm font-[Inter]">{episode.description}</div>
-          <div className="text-sm text-muted-foreground font-[Inter]">
+          <div className="text-sm font-sans">{episode.description}</div>
+          <div className="text-sm text-muted-foreground">
             Published {moment(episode.pubDate).format('MMMM Do YYYY')}
           </div>
           <EpisodeIndicators episode={episodeWithoutPodcast} />
@@ -153,7 +153,7 @@ export async function EpisodeDetail({ podcastSlug, episodeSlug }: { podcastSlug:
   const episode = await GetEpisodeWithPodcastBySlug(supabase, podcastSlug, episodeSlug);
 
   return (
-    <div className="w-4/5 mx-auto mt-8">
+    <div className="w-4/5 mx-auto mt-8 font-mono">
       <EpisodeHeader episode={episode} />
       <EpisodeSummary episode={episode} />
       <div className="flex flex-row gap-4">
