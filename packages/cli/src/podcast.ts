@@ -62,6 +62,7 @@ async function readPodcastFeed(podcastUrl: string, podcastSlug?: string): Promis
   const newPodcast: PodcastWithEpisodes = {
     id: 0,
     created_at: '',
+    owner: null,
     slug: titleSlug,
     title: feed.title,
     description: feed.description || null,

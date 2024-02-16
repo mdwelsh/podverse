@@ -1,10 +1,12 @@
 import supabase from '@/lib/supabase';
-import { PodcastWithEpisodes, GetPodcastWithEpisodes } from 'podverse-utils';
+import { PodcastWithEpisodes, GetPodcastWithEpisodes, GetUser } from 'podverse-utils';
 import { PodcastEpisodeList } from '@/components/PodcastEpisodeList';
 import Link from 'next/link';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
 async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
+  const user = podcast.owner ? await GetUser(supabase, podcast.owner) : null;
+
   return (
     <div className="w-full flex flex-col gap-4 font-mono">
       <div className="w-full flex flex-row gap-4">
@@ -16,6 +18,7 @@ async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
               <ArrowTopRightOnSquareIcon className="text-primary h-4 w-4 ml-1 inline align-super" />
             </Link>
           </div>
+          { user && <div className="text-sm text-muted-foreground">By {user.displayName}</div> }
           <div className="text-sm font-[Inter]">{podcast.description}</div>
           <div className="text-sm text-muted-foreground flex flex-row gap-4 font-mono">
             <div>{podcast.Episodes.length} episodes</div>

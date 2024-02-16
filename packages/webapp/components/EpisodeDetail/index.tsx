@@ -6,7 +6,6 @@ import { EpisodeIndicators } from '../Indicators';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { Chat } from '@/components/Chat';
 import { Collapse, CollapseWithToggle } from '@/components/Collapse';
-import { Button } from '@/components/ui/button';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: 0 };

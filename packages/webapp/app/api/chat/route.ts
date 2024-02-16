@@ -56,7 +56,7 @@ export async function POST(req: Request) {
         for (const toolCall of call.tools) {
           console.log(`onToolCall: tool=${JSON.stringify(toolCall)}`);
           if (toolCall.func.name === 'searchKnowledgeBase') {
-            const args = JSON.parse(toolCall.func.arguments as string);
+            const args = JSON.parse(toolCall.func.arguments as unknown as string);
             const chunks = await VectorSearch(supabase, args.query) as { content: string }[];
             const chunkResults = chunks.map((chunk, index) => {
               return {

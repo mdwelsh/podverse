@@ -1,5 +1,15 @@
-import { Podcast, Episode, EpisodeWithPodcast, PodcastWithEpisodes } from './types.js';
+import { User, Podcast, Episode, EpisodeWithPodcast, PodcastWithEpisodes } from './types.js';
 import { SupabaseClient } from '@supabase/supabase-js';
+
+/** Return the User with the given ID. */
+export async function GetUser(supabase: SupabaseClient, userId: string): Promise<User> {
+  const { data, error } = await supabase.from('Users').select('*').eq('id', userId).limit(1);
+  if (error) {
+    console.log('error', error);
+    throw error;
+  }
+  return data[0];
+}
 
 /** Return list of Podcasts. */
 export async function GetPodcasts(supabase: SupabaseClient): Promise<Podcast[]> {

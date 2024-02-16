@@ -21,7 +21,7 @@ export function Collapse({ children, open = false, ...props }: { children: React
 export function CollapseWithToggle({ children, extra }: { children: React.ReactNode; extra?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [contentHeight, setContentHeight] = useState(0);
-  const contentRef = useRef(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (contentRef.current) {

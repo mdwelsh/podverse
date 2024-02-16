@@ -18,7 +18,7 @@ export default async function HomePage() {
         <h1 className="font-mono text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
           AI superpowers for your podcast.
         </h1>
-        <p className="font-mono max-w-[700px] text-lg text-muted-foreground">
+        <p className="text-muted-foreground max-w-[700px] font-mono text-lg">
           Automatic episode transcripts, summaries, AI chat, and more.
           <br />
           Take your podcast to the next level.
@@ -32,12 +32,12 @@ export default async function HomePage() {
           Learn more
         </Link>
       </div>
-      <div className="flex flex-col gap-4 mt-4">
-        <div className="text-xl">Latest episodes</div>
+      <div className="mt-4 flex flex-col gap-4">
+        <div className="font-mono text-xl">Latest episodes</div>
         <EpisodeList />
       </div>
-      <div className="flex flex-col gap-4 mt-4">
-        <div className="text-xl">Explore podcasts</div>
+      <div className="mt-4 flex flex-col gap-4">
+        <div className="font-mono text-xl">Explore podcasts</div>
         <PodcastList />
       </div>
     </section>
