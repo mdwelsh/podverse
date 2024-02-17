@@ -37,10 +37,10 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
   const episodesToShow = episodes.slice((page - 1) * ENTRIES_PER_PAGE, page * ENTRIES_PER_PAGE);
 
   return (
-    <div className="w-3/5 mt-8 h-[800px] flex flex-col gap-2">
-      <div className="w-full flex flex-row gap-2 items-center">
+    <div className="mt-8 flex h-[800px] w-3/5 flex-col gap-2">
+      <div className="flex w-full flex-row items-center gap-2">
         <div>Episodes</div>
-        <div className="flex-grow" />
+        <div className="grow" />
         <div>
           <Pagination>
             <PaginationContent className="gap-0 text-xs">
@@ -79,30 +79,36 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
           </Pagination>
         </div>
       </div>
-      <div className="w-full flex flex-col p-2 gap-2 text-xs overflow-y-auto h-full">
+      <div className="flex size-full flex-col gap-2 overflow-y-auto p-2 text-xs">
         {episodesToShow.map((episode, index) => (
-          <EpisodeStrip key={index} podcast={podcast} episode={episode} />
+          <Link href={`/podcast/${podcast.slug}/episode/${episode.slug}`} className="hover:ring-primary hover:ring-4">
+            <EpisodeStrip key={index} podcast={podcast} episode={episode} />
+          </Link>
         ))}
       </div>
     </div>
   );
 }
 
-function EpisodeStrip({ podcast, episode }: { podcast: PodcastWithEpisodes; episode: Episode }) {
+export function EpisodeStrip({
+  podcast,
+  episode,
+}: {
+  podcast: PodcastWithEpisodes;
+  episode: Episode;
+}) {
   return (
-    <Link href={`/podcast/${podcast.slug}/episode/${episode.slug}`}>
-      <div className="font-mono hover:ring-4 hover:ring-primary flex flex-row gap-4 w-full rounded-lg p-4 border bg-gray-700 dark:bg-gray-700 text-white dark:text-white overflow-hidden">
-        <div className="flex flex-row w-full h-full gap-4">
-          <div className="w-1/5">{episode.imageUrl && <img src={episode.imageUrl} />}</div>
-          <div className="w-4/5 text-wrap line-clamp-3 truncate flex flex-col gap-4">
-            <div className="text-sm">{episode.title}</div>
-            <div className="text-xs text-muted-foreground">
-              Published {moment(episode.pubDate).format('MMMM Do YYYY')}
-            </div>
-            <EpisodeIndicators episode={episode} />
+    <div className="flex w-full flex-row gap-4 overflow-hidden rounded-lg border bg-gray-700 p-4 font-mono text-white dark:bg-gray-700 dark:text-white">
+      <div className="flex size-full flex-row gap-4">
+        <div className="w-1/5">{episode.imageUrl && <img src={episode.imageUrl} />}</div>
+        <div className="line-clamp-3 flex w-4/5 flex-col gap-4 truncate text-wrap">
+          <div className="text-sm">{episode.title}</div>
+          <div className="text-muted-foreground text-xs">
+            Published {moment(episode.pubDate).format('MMMM Do YYYY')}
           </div>
+          <EpisodeIndicators episode={episode} />
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

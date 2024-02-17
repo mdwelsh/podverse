@@ -17,6 +17,7 @@ module.exports = {
         border: 'var(--border)',
         input: 'var(--input)',
         ring: 'var(--ring)',
+        error: 'var(--error)',
         background: 'var(--background)',
         foreground: 'var(--foreground)',
         primary: {

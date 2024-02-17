@@ -1,34 +1,11 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Episode, PodcastWithEpisodes, SetPodcast, SetEpisodes, GetPodcastWithEpisodes } from 'podverse-utils';
+import { Episode, PodcastWithEpisodes } from './types.js';
+import { SetPodcast, SetEpisodes, GetPodcastWithEpisodes } from './storage.js';
 import slug from 'slug';
 import Parser from 'rss-parser';
 
-// /**
-//  * Merge two podcasts. Metadata from newPodcast is preferred, but episodes present in oldPodcast
-//  * are retained by keeping existing epiodes from oldPodcast.
-//  */
-// export function MergePodcasts(oldPodcast: Podcast, newPodcast: Podcast): Podcast {
-//   // Retain old corpus ID if one was already set for this podcast, since this does not
-//   // come from the RSS feed.
-//   if (oldPodcast.corpusId) {
-//     newPodcast.corpusId = oldPodcast.corpusId;
-//   }
-//   newPodcast.episodes = newPodcast.episodes?.map((newEpisode: Episode) => {
-//     // If the episode exists in oldPodcast, use that.
-//     const oldEpisode = oldPodcast.episodes?.find((episode: Episode) => {
-//       return episode.url === newEpisode.url;
-//     });
-//     if (oldEpisode) {
-//       return oldEpisode;
-//     } else {
-//       return newEpisode;
-//     }
-//   });
-//   return newPodcast;
-// }
-
-/** Read the given RSS feed URL and return it as a Podcast object. */
-async function readPodcastFeed(podcastUrl: string, podcastSlug?: string): Promise<PodcastWithEpisodes> {
+/** Read the given RSS feed URL and return it as a PodcastWithEpisodes object. */
+export async function ReadPodcastFeed(podcastUrl: string, podcastSlug?: string): Promise<PodcastWithEpisodes> {
   // Read the RSS feed metadata.
   const parser = new Parser();
   const feed = await parser.parseURL(podcastUrl);
@@ -86,7 +63,7 @@ export async function Ingest({
   podcastUrl: string;
   refresh?: boolean;
 }): Promise<PodcastWithEpisodes> {
-  const newPodcast = await readPodcastFeed(podcastUrl);
+  const newPodcast = await ReadPodcastFeed(podcastUrl);
 
   let oldPodcast: PodcastWithEpisodes | undefined;
   try {

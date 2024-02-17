@@ -5,3 +5,4 @@ export * from './summarize.js';
 export * from './speakerid.js';
 export * from './embed.js';
 export * from './process.js';
+export * from './podcast.js';

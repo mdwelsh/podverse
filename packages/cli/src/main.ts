@@ -11,7 +11,6 @@ const supabase = createClient(process.env.SUPABASE_URL as string, process.env.SU
 import { program } from 'commander';
 import terminal from 'terminal-kit';
 const { terminal: term } = terminal;
-import { Ingest } from './podcast.js';
 import {
   GetPodcast,
   GetPodcasts,
@@ -23,6 +22,7 @@ import {
   ChunkText,
   Embed,
   VectorSearch,
+  Ingest,
 } from 'podverse-utils';
 import { dump, load } from 'js-yaml';
 import fs from 'fs';
