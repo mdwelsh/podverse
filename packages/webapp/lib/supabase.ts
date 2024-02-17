@@ -15,7 +15,6 @@ export default createClient(
 export async function getSupabaseClient() {
   const { getToken } = auth();
   const supabaseAccessToken = await getToken({ template: 'podverse-supabase' });
-  console.log('supabaseAccessToken:', supabaseAccessToken);
   if (!supabaseAccessToken) {
     return createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL as string,
