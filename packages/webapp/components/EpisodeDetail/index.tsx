@@ -3,9 +3,11 @@ import supabase from '@/lib/supabase';
 import { EpisodeWithPodcast, GetEpisodeWithPodcastBySlug } from 'podverse-utils';
 import moment from 'moment';
 import { EpisodeIndicators } from '../Indicators';
-import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { ArrowTopRightOnSquareIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { Chat } from '@/components/Chat';
 import { Collapse, CollapseWithToggle } from '@/components/Collapse';
+import { Owner } from '@/components/Owner';
+import { EditSpeakersDialog } from '../EditSpeakersDialog';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: 0 };
@@ -32,14 +34,16 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
               </span>
             </Link>
           </div>
-          <CollapseWithToggle extra={
-            <div className="flex flex-col gap-2">
-              <div className="text-muted-foreground font-mono text-sm">
-                Published {moment(episode.pubDate).format('MMMM Do YYYY')}
+          <CollapseWithToggle
+            extra={
+              <div className="flex flex-col gap-2">
+                <div className="text-muted-foreground font-mono text-sm">
+                  Published {moment(episode.pubDate).format('MMMM Do YYYY')}
+                </div>
+                <EpisodeIndicators episode={episodeWithoutPodcast} />
               </div>
-              <EpisodeIndicators episode={episodeWithoutPodcast} />
-            </div>
-          }>
+            }
+          >
             <div className="font-sans text-sm">{episode.description}</div>
           </CollapseWithToggle>
         </div>
@@ -74,7 +78,7 @@ async function EpisodeSummary({ episode }: { episode: EpisodeWithPodcast }) {
   );
 }
 
-function ParagraphView({ paragraph }: { paragraph: any }) {
+function ParagraphView({ paragraph, episode }: { paragraph: any; episode: EpisodeWithPodcast }) {
   const speakerColors = ['text-teal-400', 'text-sky-400', 'text-[#0000FF]'];
 
   const start = paragraph.start;
@@ -91,9 +95,14 @@ function ParagraphView({ paragraph }: { paragraph: any }) {
   const speaker = paragraph.speaker;
   const speakerColor = speakerColors[speaker % speakerColors.length];
   return (
-    <div className="flex flex-row gap-2">
+    <div className="group flex flex-row gap-2">
       <div className="flex w-1/5 flex-col gap-2 overflow-hidden text-wrap text-xs">
-        <div className="text-primary">Speaker {speaker}</div>
+        <div className="text-primary">
+          Speaker {speaker}
+          <div className="hidden group-hover:block text-xs">
+            <EditSpeakersDialog episode={episode} />
+          </div>
+        </div>
         <div className="text-muted-foreground">{startString}</div>
       </div>
       <div className={`w-4/5 font-[Inter] text-base ${speakerColor}`}>
@@ -105,9 +114,9 @@ function ParagraphView({ paragraph }: { paragraph: any }) {
   );
 }
 
-function TranscriptView({ transcript }: { transcript: any }) {
+function TranscriptView({ transcript, episode }: { transcript: any; episode: EpisodeWithPodcast }) {
   const paragraphs = transcript.results?.channels[0].alternatives[0].paragraphs.paragraphs as any[];
-  const views = paragraphs.map((paragraph: any, index: number) => <ParagraphView paragraph={paragraph} key={index} />);
+  const views = paragraphs.map((paragraph: any, index: number) => <ParagraphView paragraph={paragraph} episode={episode} key={index} />);
 
   return (
     <div className="w-full overflow-y-auto border p-4 text-xs">
@@ -137,7 +146,7 @@ async function EpisodeTranscript({ episode }: { episode: EpisodeWithPodcast }) {
       <div>
         <h1>Transcript</h1>
       </div>
-      <TranscriptView transcript={result} />
+      <TranscriptView transcript={result} episode={episode} />
     </div>
   );
 }
