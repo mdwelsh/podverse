@@ -7,26 +7,12 @@ export const processEpisodes = inngest.createFunction(
   { id: 'process-episodes' },
   { event: 'process/episodes' },
   async ({ event, step, runId, attempt }) => {
-    const podcastSlug = event.data.podcastSlug;
+    const podcastId = event.data.podcastId;
     const stage = event.data.stage;
     const repeat = event.data.repeat === true;
     console.log(
-      `process/episodes - event ${runId} received for ${podcastSlug}, stage is ${stage}, repeat is ${repeat}, attempt ${attempt}`,
+      `process/episodes - event ${runId} received for ${podcastId}, stage is ${stage}, repeat is ${repeat}, attempt ${attempt}`,
     );
-
-    let podcastId: number | null = null;
-    if (podcastSlug) {
-      console.log(`process/episodes - Filtering by podcast ${podcastSlug}`);
-      const { data, error } = await supabase.from('Podcasts').select('id').eq('slug', podcastSlug).limit(1);
-      if (error) {
-        throw new Error('process/episodes - Error fetching podcast: ' + JSON.stringify(error));
-      }
-      if (data === null || data.length === 0) {
-        return { event, body: `Podcast ${podcastSlug} not found.` };
-      }
-      podcastId = data[0].id;
-    }
-
     if (stage === undefined || stage === 'transcribe') {
       const episodes = (await step.run('fetch-episodes-to-transcribe', async () => {
         let query = supabase
@@ -113,7 +99,7 @@ export const processEpisodes = inngest.createFunction(
       await step.sendEvent('process-episodes', {
         name: 'process/episodes',
         data: {
-          podcastSlug,
+          podcastId,
           repeat,
           stage,
         },

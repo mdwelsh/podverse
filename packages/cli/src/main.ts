@@ -3,12 +3,10 @@
  */
 
 import { config } from 'dotenv';
-config({ debug: true});
+config({ debug: true });
 
 import { createClient } from '@supabase/supabase-js';
-const supabase = createClient(
-  process.env.SUPABASE_URL as string,
-  process.env.SUPABASE_API_KEY as string);
+const supabase = createClient(process.env.SUPABASE_URL as string, process.env.SUPABASE_API_KEY as string);
 
 import { program } from 'commander';
 import terminal from 'terminal-kit';
@@ -24,7 +22,7 @@ import {
   SpeakerID,
   ChunkText,
   Embed,
-  VectorSearch
+  VectorSearch,
 } from 'podverse-utils';
 import { dump, load } from 'js-yaml';
 import fs from 'fs';
@@ -184,10 +182,23 @@ program
         throw new Error('Missing INNGEST_EVENT_KEY environment variable.');
       }
       const inngest = new Inngest({ id: 'podverse-app', eventKey });
+
+      let podcastId: number | undefined = undefined;
+      if (podcastSlug) {
+        const { data, error } = await supabase.from('Podcasts').select('id').eq('slug', podcastSlug).limit(1);
+        if (error) {
+          throw new Error('Error fetching podcast: ' + JSON.stringify(error));
+        }
+        if (data === null || data.length === 0) {
+          throw new Error(`Podcast ${podcastSlug} not found.`);
+        }
+        podcastId = data[0].id;
+      }
+
       await inngest.send({
         name: 'process/episodes',
         data: {
-          podcastSlug: podcastSlug || undefined,
+          podcastId,
           repeat: opts.repeat,
           stage: opts.stage,
         },
@@ -325,7 +336,6 @@ program
       term.green(JSON.stringify(result, null, 2) + '\n\n');
     }
   });
-
 
 // program
 //   .command('process [podcast]')

@@ -2,8 +2,10 @@
 
 import { PodcastWithEpisodes } from 'podverse-utils';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import moment from 'moment';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const handleDelete = async () => {
@@ -13,7 +15,9 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   return (
     <Dialog>
       <DialogTrigger>
-        <Button className="font-mono" variant='destructive'>Delete podcast</Button>
+        <Button className="font-mono" variant="destructive">
+          Delete podcast
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -26,7 +30,7 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
           </div>
         </div>
         <DialogFooter>
-          <Button variant='destructive' className="font-mono" onClick={handleDelete}>
+          <Button variant="destructive" className="font-mono" onClick={handleDelete}>
             Delete
           </Button>
         </DialogFooter>
@@ -42,13 +46,13 @@ export function ManagePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes 
   const mostRecentlyPublished = podcast.Episodes.reduce((a, b) => ((a.pubDate || 0) > (b.pubDate || 0) ? a : b));
 
   const handleProcess = async () => {
-    // TODO
+    toast.success(`Started processing for ${podcast.title}`);
   };
 
   return (
     <Dialog>
       <DialogTrigger>
-        <div className="text-primary border p-2 rounded-lg">Manage</div>
+        <div className={cn(buttonVariants({ variant: 'secondary' }))}>Manage</div>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -59,7 +63,8 @@ export function ManagePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes 
         <div>
           <div className="text-sm text-muted-foreground flex flex-col gap-1 font-mono">
             <div>
-              Most recent episode: <span className="text-primary">{moment(mostRecentlyPublished.pubDate).format("MMMM Do YYYY")}</span>
+              Most recent episode:{' '}
+              <span className="text-primary">{moment(mostRecentlyPublished.pubDate).format('MMMM Do YYYY')}</span>
             </div>
             <div>
               <span className="text-primary">{podcast.Episodes.length}</span> episodes total

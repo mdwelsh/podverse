@@ -4,3 +4,4 @@ export * from './transcribe.js';
 export * from './summarize.js';
 export * from './speakerid.js';
 export * from './embed.js';
+export * from './process.js';
