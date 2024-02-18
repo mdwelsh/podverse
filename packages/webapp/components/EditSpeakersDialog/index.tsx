@@ -1,10 +1,10 @@
 'use client';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Episode } from 'podverse-utils';
+import { Episode, EpisodeWithPodcast } from 'podverse-utils';
 import { PencilSquareIcon } from '@heroicons/react/24/outline';
 
-export function EditSpeakersDialog({ episode }: { episode: Episode }) {
+export function EditSpeakersDialog({ episode }: { episode: EpisodeWithPodcast }) {
   return (
     <Dialog>
       <DialogTrigger>
