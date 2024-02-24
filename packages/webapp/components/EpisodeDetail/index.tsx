@@ -8,6 +8,8 @@ import { Chat } from '@/components/Chat';
 import { Collapse, CollapseWithToggle } from '@/components/Collapse';
 import { Owner } from '@/components/Owner';
 import { EditSpeakersDialog } from '../EditSpeakersDialog';
+import { AudioPlayer, AudioPlayerProvider } from '@/components/AudioPlayer';
+import { ParagraphText } from '@/components/ParagraphText';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: 0 };
@@ -55,7 +57,7 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
 async function EpisodeSummary({ episode }: { episode: EpisodeWithPodcast }) {
   if (episode.summaryUrl === null) {
     return (
-      <div className="mt-8 flex w-full flex-col gap-2">
+      <div className="flex w-full flex-col gap-2">
         <div>
           <h1>Summary</h1>
         </div>
@@ -69,7 +71,7 @@ async function EpisodeSummary({ episode }: { episode: EpisodeWithPodcast }) {
   const res = await fetch(episode.summaryUrl);
   const result = await res.text();
   return (
-    <div className="mt-8 flex w-full flex-col gap-2">
+    <div className="flex w-full flex-col gap-2">
       <div>
         <h1>Summary</h1>
       </div>
@@ -105,18 +107,16 @@ function ParagraphView({ paragraph, episode }: { paragraph: any; episode: Episod
         </div>
         <div className="text-muted-foreground">{startString}</div>
       </div>
-      <div className={`w-4/5 font-[Inter] text-base ${speakerColor}`}>
-        {sentences.map((sentence: any, index: number) => (
-          <div key={index}>{sentence.text}</div>
-        ))}
-      </div>
+      <ParagraphText startTime={start} sentences={sentences} speakerColor={speakerColor} />
     </div>
   );
 }
 
 function TranscriptView({ transcript, episode }: { transcript: any; episode: EpisodeWithPodcast }) {
   const paragraphs = transcript.results?.channels[0].alternatives[0].paragraphs.paragraphs as any[];
-  const views = paragraphs.map((paragraph: any, index: number) => <ParagraphView paragraph={paragraph} episode={episode} key={index} />);
+  const views = paragraphs.map((paragraph: any, index: number) => (
+    <ParagraphView paragraph={paragraph} episode={episode} key={index} />
+  ));
 
   return (
     <div className="w-full overflow-y-auto border p-4 text-xs">
@@ -169,12 +169,15 @@ export async function EpisodeDetail({ podcastSlug, episodeSlug }: { podcastSlug:
 
   return (
     <div className="mx-auto mt-8 w-4/5 font-mono">
-      <EpisodeHeader episode={episode} />
-      <EpisodeSummary episode={episode} />
-      <div className="flex flex-row gap-4">
-        <EpisodeTranscript episode={episode} />
-        <EpisodeChat episode={episode} />
-      </div>
+      <AudioPlayerProvider>
+        <EpisodeHeader episode={episode} />
+        <AudioPlayer episode={episode} />
+        <EpisodeSummary episode={episode} />
+        <div className="flex flex-row gap-4">
+          <EpisodeTranscript episode={episode} />
+          <EpisodeChat episode={episode} />
+        </div>
+      </AudioPlayerProvider>
     </div>
   );
 }

@@ -8585,6 +8585,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"wavesurfer-react@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "wavesurfer-react@npm:3.0.2"
+  peerDependencies:
+    react: ^16 || ^17 || ^18 || ^19
+    wavesurfer.js: ^7
+  checksum: a4c6179b2b8542db5766dabeafa9f29ea704759402bf31d196d7250ca46f9193f968c111fd5c6ecdb92ea12de0c5d0dc7abe22f5927364259d0d830833fa90bd
+  languageName: node
+  linkType: hard
+
+"wavesurfer.js@npm:^7.7.3":
+  version: 7.7.3
+  resolution: "wavesurfer.js@npm:7.7.3"
+  checksum: 1fef84b64ca4e4c07f0af484555a93fd57d5601c076c1b8e6e0c1bc32a95af7fc872400e83f9c055e14d773318cb1be3ae7cd6fe9a73e64704d836d87f03e378
+  languageName: node
+  linkType: hard
+
 "web-streams-polyfill@npm:4.0.0-beta.3":
   version: 4.0.0-beta.3
   resolution: "web-streams-polyfill@npm:4.0.0-beta.3"
@@ -8648,6 +8665,8 @@ __metadata:
     tailwindcss: ^3.3.2
     tailwindcss-animate: ^1.0.6
     typescript: ^5.1.3
+    wavesurfer-react: ^3.0.2
+    wavesurfer.js: ^7.7.3
   languageName: unknown
   linkType: soft
 

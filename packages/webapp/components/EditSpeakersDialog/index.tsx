@@ -8,7 +8,7 @@ export function EditSpeakersDialog({ episode }: { episode: EpisodeWithPodcast })
   return (
     <Dialog>
       <DialogTrigger>
-        <div className="text-primary flex flex-row gap-2 font-mono text-xs border border-muted-foreground rounded-lg p-2 m-2">
+        <div className="text-muted-foreground flex flex-row gap-2 font-mono text-xs">
           <PencilSquareIcon className="size-4" />
           Edit
         </div>
