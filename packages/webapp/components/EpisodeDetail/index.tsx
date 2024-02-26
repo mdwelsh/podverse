@@ -10,6 +10,7 @@ import { Owner } from '@/components/Owner';
 import { EditSpeakersDialog } from '../EditSpeakersDialog';
 import { AudioPlayer, AudioPlayerProvider } from '@/components/AudioPlayer';
 import { ParagraphText } from '@/components/ParagraphText';
+import { revalidateTag } from 'next/cache';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: 0 };
@@ -48,6 +49,7 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
           >
             <div className="font-sans text-sm">{episode.description}</div>
           </CollapseWithToggle>
+          <div> Speakers: {JSON.stringify(episode.speakers)}</div>
         </div>
       </div>
     </div>
@@ -80,7 +82,7 @@ async function EpisodeSummary({ episode }: { episode: EpisodeWithPodcast }) {
   );
 }
 
-function ParagraphView({ paragraph, episode }: { paragraph: any; episode: EpisodeWithPodcast }) {
+function ParagraphView({ paragraph, episode, speakerIds }: { paragraph: any; episode: EpisodeWithPodcast; speakerIds: Set<string> }) {
   const speakerColors = ['text-teal-400', 'text-sky-400', 'text-[#0000FF]'];
 
   const start = paragraph.start;
@@ -94,15 +96,16 @@ function ParagraphView({ paragraph, episode }: { paragraph: any; episode: Episod
   const startTime = moment.duration(start, 'seconds');
   const endTime = paragraph.end;
   const sentences = paragraph.sentences;
-  const speaker = paragraph.speaker;
-  const speakerColor = speakerColors[speaker % speakerColors.length];
+  const speaker = (episode.speakers && episode.speakers[paragraph.speaker]) ?? `Speaker ${paragraph.speaker}`;
+  const speakerColor = speakerColors[paragraph.speaker % speakerColors.length];
+
   return (
     <div className="group flex flex-row gap-2">
       <div className="flex w-1/5 flex-col gap-2 overflow-hidden text-wrap text-xs">
         <div className="text-primary">
-          Speaker {speaker}
+          {speaker}
           <div className="hidden group-hover:block text-xs">
-            <EditSpeakersDialog episode={episode} />
+            <EditSpeakersDialog episode={episode} speaker={paragraph.speaker} />
           </div>
         </div>
         <div className="text-muted-foreground">{startString}</div>
@@ -114,8 +117,15 @@ function ParagraphView({ paragraph, episode }: { paragraph: any; episode: Episod
 
 function TranscriptView({ transcript, episode }: { transcript: any; episode: EpisodeWithPodcast }) {
   const paragraphs = transcript.results?.channels[0].alternatives[0].paragraphs.paragraphs as any[];
+
+  // Extract list of speaker IDs.
+  const speakerIds = new Set<string>();
+  for (const paragraph of paragraphs) {
+    speakerIds.add(paragraph.speaker);
+  }
+
   const views = paragraphs.map((paragraph: any, index: number) => (
-    <ParagraphView paragraph={paragraph} episode={episode} key={index} />
+    <ParagraphView paragraph={paragraph} episode={episode} key={index} speakerIds={speakerIds} />
   ));
 
   return (
