@@ -180,8 +180,8 @@ export async function EpisodeDetail({ podcastSlug, episodeSlug }: { podcastSlug:
   return (
     <div className="mx-auto mt-8 w-4/5 font-mono">
       <AudioPlayerProvider>
-        <EpisodeHeader episode={episode} />
         <AudioPlayer episode={episode} />
+        <EpisodeHeader episode={episode} />
         <EpisodeSummary episode={episode} />
         <div className="flex flex-row gap-4">
           <EpisodeTranscript episode={episode} />
