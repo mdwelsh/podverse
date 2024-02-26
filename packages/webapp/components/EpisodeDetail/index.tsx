@@ -8,9 +8,9 @@ import { Chat } from '@/components/Chat';
 import { Collapse, CollapseWithToggle } from '@/components/Collapse';
 import { Owner } from '@/components/Owner';
 import { EditSpeakersDialog } from '../EditSpeakersDialog';
-import { AudioPlayer, AudioPlayerProvider } from '@/components/AudioPlayer';
 import { ParagraphText } from '@/components/ParagraphText';
 import { revalidateTag } from 'next/cache';
+import { EpisodeTranscript } from '@/components/EpisodeTranscript';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: 0 };
@@ -82,84 +82,6 @@ async function EpisodeSummary({ episode }: { episode: EpisodeWithPodcast }) {
   );
 }
 
-function ParagraphView({ paragraph, episode, speakerIds }: { paragraph: any; episode: EpisodeWithPodcast; speakerIds: Set<string> }) {
-  const speakerColors = ['text-teal-400', 'text-sky-400', 'text-[#0000FF]'];
-
-  const start = paragraph.start;
-  const startHours = Math.floor(start / 3600);
-  const startMinutes = Math.floor((start % 3600) / 60);
-  const startSeconds = Math.floor(start % 60);
-  const startString = `${startHours}:${startMinutes.toString().padStart(2, '0')}:${startSeconds
-    .toString()
-    .padStart(2, '0')}`;
-
-  const startTime = moment.duration(start, 'seconds');
-  const endTime = paragraph.end;
-  const sentences = paragraph.sentences;
-  const speaker = (episode.speakers && episode.speakers[paragraph.speaker]) ?? `Speaker ${paragraph.speaker}`;
-  const speakerColor = speakerColors[paragraph.speaker % speakerColors.length];
-
-  return (
-    <div className="group flex flex-row gap-2">
-      <div className="flex w-1/5 flex-col gap-2 overflow-hidden text-wrap text-xs">
-        <div className="text-primary">
-          {speaker}
-          <div className="hidden group-hover:block text-xs">
-            <EditSpeakersDialog episode={episode} speaker={paragraph.speaker} />
-          </div>
-        </div>
-        <div className="text-muted-foreground">{startString}</div>
-      </div>
-      <ParagraphText startTime={start} sentences={sentences} speakerColor={speakerColor} />
-    </div>
-  );
-}
-
-function TranscriptView({ transcript, episode }: { transcript: any; episode: EpisodeWithPodcast }) {
-  const paragraphs = transcript.results?.channels[0].alternatives[0].paragraphs.paragraphs as any[];
-
-  // Extract list of speaker IDs.
-  const speakerIds = new Set<string>();
-  for (const paragraph of paragraphs) {
-    speakerIds.add(paragraph.speaker);
-  }
-
-  const views = paragraphs.map((paragraph: any, index: number) => (
-    <ParagraphView paragraph={paragraph} episode={episode} key={index} speakerIds={speakerIds} />
-  ));
-
-  return (
-    <div className="w-full overflow-y-auto border p-4 text-xs">
-      <div className="flex flex-col gap-4">{views}</div>
-    </div>
-  );
-}
-
-async function EpisodeTranscript({ episode }: { episode: EpisodeWithPodcast }) {
-  if (episode.rawTranscriptUrl === null) {
-    return (
-      <div className="mt-8 flex h-[600px] w-3/5 flex-col gap-2">
-        <div>
-          <h1>Transcript</h1>
-        </div>
-        <div className="size-full overflow-y-auto border p-4 text-xs">
-          <div className="text-muted-foreground text-xs">Transcript not available</div>
-        </div>
-      </div>
-    );
-  }
-
-  const res = await fetch(episode.rawTranscriptUrl, { cache: 'no-store' });
-  const result = await res.json();
-  return (
-    <div className="mt-8 flex h-[600px] w-3/5 flex-col gap-2">
-      <div>
-        <h1>Transcript</h1>
-      </div>
-      <TranscriptView transcript={result} episode={episode} />
-    </div>
-  );
-}
 
 async function EpisodeChat({ episode }: { episode: EpisodeWithPodcast }) {
   return (
@@ -179,15 +101,12 @@ export async function EpisodeDetail({ podcastSlug, episodeSlug }: { podcastSlug:
 
   return (
     <div className="mx-auto mt-8 w-4/5 font-mono">
-      <AudioPlayerProvider>
-        <AudioPlayer episode={episode} />
         <EpisodeHeader episode={episode} />
         <EpisodeSummary episode={episode} />
         <div className="flex flex-row gap-4">
           <EpisodeTranscript episode={episode} />
           <EpisodeChat episode={episode} />
         </div>
-      </AudioPlayerProvider>
     </div>
   );
 }

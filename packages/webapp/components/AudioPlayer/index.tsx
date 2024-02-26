@@ -64,28 +64,12 @@ export function AudioPlayer({ episode }: { episode: EpisodeWithPodcast }) {
   }
   const { audioRef } = player;
 
-  const audioUrl = '/audio/7a623d27-1461-4144-a653-850b04b788df.mp3';
-  //   const wavesurferRef = useRef<WaveSurfer | null>(null);
-  //   const handleMount = useCallback((waveSurfer: WaveSurfer) => {
-  //     wavesurferRef.current = waveSurfer;
-  //     if (wavesurferRef.current) {
-  //       //const proxyUrl = `/api/proxy?url=${episode.audioUrl}`;
-  //       const proxyUrl = '/audio/7a623d27-1461-4144-a653-850b04b788df.mp3';
-  //       wavesurferRef.current.load(proxyUrl);
-  //       wavesurferRef.current.on('ready', () => {
-  //         console.log('WaveSurfer is ready');
-  //       });
-  //       wavesurferRef.current.on('loading', (data: any) => {
-  //         console.log('loading --> ', data);
-  //       });
-  //       if (window) {
-  //         // @ts-ignore
-  //         window.surferidze = wavesurferRef.current;
-  //       }
-  //     }
-  //   }, [episode.audioUrl]);
+  //const audioUrl = '/audio/7a623d27-1461-4144-a653-850b04b788df.mp3';
+  const audioUrl = `/api/proxy?url=${episode.audioUrl}`;
+  console.log('audioUrl: ', audioUrl);
 
   const onLoadedMetadata = () => {
+    console.log('onLoadedMetadata called: ', audioRef.current.duration);
     const seconds = audioRef.current.duration;
     setDuration(seconds);
   };

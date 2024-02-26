@@ -1,0 +1,133 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { EpisodeWithPodcast } from 'podverse-utils';
+import { EditSpeakersDialog } from '../EditSpeakersDialog';
+import { AudioPlayer, AudioPlayerProvider } from '@/components/AudioPlayer';
+import { PlayCircleIcon } from '@heroicons/react/24/outline';
+import { useAudioPlayer } from '@/components/AudioPlayer';
+
+/** Top level transcript component. Includes the AudioPlayer. */
+export function EpisodeTranscript({ episode }: { episode: EpisodeWithPodcast }) {
+  const [transcript, setTranscript] = useState(null);
+
+  useEffect(() => {
+    if (episode.rawTranscriptUrl === null) {
+      return;
+    }
+
+    fetch(episode.rawTranscriptUrl, { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((result) => {
+        setTranscript(result);
+      });
+  }, [episode]);
+
+  if (episode.rawTranscriptUrl === null || transcript === null) {
+    return (
+      <div className="mt-8 flex h-[600px] w-3/5 flex-col gap-2">
+        <div>
+          <h1>Transcript</h1>
+        </div>
+        <div className="size-full overflow-y-auto border p-4 text-xs">
+          <div className="text-muted-foreground text-xs">Transcript not available</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <AudioPlayerProvider>
+        <AudioPlayer episode={episode} />
+        <div className="mt-8 flex h-[600px] w-3/5 flex-col gap-2">
+          <div>
+            <h1>Transcript</h1>
+          </div>
+          <TranscriptView transcript={transcript} episode={episode} />
+        </div>
+      </AudioPlayerProvider>
+    </>
+  );
+}
+
+/** Show view of transcript when available. */
+function TranscriptView({ transcript, episode }: { transcript: any; episode: EpisodeWithPodcast }) {
+  const paragraphs = transcript.results?.channels[0].alternatives[0].paragraphs.paragraphs as any[];
+
+  const views = paragraphs.map((paragraph: any, index: number) => (
+    <ParagraphView paragraph={paragraph} episode={episode} key={index} />
+  ));
+
+  return (
+    <div className="w-full overflow-y-auto border p-4 text-xs">
+      <div className="flex flex-col gap-4">{views}</div>
+    </div>
+  );
+}
+
+/** Show a single paragraph. */
+function ParagraphView({ paragraph, episode }: { paragraph: any; episode: EpisodeWithPodcast }) {
+  const speakerColors = ['text-teal-400', 'text-sky-400', 'text-[#0000FF]'];
+
+  const start = paragraph.start;
+  const startHours = Math.floor(start / 3600);
+  const startMinutes = Math.floor((start % 3600) / 60);
+  const startSeconds = Math.floor(start % 60);
+  const startString = `${startHours}:${startMinutes.toString().padStart(2, '0')}:${startSeconds
+    .toString()
+    .padStart(2, '0')}`;
+
+  const sentences = paragraph.sentences;
+  const speaker = (episode.speakers && episode.speakers[paragraph.speaker]) ?? `Speaker ${paragraph.speaker}`;
+  const speakerColor = speakerColors[paragraph.speaker % speakerColors.length];
+
+  return (
+    <div className="group flex flex-row gap-2">
+      <div className="flex w-1/5 flex-col gap-2 overflow-hidden text-wrap text-xs">
+        <div className="text-primary">
+          {speaker}
+          <div className="hidden group-hover:block text-xs">
+            <EditSpeakersDialog episode={episode} speaker={paragraph.speaker} />
+          </div>
+        </div>
+        <div className="text-muted-foreground">{startString}</div>
+      </div>
+      <ParagraphText startTime={start} sentences={sentences} speakerColor={speakerColor} />
+    </div>
+  );
+}
+
+export function ParagraphText({
+  sentences,
+  speakerColor,
+  startTime,
+}: {
+  sentences: any;
+  speakerColor: string;
+  startTime: number;
+}) {
+  const audioPlayer = useAudioPlayer();
+  if (!audioPlayer) {
+    return null;
+  }
+  const { play, seek } = audioPlayer;
+
+  const doSeek = () => {
+    seek(startTime);
+    play();
+  };
+
+  return (
+    <div className="flex w-4/5 flex-row gap-1">
+      <div className={`font-mono text-base ${speakerColor}`}>
+        {sentences.map((sentence: any, index: number) => (
+          <div key={index}>{sentence.text}</div>
+        ))}
+      </div>
+      <div className="text-primary hidden group-hover:block" onClick={doSeek}>
+        <PlayCircleIcon className="size-8" />
+      </div>
+    </div>
+  );
+}
