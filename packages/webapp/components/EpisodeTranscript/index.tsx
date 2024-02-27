@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { EpisodeWithPodcast } from 'podverse-utils';
 import { EditSpeakersDialog } from '../EditSpeakersDialog';
 import { AudioPlayer, AudioPlayerProvider } from '@/components/AudioPlayer';
@@ -54,10 +54,47 @@ export function EpisodeTranscript({ episode }: { episode: EpisodeWithPodcast }) 
 /** Show view of transcript when available. */
 function TranscriptView({ transcript, episode }: { transcript: any; episode: EpisodeWithPodcast }) {
   const paragraphs = transcript.results?.channels[0].alternatives[0].paragraphs.paragraphs as any[];
+  const itemRefs = useRef(paragraphs.map(() => React.createRef<HTMLDivElement>()));
+  const playAnimationRef = useRef<number | undefined>(undefined);
+  const player = useAudioPlayer();
+  const { audioRef } = player || {};
+  const [curTime, setCurTime] = useState(0);
 
-  const views = paragraphs.map((paragraph: any, index: number) => (
-    <ParagraphView paragraph={paragraph} episode={episode} key={index} />
-  ));
+  const doUpdate = useCallback(() => {
+    if (!audioRef) {
+      return;
+    }
+    setCurTime(audioRef.current.currentTime);
+    playAnimationRef.current = requestAnimationFrame(doUpdate);
+  }, [audioRef]);
+
+  useEffect(() => {
+    const scrollToTime = (time: number) => {
+      const index = paragraphs.findIndex((para) => time >= para.start && time <= para.end);
+      if (itemRefs.current[index] === undefined) {
+        return;
+      }
+      itemRefs.current[index].current?.scrollIntoView({ block: 'center' });
+    };
+    scrollToTime(curTime);
+  }, [curTime, paragraphs, itemRefs, doUpdate]);
+
+  useEffect(() => {
+    playAnimationRef.current = requestAnimationFrame(doUpdate);
+  }, [doUpdate]);
+
+  const views = paragraphs.map((paragraph: any, index: number) => {
+    const isCurrent = (paragraph.start <= curTime && paragraph.end >= curTime) || false;
+    return (
+      <ParagraphView
+        highlight={isCurrent}
+        selfRef={itemRefs.current[index]}
+        paragraph={paragraph}
+        episode={episode}
+        key={index}
+      />
+    );
+  });
 
   return (
     <div className="w-full overflow-y-auto border p-4 text-xs">
@@ -67,7 +104,17 @@ function TranscriptView({ transcript, episode }: { transcript: any; episode: Epi
 }
 
 /** Show a single paragraph. */
-function ParagraphView({ paragraph, episode }: { paragraph: any; episode: EpisodeWithPodcast }) {
+function ParagraphView({
+  paragraph,
+  episode,
+  selfRef,
+  highlight,
+}: {
+  paragraph: any;
+  episode: EpisodeWithPodcast;
+  selfRef: React.Ref<HTMLDivElement>;
+  highlight: boolean;
+}) {
   const speakerColors = ['text-teal-400', 'text-sky-400', 'text-[#0000FF]'];
 
   const start = paragraph.start;
@@ -83,7 +130,7 @@ function ParagraphView({ paragraph, episode }: { paragraph: any; episode: Episod
   const speakerColor = speakerColors[paragraph.speaker % speakerColors.length];
 
   return (
-    <div className="group flex flex-row gap-2">
+    <div className={`group flex flex-row gap-2 ${highlight && 'bg-secondary'}`} ref={selfRef}>
       <div className="flex w-1/5 flex-col gap-2 overflow-hidden text-wrap text-xs">
         <div className="text-primary">
           {speaker}

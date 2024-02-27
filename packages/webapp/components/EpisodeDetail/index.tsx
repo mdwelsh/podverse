@@ -8,7 +8,6 @@ import { Chat } from '@/components/Chat';
 import { Collapse, CollapseWithToggle } from '@/components/Collapse';
 import { Owner } from '@/components/Owner';
 import { EditSpeakersDialog } from '../EditSpeakersDialog';
-import { ParagraphText } from '@/components/ParagraphText';
 import { revalidateTag } from 'next/cache';
 import { EpisodeTranscript } from '@/components/EpisodeTranscript';
 

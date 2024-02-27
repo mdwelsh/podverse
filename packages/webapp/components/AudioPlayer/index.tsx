@@ -75,7 +75,7 @@ export function AudioPlayer({ episode }: { episode: EpisodeWithPodcast }) {
   };
 
   return (
-    <div className="fixed bottom-0 z-20 w-4/5 border-t border-primary bg-muted p-4">
+    <div className="border-primary bg-muted fixed bottom-0 z-20 w-4/5 border-t p-4">
       <AudioControls audioRef={audioRef} duration={duration} />
       <audio src={audioUrl} ref={audioRef} onLoadedMetadata={onLoadedMetadata} />
     </div>
@@ -85,7 +85,7 @@ export function AudioPlayer({ episode }: { episode: EpisodeWithPodcast }) {
 function AudioControls({ audioRef, duration }: { audioRef: MutableRefObject<HTMLAudioElement>; duration: number }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [curTime, setCurTime] = useState(0);
-  const playAnimationRef = useRef<number| undefined>(undefined);
+  const playAnimationRef = useRef<number | undefined>(undefined);
 
   const doUpdate = useCallback(() => {
     setIsPlaying(!audioRef.current.paused);
@@ -117,7 +117,7 @@ function AudioControls({ audioRef, duration }: { audioRef: MutableRefObject<HTML
   };
 
   return (
-    <div className="flex w-full flex-row gap-2 items-center">
+    <div className="flex w-full flex-row items-center gap-2">
       <div>{secondsToTime(curTime)}</div>
       <PausePlayButton isPlaying={isPlaying} onClick={onPlayPauseClick} />
       <AudioSeeker audioRef={audioRef} curTime={curTime} duration={duration} onValueChange={onSeek} />
