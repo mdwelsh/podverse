@@ -1,3 +1,5 @@
+/** This module has functions for accessing tables in Supabase. */
+
 import { User, Podcast, Episode, EpisodeWithPodcast, PodcastWithEpisodes, Speakers } from './types.js';
 import { SupabaseClient } from '@supabase/supabase-js';
 
@@ -37,7 +39,7 @@ export async function GetPodcastWithEpisodes(supabase: SupabaseClient, slug: str
   return podcast;
 }
 
-/** Return value of GetLatestEpisodes. */
+/** This is the return value of GetLatestEpisodes. */
 export type LatestEpisode = Omit<Episode, 'podcast'> & { podcast: { slug: string; title: string } };
 
 /** Return latest episodes. */
@@ -91,14 +93,29 @@ export async function GetSpeakerMap(supabase: SupabaseClient, episodeId: number)
   return speakers;
 }
 
-/** Update the given Episode. */
+/** Create or update the given speaker map entry. */
 export async function UpdateSpeakerMap(
   supabase: SupabaseClient,
   episodeId: number,
   speakerId: string,
   speakerName: string,
+  force: boolean = false,
 ) {
   const entry = { episode: episodeId, speakerId, name: speakerName };
+  if (!force) {
+    const { data: existing, error } = await supabase
+      .from('SpeakerMap')
+      .select('*')
+      .eq('episode', episodeId)
+      .eq('speakerId', speakerId);
+    if (error) {
+      console.error('error', error);
+      throw error;
+    }
+    if (existing && existing.length > 0) {
+      return;
+    }
+  }
   const { error } = await supabase
     .from('SpeakerMap')
     .upsert(entry, { onConflict: 'episode,speakerId', ignoreDuplicates: false })

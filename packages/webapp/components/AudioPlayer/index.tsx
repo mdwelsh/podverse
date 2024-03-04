@@ -66,10 +66,9 @@ export function AudioPlayer({ episode }: { episode: EpisodeWithPodcast }) {
 
   //const audioUrl = '/audio/7a623d27-1461-4144-a653-850b04b788df.mp3';
   const audioUrl = `/api/proxy?url=${episode.audioUrl}`;
-  console.log('audioUrl: ', audioUrl);
+  console.log('Loading audio from URL: ', audioUrl);
 
   const onLoadedMetadata = () => {
-    console.log('onLoadedMetadata called: ', audioRef.current.duration);
     const seconds = audioRef.current.duration;
     setDuration(seconds);
   };

@@ -1,5 +1,5 @@
 import { Podcast, Episode } from './types.js';
-import OpenAI from 'openai';
+import { OpenAI } from 'openai';
 
 const SPEAKERID_PROMPT = `The following is a transcript of a conversation between
   multiple individuals, identified as "Speaker 0", "Speaker 1", and so forth. Please
@@ -34,14 +34,14 @@ export async function SpeakerID({
   podcast?: Podcast;
   episode?: Episode;
   maxTokenLen?: number;
-}): Promise<string> {
+}): Promise<Record<string, string>> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('Missing OPENAI_API_KEY environment variable.');
   }
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
-  let systemMessage = makePrompt(SPEAKERID_PROMPT, podcast, episode);
+  const systemMessage = makePrompt(SPEAKERID_PROMPT, podcast, episode);
 
   if (tokenLen(text) > maxTokenLen) {
     // Restrict to first maxTokenLen tokens.
@@ -55,5 +55,12 @@ export async function SpeakerID({
     ],
     model: 'gpt-4-turbo-preview',
   });
-  return completion.choices[0].message.content || '';
+
+  const result = completion.choices[0].message.content || '{}';
+  // Parse.
+  const parsed = JSON.parse(result);
+  if (typeof parsed !== 'object') {
+    throw new Error(`Expected JSON object as response, got: ${result}`);
+  }
+  return parsed;
 }

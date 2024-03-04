@@ -1,5 +1,5 @@
 import { Podcast, Episode } from './types.js';
-import OpenAI from 'openai';
+import { OpenAI } from 'openai';
 
 const TRANSCRIPT_SUMMARY = `Provide a one or two sentence summary of the
   following podcast transcript. Only use the information

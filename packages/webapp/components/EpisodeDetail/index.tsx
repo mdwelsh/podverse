@@ -5,10 +5,7 @@ import moment from 'moment';
 import { EpisodeIndicators } from '../Indicators';
 import { ArrowTopRightOnSquareIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { Chat } from '@/components/Chat';
-import { Collapse, CollapseWithToggle } from '@/components/Collapse';
-import { Owner } from '@/components/Owner';
-import { EditSpeakersDialog } from '../EditSpeakersDialog';
-import { revalidateTag } from 'next/cache';
+import { CollapseWithToggle } from '@/components/Collapse';
 import { EpisodeTranscript } from '@/components/EpisodeTranscript';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
@@ -48,7 +45,6 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
           >
             <div className="font-sans text-sm">{episode.description}</div>
           </CollapseWithToggle>
-          <div> Speakers: {JSON.stringify(episode.speakers)}</div>
         </div>
       </div>
     </div>

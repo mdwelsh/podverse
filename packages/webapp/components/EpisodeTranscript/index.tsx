@@ -134,7 +134,7 @@ function ParagraphView({
       <div className="flex w-1/5 flex-col gap-2 overflow-hidden text-wrap text-xs">
         <div className="text-primary">
           {speaker}
-          <div className="hidden group-hover:block text-xs">
+          <div className="hidden text-xs group-hover:block">
             <EditSpeakersDialog episode={episode} speaker={paragraph.speaker} />
           </div>
         </div>

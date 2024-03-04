@@ -1,16 +1,18 @@
 {
+  "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
-    "target": "ES2020", // Node.js 14
     "strict": true,
     "noEmitOnError": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "module": "node16",
-    "moduleResolution": "nodenext",
+    "moduleResolution": "node16",
     "jsx": "react",
     "esModuleInterop": true,
+    "rootDir": ".",
     "outDir": "dist",
-    "declaration": true
+    "declaration": true,
+    "types": ["node", "jest"]
   },
   "include": ["src"],
   "exclude": ["node_modules"]
