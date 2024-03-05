@@ -1,9 +1,9 @@
 /** This module performs audio->text transcription using Deepgram. */
 
-import { createClient } from '@deepgram/sdk';
+import { createClient, SyncPrerecordedResponse } from '@deepgram/sdk';
 
 /** Transcribe the given audio file and return the text of the transcript. */
-export async function Transcribe(audioUrl: string): Promise<any> {
+export async function Transcribe(audioUrl: string): Promise<SyncPrerecordedResponse> {
   console.log(`Transcribe audio from ${audioUrl}`);
   const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY || '';
   if (!DEEPGRAM_API_KEY) {
