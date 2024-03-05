@@ -3,36 +3,38 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { createHash } from 'crypto';
 import { TextSplitter, TextSplit } from './splitters.js';
 
-/** Given the provided text, return an embedding vector. */
-export async function CreateEmbedding(input: string): Promise<number[]> {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('Missing OPENAI_API_KEY environment variable.');
-  }
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-  const embeddingResponse = await openai.embeddings.create({
-    model: 'text-embedding-ada-002',
-    input,
-  });
-  const embedding = embeddingResponse.data[0].embedding;
-  return embedding;
-}
-
-
-/** Given the provided text, return a set of chunks. */
-export function ChunkText(text: string): TextSplit[] {
-  const splitter = new TextSplitter({ splitLongSentences: true });
-  return splitter.splitText(text);
-}
-
 /** Given a URL pointing to a plain text file, embed it for vector search. Return the Document ID. */
 export async function EmbedText(supabase: SupabaseClient, url: string, meta: object): Promise<number> {
   console.log(`Embedding text from ${url}`);
   const res = await fetch(url);
   const text = await res.text();
   const checksum = createHash('sha256').update(text).digest('base64');
-  const chunks = ChunkText(text);
+  const splitter = new TextSplitter({ splitLongSentences: true });
+  const chunks = splitter.splitText(text);
+  return await EmbedChunks(supabase, chunks, url, checksum, meta);
+}
+
+/** Given a URL pointing to a transcript JSON file, embed it for vector search. Return the Document ID. */
+export async function EmbedTranscript(supabase: SupabaseClient, url: string, meta: object): Promise<number> {
+  console.log(`Embedding transcript from ${url}`);
+  const res = await fetch(url);
+  const text = await res.text();
+  const transcript = JSON.parse(text);
+  const checksum = createHash('sha256').update(text).digest('base64');
+  const splitter = new TextSplitter({ splitLongSentences: true });
+  const chunks = splitter.splitTranscript(transcript);
+  return await EmbedChunks(supabase, chunks, url, checksum, meta);
+}
+
+/** Given a set of chunks, store embeddings for them. */
+async function EmbedChunks(
+  supabase: SupabaseClient,
+  chunks: TextSplit[],
+  sourceUrl: string,
+  checksum: string,
+  meta: object,
+): Promise<number> {
+  // Generate embedding for each chunk.
   const embeddings = await Promise.all(chunks.map((chunk) => CreateEmbedding(chunk.text)));
 
   // Create Document entry.
@@ -41,7 +43,7 @@ export async function EmbedText(supabase: SupabaseClient, url: string, meta: obj
     .upsert(
       {
         checksum,
-        source: url,
+        source: sourceUrl,
         meta,
       },
       { onConflict: 'path' },
@@ -58,18 +60,13 @@ export async function EmbedText(supabase: SupabaseClient, url: string, meta: obj
   // as a parent. Each section contains the content of the chunk and its vector embedding.
   for (let i = 0; i < chunks.length; i++) {
     const embedding = embeddings[i];
-
-    const meta = {
-      sourceOffset: chunks[i].offset,
-    };
-
     const { error } = await supabase
       .from('Chunks')
       .insert({
         document: document.id,
         content: chunks[i].text,
         embedding,
-        meta,
+        meta: chunks[i].meta,
       })
       .select()
       .limit(1)
@@ -83,6 +80,23 @@ export async function EmbedText(supabase: SupabaseClient, url: string, meta: obj
   return document.id;
 }
 
+/** Given the provided text, return an embedding vector. */
+export async function CreateEmbedding(input: string): Promise<number[]> {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('Missing OPENAI_API_KEY environment variable.');
+  }
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+  const embeddingResponse = await openai.embeddings.create({
+    model: 'text-embedding-ada-002',
+    input,
+  });
+  const embedding = embeddingResponse.data[0].embedding;
+  return embedding;
+}
+
+/** Represents a vector search result. */
 export interface VectorSearchResult {
   chunkId: number;
   documentId: number;

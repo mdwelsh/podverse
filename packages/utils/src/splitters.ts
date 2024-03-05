@@ -3,8 +3,8 @@
 import { Tiktoken, encodingForModel } from 'js-tiktoken';
 import { SyncPrerecordedResponse } from '@deepgram/sdk';
 
-export const DEFAULT_CHUNK_SIZE = 1024;
-export const DEFAULT_CHUNK_OVERLAP = 20;
+const DEFAULT_CHUNK_SIZE = 1024;
+const DEFAULT_CHUNK_OVERLAP = 20;
 
 /** Represents a chunk of text. */
 export type TextSplit = {
