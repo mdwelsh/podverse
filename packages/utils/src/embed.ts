@@ -33,7 +33,7 @@ export type TextSplit = {
 
 /** Given the provided text, return a set of chunks. */
 export function ChunkText(text: string): TextSplit[] {
-  const splitter = new SentenceSplitter();
+  const splitter = new SentenceSplitter({ splitLongSentences: true });
   return splitter.splitText(text);
 }
 
@@ -61,7 +61,7 @@ export async function EmbedText(supabase: SupabaseClient, url: string, meta: obj
     .limit(1)
     .single();
   if (error) {
-    console.log('error inserting Embed page entry', error);
+    console.error('error inserting Embed page entry', error);
     throw error;
   }
 
@@ -156,7 +156,7 @@ export async function VectorSearch(supabase: SupabaseClient, input: string): Pro
     min_content_length: 50,
   });
   if (error) {
-    console.log('Error performing lookup', error);
+    console.error('Error performing lookup', error);
     throw error;
   }
   return data.map((row: { id: number; document: number; similarity: number; content: string; meta: object }) => {
@@ -334,13 +334,15 @@ export class SentenceSplitter {
       if (splitLen <= this.chunkSize) {
         newSplits.push({ text: split.text, numTokens: splitLen, offset: split.offset });
       } else {
+        let curOffset = 0;
         for (let i = 0; i < splitLen; i += this.chunkSize) {
           const cur_split = this.tokenizerDecoder(splitTokens.slice(i, i + this.chunkSize));
           newSplits.push({
             text: cur_split,
-            offset: i + (split.offset ?? 0),
-            numTokens: this.chunkSize,
+            offset: curOffset + (split.offset ?? 0),
+            numTokens: this.tokenizer(cur_split).length,
           });
+          curOffset += cur_split.length;
         }
       }
     }
@@ -349,10 +351,13 @@ export class SentenceSplitter {
 
   // Combine the splits into a single split.
   private combineSplits(splits: TextSplit[]): TextSplit {
+    if (splits.length === 0) {
+      return { text: '', numTokens: 0 };
+    }
     return {
       text: splits.map((split) => split.text).join(' '),
       numTokens: splits.reduce((acc, split) => acc + split.numTokens!, 0),
-      offset: splits[0].offset,
+      offset: splits[0].offset ?? undefined,
     };
   }
 
@@ -385,9 +390,8 @@ export class SentenceSplitter {
         }
       }
       curSentences.push(sentences[i]);
-      curTokens += sentences[i].numTokens! + 1;
+      curTokens += sentences[i].numTokens!;
     }
-
     chunks.push(this.combineSplits(curSentences));
     return chunks;
   }
