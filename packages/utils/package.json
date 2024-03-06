@@ -2,7 +2,7 @@
   "name": "podverse-utils",
   "version": "0.2.0",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "private": true,
   "scripts": {
     "build": "tsc",

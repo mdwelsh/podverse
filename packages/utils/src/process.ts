@@ -5,7 +5,7 @@ import { GetEpisode, Upload, UpdateEpisode, UpdateSpeakerMap, GetPodcastByID } f
 import { Transcribe } from './transcribe.js';
 import { Summarize } from './summarize.js';
 import { SpeakerID } from './speakerid.js';
-import { EmbedText } from './embed.js';
+import { EmbedTranscript } from './embed.js';
 
 /** Perform processing on the given episode. */
 export async function ProcessEpisode({
@@ -21,7 +21,7 @@ export async function ProcessEpisode({
   const transcriptResult = await TranscribeEpisode({ supabase, episodeId, force });
   const summarizeResult = await SummarizeEpisode({ supabase, episodeId, force });
   const speakerIdResult = await SpeakerIDEpisode({ supabase, episodeId, force });
-  const embedResult = await EmbedEpisode(supabase, episodeId);
+  const embedResult = await EmbedEpisode({ supabase, episodeId, force });
   return JSON.stringify({ transcriptResult, summarizeResult, speakerIdResult, embedResult });
 }
 
@@ -122,18 +122,39 @@ export async function SpeakerIDEpisode({
 }
 
 /** Embed the given episode. */
-export async function EmbedEpisode(supabase: SupabaseClient, episodeId: number): Promise<string> {
+export async function EmbedEpisode({
+  supabase,
+  episodeId,
+  force,
+}: {
+  supabase: SupabaseClient;
+  episodeId: number;
+  force: boolean;
+}): Promise<string> {
   console.log(`Embed for episode ${episodeId}`);
   const episode = await GetEpisode(supabase, episodeId);
-  const podcast = await GetPodcastByID(supabase, episode.podcast.toString());
-  if (episode.transcriptUrl === null) {
-    return `Episode ${episodeId} has no transcript.`;
+  if (episode.rawTranscriptUrl === null) {
+    return `Episode ${episodeId} has no JSON transcript.`;
   }
-  // XXX Check for existing embeddings here.
-  const pageId = await EmbedText(supabase, episode.transcriptUrl, {});
-
-  console.log(`Done embedding episode ${episodeId}`);
-  return `Embed on episode ${episodeId} done`;
+  // Check for existing embeddings.
+  const { data: existing, error } = await supabase.from('Documents').select('*').eq('episode', episodeId);
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  if (existing && existing.length > 0) {
+    if (!force) {
+      return `Episode ${episodeId} already embedded.`;
+    } else {
+      console.log(`Deleting existing embeddings for episode ${episodeId}`);
+      const { error } = await supabase.from('Documents').delete().eq('episode', episodeId);
+      if (error) {
+        console.error('error', error);
+        throw error;
+      }
+    }
+  }
+  const docId = await EmbedTranscript(supabase, episode.rawTranscriptUrl, {});
+  console.log(`Done embedding episode ${episodeId} - page ${docId}`);
+  return `Embed on episode ${episodeId} done - document ID ${docId}`;
 }
-
-

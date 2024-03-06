@@ -19,10 +19,10 @@ import {
   Transcribe,
   Summarize,
   SpeakerID,
-  ChunkText,
-  Embed,
   VectorSearch,
   Ingest,
+  EmbedText,
+  TextSplitter,
 } from 'podverse-utils';
 import { dump, load } from 'js-yaml';
 import fs from 'fs';
@@ -308,7 +308,8 @@ program
     term(`Chunking ${url}...`);
     const res = await fetch(url);
     const text = await res.text();
-    const chunks = await ChunkText(text);
+    const splitter = new TextSplitter({ splitLongSentences: true });
+    const chunks = splitter.splitText(text);
     term(`Got ${chunks.length} chunks.\n`);
     for (const chunk of chunks) {
       term.green(chunk + '\n\n');
@@ -321,7 +322,7 @@ program
   .argument('<url>', 'URL of the text to embed.')
   .action(async (url: string) => {
     term(`Embedding ${url}...`);
-    const pageId = await Embed(supabase, url, { source: 'CLI' });
+    const pageId = await EmbedText(supabase, url, { source: 'CLI' });
     term(`Embedded as page ID: ${pageId}\n`);
   });
 

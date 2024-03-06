@@ -81,7 +81,7 @@ async function EmbedChunks(
 }
 
 /** Given the provided text, return an embedding vector. */
-export async function CreateEmbedding(input: string): Promise<number[]> {
+async function CreateEmbedding(input: string): Promise<number[]> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('Missing OPENAI_API_KEY environment variable.');
   }

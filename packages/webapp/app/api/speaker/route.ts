@@ -2,6 +2,7 @@ import { GetEpisodeWithPodcast, UpdateSpeakerMap } from 'podverse-utils';
 import { auth } from '@clerk/nextjs';
 import supabase from '@/lib/supabase';
 
+/** Update speaker map for a given episode and speaker ID. */
 export async function POST(req: Request) {
   const { userId } = auth();
   if (!userId) {

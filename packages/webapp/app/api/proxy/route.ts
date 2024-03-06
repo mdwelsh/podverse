@@ -1,3 +1,7 @@
+/**
+ * This endpoint is used to proxy requests to third-party URLs.
+ * This is needed for, e.g., access to externally-hosted podcast audio due to CORS restrictions.
+ */
 export async function GET(req: Request) {
   const reqUrl = new URL(req.url);
   const fetchUrl = reqUrl.searchParams.get('url');

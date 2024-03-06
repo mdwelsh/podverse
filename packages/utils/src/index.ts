@@ -3,6 +3,7 @@ export * from './storage.js';
 export * from './transcribe.js';
 export * from './summarize.js';
 export * from './speakerid.js';
+export * from './splitters.js';
 export * from './embed.js';
 export * from './process.js';
 export * from './podcast.js';
