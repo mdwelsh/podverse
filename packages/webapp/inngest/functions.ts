@@ -1,6 +1,6 @@
 /** This module contains Inngest Functions that are invoked in response to Inngest events. */
 
-import { getSupabaseClient } from '../lib/supabase';
+import { getSupabaseClientWithToken } from '../lib/supabase';
 import { inngest } from './client';
 import { ProcessEpisode } from 'podverse-utils';
 
@@ -15,18 +15,23 @@ export const processEpisode = inngest.createFunction(
   },
   { event: 'process/episode' },
   async ({ event, step }) => {
-    const { episodeId, force } = event.data;
+    const { episodeId, force, supabaseAccessToken } = event.data;
     if (!episodeId) {
       throw new Error('process/episode - Missing episodeId in event data');
     }
     console.log(`process/episode event received for episodeId ${episodeId}`, event);
-    const supabase = await getSupabaseClient();
-    const result = await ProcessEpisode({ supabase, episodeId, force });
-    console.log(`process/episode done processing episodeId ${episodeId}`, event);
-    return {
-      event,
-      body: result,
-    };
+    const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
+    try {
+      const result = await ProcessEpisode({ supabase, episodeId, force });
+      console.log(`process/episode done processing episodeId ${episodeId}`, event);
+      return {
+        event,
+        body: result,
+      };
+    } catch (error) {
+      console.error(`process/episode - Error processing episode ${episodeId}`, error);
+      throw error;
+    }
   },
 );
 

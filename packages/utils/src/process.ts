@@ -1,7 +1,7 @@
 /* This module has functions for processing individual episodes. */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { GetEpisode, Upload, UpdateEpisode, UpdateSpeakerMap, GetPodcastByID } from './storage.js';
+import { GetEpisode, Upload, UpdateEpisode, GetSpeakerMap, UpdateSpeakerMap, GetPodcastByID } from './storage.js';
 import { Transcribe } from './transcribe.js';
 import { Summarize } from './summarize.js';
 import { SpeakerID } from './speakerid.js';
@@ -19,9 +19,13 @@ export async function ProcessEpisode({
 }): Promise<string> {
   console.log(`Processing episode ${episodeId}`);
   const transcriptResult = await TranscribeEpisode({ supabase, episodeId, force });
+  console.log(transcriptResult);
   const summarizeResult = await SummarizeEpisode({ supabase, episodeId, force });
+  console.log(summarizeResult);
   const speakerIdResult = await SpeakerIDEpisode({ supabase, episodeId, force });
+  console.log(speakerIdResult);
   const embedResult = await EmbedEpisode({ supabase, episodeId, force });
+  console.log(embedResult);
   return JSON.stringify({ transcriptResult, summarizeResult, speakerIdResult, embedResult });
 }
 
@@ -108,6 +112,12 @@ export async function SpeakerIDEpisode({
   if (episode.transcriptUrl === null) {
     return `Episode ${episodeId} has no transcript.`;
   }
+
+  // Check for existing speaker map.
+  const speakerMap = await GetSpeakerMap(supabase, episodeId);
+  if (Object.keys(speakerMap).length > 0 && !force) {
+    return `Episode ${episodeId} already has speaker map.`;
+  }
   const res = await fetch(episode.transcriptUrl);
   const text = await res.text();
   const speakers = await SpeakerID({ text, episode, podcast });
@@ -154,7 +164,7 @@ export async function EmbedEpisode({
       }
     }
   }
-  const docId = await EmbedTranscript(supabase, episode.rawTranscriptUrl, {});
+  const docId = await EmbedTranscript(supabase, episode.rawTranscriptUrl, episodeId);
   console.log(`Done embedding episode ${episodeId} - page ${docId}`);
   return `Embed on episode ${episodeId} done - document ID ${docId}`;
 }

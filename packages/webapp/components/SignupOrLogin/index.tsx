@@ -5,7 +5,6 @@ import { getSupabaseClient } from '@/lib/supabase';
 async function createUser() {
   const { userId, getToken } = auth();
   if (!userId) {
-    console.log('Not signed in');
     return;
   }
   const supabase = await getSupabaseClient();

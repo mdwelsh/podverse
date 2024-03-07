@@ -7,6 +7,8 @@ import { ArrowTopRightOnSquareIcon, PencilSquareIcon } from '@heroicons/react/24
 import { Chat } from '@/components/Chat';
 import { CollapseWithToggle } from '@/components/Collapse';
 import { EpisodeTranscript } from '@/components/EpisodeTranscript';
+import { Owner } from '@/components/Owner';
+import { ProcessEpisodeDialog } from '../ProcessEpisodeDialog';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: 0 };
@@ -40,6 +42,9 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
                   Published {moment(episode.pubDate).format('MMMM Do YYYY')}
                 </div>
                 <EpisodeIndicators episode={episodeWithoutPodcast} />
+                <div className="w-fit">
+                  <ProcessEpisodeDialog episode={episodeWithoutPodcast} />
+                </div>
               </div>
             }
           >
@@ -77,7 +82,6 @@ async function EpisodeSummary({ episode }: { episode: EpisodeWithPodcast }) {
   );
 }
 
-
 async function EpisodeChat({ episode }: { episode: EpisodeWithPodcast }) {
   return (
     <div className="mt-8 flex h-[600px] w-2/5 flex-col gap-2">
@@ -96,12 +100,12 @@ export async function EpisodeDetail({ podcastSlug, episodeSlug }: { podcastSlug:
 
   return (
     <div className="mx-auto mt-8 w-4/5 font-mono">
-        <EpisodeHeader episode={episode} />
-        <EpisodeSummary episode={episode} />
-        <div className="flex flex-row gap-4">
-          <EpisodeTranscript episode={episode} />
-          <EpisodeChat episode={episode} />
-        </div>
+      <EpisodeHeader episode={episode} />
+      <EpisodeSummary episode={episode} />
+      <div className="flex flex-row gap-4">
+        <EpisodeTranscript episode={episode} />
+        <EpisodeChat episode={episode} />
+      </div>
     </div>
   );
 }

@@ -4,26 +4,26 @@ import { createHash } from 'crypto';
 import { TextSplitter, TextSplit } from './splitters.js';
 
 /** Given a URL pointing to a plain text file, embed it for vector search. Return the Document ID. */
-export async function EmbedText(supabase: SupabaseClient, url: string, meta: object): Promise<number> {
+export async function EmbedText(supabase: SupabaseClient, url: string, episodeId?: number, meta?: object): Promise<number> {
   console.log(`Embedding text from ${url}`);
   const res = await fetch(url);
   const text = await res.text();
   const checksum = createHash('sha256').update(text).digest('base64');
   const splitter = new TextSplitter({ splitLongSentences: true });
   const chunks = splitter.splitText(text);
-  return await EmbedChunks(supabase, chunks, url, checksum, meta);
+  return await EmbedChunks(supabase, chunks, url, checksum, episodeId, meta);
 }
 
 /** Given a URL pointing to a transcript JSON file, embed it for vector search. Return the Document ID. */
-export async function EmbedTranscript(supabase: SupabaseClient, url: string, meta: object): Promise<number> {
-  console.log(`Embedding transcript from ${url}`);
+export async function EmbedTranscript(supabase: SupabaseClient, url: string, episodeId?: number, meta?: object): Promise<number> {
+  console.log(`Embedding transcript from ${url} for episode ${episodeId}`);
   const res = await fetch(url);
   const text = await res.text();
   const transcript = JSON.parse(text);
   const checksum = createHash('sha256').update(text).digest('base64');
   const splitter = new TextSplitter({ splitLongSentences: true });
   const chunks = splitter.splitTranscript(transcript);
-  return await EmbedChunks(supabase, chunks, url, checksum, meta);
+  return await EmbedChunks(supabase, chunks, url, checksum, episodeId, meta);
 }
 
 /** Given a set of chunks, store embeddings for them. */
@@ -32,10 +32,22 @@ async function EmbedChunks(
   chunks: TextSplit[],
   sourceUrl: string,
   checksum: string,
-  meta: object,
+  episodeId?: number,
+  meta?: object,
 ): Promise<number> {
   // Generate embedding for each chunk.
+  console.log(`Embedding ${chunks.length} chunks for episode ${episodeId} from ${sourceUrl} with checksum ${checksum}`);
+
   const embeddings = await Promise.all(chunks.map((chunk) => CreateEmbedding(chunk.text)));
+
+  // XXX MDW DEBUGGING
+  const { data, error: e } = await supabase.from('Episodes').select('*, podcast(*)').eq('id', episodeId).limit(1);
+  if (e) {
+    console.error('error trying to look up episode', e);
+  }
+  if (data && data.length > 0) {
+    console.log('found episode:', data[0]);
+  }
 
   // Create Document entry.
   const { data: document, error } = await supabase
@@ -43,10 +55,11 @@ async function EmbedChunks(
     .upsert(
       {
         checksum,
+        episode: episodeId,
         source: sourceUrl,
         meta,
       },
-      { onConflict: 'path' },
+      { onConflict: 'episode,source' },
     )
     .select()
     .limit(1)

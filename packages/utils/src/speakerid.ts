@@ -9,7 +9,7 @@ const SPEAKERID_PROMPT = `The following is a transcript of a conversation betwee
   the identified speaker names (e.g., "John Smith", "Jane Doe"). For example, your response
   might be:
   { "Speaker 0": "John Smith", "Speaker 1": "Jane Doe" }\n
-  ONLY return a JSON formatted response; DO NOT return any other information or context.`;
+  ONLY return a JSON formatted response. DO NOT return any other information or context. DO NOT prefix your response with backquotes.`;
 
 // Rough estimate.
 const tokenLen = (text: string) => text.length / 4;

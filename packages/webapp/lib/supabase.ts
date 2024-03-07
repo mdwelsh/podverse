@@ -8,8 +8,16 @@ export default createClient(
 
   // We need to use the non-anonymous key to allow writes by the process API endpoints.
   process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-  process.env.SUPABASE_API_KEY as string
+  process.env.SUPABASE_API_KEY as string,
 );
+
+/** Return a Supabase client that is authenticated using the given token. */
+export async function getSupabaseClientWithToken(token: string) {
+  console.log(`Creating supabase client with token: ${token}`);
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL as string, process.env.SUPABASE_API_KEY as string, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+}
 
 /** Return a Supabase client that is authenticated using the Clerk JWT. */
 export async function getSupabaseClient() {
@@ -18,15 +26,10 @@ export async function getSupabaseClient() {
   if (!supabaseAccessToken) {
     return createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
     );
   } else {
-    return createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-      process.env.SUPABASE_API_KEY as string,
-      {
-        global: { headers: { Authorization: `Bearer ${supabaseAccessToken}` }}
-      }
-    );
+    return getSupabaseClientWithToken(supabaseAccessToken);
   }
-};
+}
+

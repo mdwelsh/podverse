@@ -318,11 +318,11 @@ program
 
 program
   .command('embed-url')
-  .description('Embed the text content at the given URL.')
+  .description('Embed the text content at the given URL for the given episode.')
   .argument('<url>', 'URL of the text to embed.')
   .action(async (url: string) => {
     term(`Embedding ${url}...`);
-    const pageId = await EmbedText(supabase, url, { source: 'CLI' });
+    const pageId = await EmbedText(supabase, url, undefined, { source: 'CLI' });
     term(`Embedded as page ID: ${pageId}\n`);
   });
 
