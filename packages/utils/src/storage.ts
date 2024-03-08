@@ -276,7 +276,7 @@ export async function Upload(
   const { error } = await supabase.storage.from(bucket).upload(fileName, buf, { upsert: true });
   if (error) {
     console.error('error', error);
-    throw new Error(`Error uploading ${fileName} to ${bucket}: ${error}`);
+    throw new Error(`Error uploading ${fileName} to ${bucket}: ${JSON.stringify(error)}`);
   }
   const { data: publicUrlData } = await supabase.storage.from(bucket).getPublicUrl(fileName);
   return publicUrlData.publicUrl;

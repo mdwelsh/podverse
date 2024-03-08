@@ -48,14 +48,14 @@ export async function TranscribeEpisode({
     return `Episode ${episodeId} has no audio.`;
   }
   const result = await Transcribe(episode.audioUrl!);
-  const rawTranscriptUrl = await Upload(supabase, JSON.stringify(result, null, 2), 'transcripts', `${episodeId}.json`);
+  const rawTranscriptUrl = await Upload(supabase, JSON.stringify(result, null, 2), 'transcripts', `${episode.podcast}/${episodeId}/transcript.json`);
 
   // Extract just the transcript text.
   const transcript =
     result.results?.channels[0].alternatives[0].paragraphs?.transcript ||
     result.results?.channels[0].alternatives[0].transcript ||
     '';
-  const transcriptUrl = await Upload(supabase, transcript, 'transcripts', `${episodeId}.txt`);
+  const transcriptUrl = await Upload(supabase, transcript, 'transcripts', `${episode.podcast}/${episodeId}/transcript.txt`);
 
   // Update Episode.
   episode.transcriptUrl = transcriptUrl;
@@ -87,7 +87,9 @@ export async function SummarizeEpisode({
   const res = await fetch(episode.transcriptUrl);
   const text = await res.text();
   const summary = await Summarize({ text, episode, podcast });
-  const summaryUrl = await Upload(supabase, summary, 'summaries', `${episodeId}.txt`);
+  const filename = `${episode.podcast}/${episodeId}/summary.txt`;
+  console.log(`Uploading summary for episode ${episodeId} to ${filename}`);
+  const summaryUrl = await Upload(supabase, summary, 'summaries', filename);
 
   // Update Episode.
   episode.summaryUrl = summaryUrl;
