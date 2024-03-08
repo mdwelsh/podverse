@@ -4,7 +4,7 @@ import OpenAI from 'openai';
 import { OpenAIStream, StreamingTextResponse } from 'ai';
 import { Tool, ToolCallPayload } from 'ai';
 import { VectorSearch } from 'podverse-utils';
-import supabase from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -56,7 +56,9 @@ export async function POST(req: Request) {
         for (const toolCall of call.tools) {
           console.log(`onToolCall: tool=${JSON.stringify(toolCall)}`);
           if (toolCall.func.name === 'searchKnowledgeBase') {
+            const supabase = await getSupabaseClient();
             const args = JSON.parse(toolCall.func.arguments as unknown as string);
+            console.log(`searchKnowledgeBase: Calling Vector search: args=${JSON.stringify(args)}`);
             const chunks = await VectorSearch(supabase, args.query) as { content: string }[];
             const chunkResults = chunks.map((chunk, index) => {
               return {
@@ -81,7 +83,7 @@ export async function POST(req: Request) {
         }
       } catch (error) {
         console.error(`Error in onToolCall: ${error}`);
-        return `I'm sorry, there was an error processing your request: ${error}`;
+        return `I'm sorry, there was an error processing your request: ${JSON.stringify(error)}`;
       }
     },
   });

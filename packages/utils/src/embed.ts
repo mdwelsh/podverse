@@ -164,6 +164,8 @@ export async function VectorSearch(supabase: SupabaseClient, input: string): Pro
   //   limit match_count;
   // end;
 
+  console.log(`Calling chunk_vector_search with queryEmbedding: ${queryEmbedding}`);
+
   const { data, error } = await supabase.rpc('chunk_vector_search', {
     embedding: queryEmbedding,
     match_threshold: 0.8,
@@ -171,7 +173,7 @@ export async function VectorSearch(supabase: SupabaseClient, input: string): Pro
     min_content_length: 50,
   });
   if (error) {
-    console.error('Error performing lookup', error);
+    console.error('Error with RPC chunk_vector_search: ', error);
     throw error;
   }
   return data.map((row: { id: number; document: number; similarity: number; content: string; meta: object }) => {
