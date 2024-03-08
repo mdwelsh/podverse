@@ -74,11 +74,13 @@ $$;
 -- --------------------------------------------------------------------------------
 -- Podcasts
 -- --------------------------------------------------------------------------------
-DROP POLICY IF EXISTS "Allow insert on Podcasts when requesting_user_id() is not empty" ON "public"."Podcasts";
+DROP POLICY IF EXISTS "Allow insert by any authed user" ON "public"."Podcasts";
 
-DROP POLICY IF EXISTS "Allow update for Podcast owner" ON "public"."Podcasts";
+DROP POLICY IF EXISTS "Allow update by Podcast owner" ON "public"."Podcasts";
 
-DROP POLICY IF EXISTS "Enable read access for all users" ON "public"."Podcasts";
+DROP POLICY IF EXISTS "Allow delete by Podcast owner" ON "public"."Podcasts";
+
+DROP POLICY IF EXISTS "Allow read access for all users" ON "public"."Podcasts";
 
 CREATE POLICY "Allow read access for all users" ON "public"."Podcasts" FOR
 SELECT
@@ -93,11 +95,13 @@ CREATE POLICY "Allow delete by Podcast owner" ON "public"."Podcasts" TO public U
 -- --------------------------------------------------------------------------------
 -- Episodes
 -- --------------------------------------------------------------------------------
-DROP POLICY IF EXISTS "Allow insert for Podcast owner" ON "public"."Episodes";
+DROP POLICY IF EXISTS "Allow insert by Podcast owner" ON "public"."Episodes";
 
-DROP POLICY IF EXISTS "Allow update for Podcast owner" ON "public"."Episodes";
+DROP POLICY IF EXISTS "Allow update by Podcast owner" ON "public"."Episodes";
 
-DROP POLICY IF EXISTS "Enable read access for all users" ON "public"."Episodes";
+DROP POLICY IF EXISTS "Allow delete by Podcast owner" ON "public"."Episodes";
+
+DROP POLICY IF EXISTS "Allow read access for all users" ON "public"."Episodes";
 
 CREATE POLICY "Allow read access for all users" ON "public"."Episodes" FOR
 SELECT
@@ -122,11 +126,13 @@ CREATE POLICY "Allow delete by Podcast owner" ON "public"."Episodes" FOR DELETE 
 -- --------------------------------------------------------------------------------
 -- Jobs
 -- --------------------------------------------------------------------------------
-DROP POLICY IF EXISTS "Allow insert for Podcast owner" ON "public"."Jobs";
+DROP POLICY IF EXISTS "Allow insert by Podcast owner" ON "public"."Jobs";
 
-DROP POLICY IF EXISTS "Allow update for Podcast owner" ON "public"."Jobs";
+DROP POLICY IF EXISTS "Allow update by Podcast owner" ON "public"."Jobs";
 
-DROP POLICY IF EXISTS "Enable read access for all users" ON "public"."Jobs";
+DROP POLICY IF EXISTS "Allow delete by Podcast owner" ON "public"."Jobs";
+
+DROP POLICY IF EXISTS "Allow read access by Podcast owner" ON "public"."Jobs";
 
 CREATE POLICY "Allow read access by Podcast owner" ON "public"."Jobs" FOR
 SELECT
@@ -155,9 +161,11 @@ CREATE POLICY "Allow delete by Podcast owner" ON "public"."Jobs" FOR DELETE TO p
 -- --------------------------------------------------------------------------------
 DROP POLICY IF EXISTS "Allow insert by Podcast owner" ON "public"."SpeakerMap";
 
-DROP POLICY IF EXISTS "Allow insert or update by Podcast owner" ON "public"."SpeakerMap";
+DROP POLICY IF EXISTS "Allow update by Podcast owner" ON "public"."SpeakerMap";
 
-DROP POLICY IF EXISTS "Enable read access for all users" ON "public"."SpeakerMap";
+DROP POLICY IF EXISTS "Allow delete by Podcast owner" ON "public"."SpeakerMap";
+
+DROP POLICY IF EXISTS "Allow read access for all users" ON "public"."SpeakerMap";
 
 CREATE POLICY "Allow read access for all users" ON "public"."SpeakerMap" FOR
 SELECT
@@ -184,11 +192,13 @@ CREATE POLICY "Allow delete by Podcast owner" ON "public"."SpeakerMap" FOR DELET
 -- --------------------------------------------------------------------------------
 DROP POLICY IF EXISTS "Allow deletion by Podcast owner" ON "public"."Documents";
 
-DROP POLICY IF EXISTS "Allow update for Podcast owner" ON "public"."Documents";
+DROP POLICY IF EXISTS "Allow update by Podcast owner" ON "public"."Documents";
 
-DROP POLICY IF EXISTS "Enable insert for Podcast owner" ON "public"."Documents";
+DROP POLICY IF EXISTS "Allow delete by Podcast owner" ON "public"."Documents";
 
-DROP POLICY IF EXISTS "Enable read access for all users" ON "public"."Documents";
+DROP POLICY IF EXISTS "Allow insert by Podcast owner" ON "public"."Documents";
+
+DROP POLICY IF EXISTS "Allow read access for all users" ON "public"."Documents";
 
 CREATE POLICY "Allow read access for all users" ON "public"."Documents" FOR
 SELECT
@@ -217,7 +227,7 @@ DROP POLICY IF EXISTS "Allow delete by Podcast owner" ON "public"."Chunks";
 
 DROP POLICY IF EXISTS "Allow insert by Podcast owner" ON "public"."Chunks";
 
-DROP POLICY IF EXISTS "Enable read access for all users" ON "public"."Chunks";
+DROP POLICY IF EXISTS "Allow read access for all users" ON "public"."Chunks";
 
 CREATE POLICY "Allow read access for all users" ON "public"."Chunks" FOR
 SELECT
@@ -256,7 +266,13 @@ CREATE POLICY "Allow delete by Podcast owner" ON "public"."Chunks" FOR DELETE TO
 -- --------------------------------------------------------------------------------
 -- Storage policies
 -- --------------------------------------------------------------------------------
-DROP POLICY IF EXISTS "Allow select by owner" ON "storage"."objects";
+DROP POLICY IF EXISTS "Allow select by Podcast owner" ON "storage"."objects";
+
+DROP POLICY IF EXISTS "Allow insert by Podcast owner" ON "storage"."objects";
+
+DROP POLICY IF EXISTS "Allow update by Podcast owner" ON "storage"."objects";
+
+DROP POLICY IF EXISTS "Allow delete by Podcast owner" ON "storage"."objects";
 
 CREATE POLICY "Allow select by Podcast owner" ON "storage"."objects" FOR
 SELECT
