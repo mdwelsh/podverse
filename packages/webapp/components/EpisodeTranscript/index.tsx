@@ -61,11 +61,10 @@ function TranscriptView({ transcript, episode }: { transcript: any; episode: Epi
   const [curTime, setCurTime] = useState(0);
 
   const doUpdate = useCallback(() => {
-    if (!audioRef) {
-      return;
+    if (audioRef && audioRef.current) {
+      setCurTime(audioRef.current.currentTime);
+      playAnimationRef.current = requestAnimationFrame(doUpdate);
     }
-    setCurTime(audioRef.current.currentTime);
-    playAnimationRef.current = requestAnimationFrame(doUpdate);
   }, [audioRef]);
 
   useEffect(() => {

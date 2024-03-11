@@ -8,6 +8,7 @@ import { ProcessEpisode } from 'podverse-utils';
 export const processEpisode = inngest.createFunction(
   {
     id: 'process-episode',
+    retries: 0,
     concurrency: {
       // Limit number of concurrent calls to Deepgram to avoid hitting API limit.
       limit: 10,

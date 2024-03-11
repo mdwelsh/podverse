@@ -87,32 +87,40 @@ function AudioControls({ audioRef, duration }: { audioRef: MutableRefObject<HTML
   const playAnimationRef = useRef<number | undefined>(undefined);
 
   const doUpdate = useCallback(() => {
-    setIsPlaying(!audioRef.current.paused);
-    setCurTime(audioRef.current.currentTime);
-    playAnimationRef.current = requestAnimationFrame(doUpdate);
+    if (audioRef.current) {
+      setIsPlaying(!audioRef.current.paused);
+      setCurTime(audioRef.current.currentTime);
+      playAnimationRef.current = requestAnimationFrame(doUpdate);
+    }
   }, [audioRef]);
 
   useEffect(() => {
-    if (isPlaying) {
-      audioRef.current.play();
-    } else {
-      audioRef.current.pause();
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.play();
+      } else {
+        audioRef.current.pause();
+      }
     }
     playAnimationRef.current = requestAnimationFrame(doUpdate);
   }, [isPlaying, audioRef, doUpdate]);
 
   const onPlayPauseClick = () => {
-    if (audioRef.current.paused) {
-      audioRef.current.play();
-    } else {
-      audioRef.current.pause();
+    if (audioRef.current) {
+      if (audioRef.current.paused) {
+        audioRef.current.play();
+      } else {
+        audioRef.current.pause();
+      }
+      setIsPlaying(!audioRef.current.paused);
     }
-    setIsPlaying(!audioRef.current.paused);
   };
 
   const onSeek = (time: number) => {
-    audioRef.current.currentTime = time;
-    setCurTime(time);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setCurTime(time);
+    }
   };
 
   return (

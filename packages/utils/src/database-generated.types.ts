@@ -9,6 +9,73 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      Chunks: {
+        Row: {
+          content: string | null
+          document: number
+          embedding: string | null
+          id: number
+          meta: Json | null
+        }
+        Insert: {
+          content?: string | null
+          document: number
+          embedding?: string | null
+          id?: number
+          meta?: Json | null
+        }
+        Update: {
+          content?: string | null
+          document?: number
+          embedding?: string | null
+          id?: number
+          meta?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_Chunks_document_fkey"
+            columns: ["document"]
+            isOneToOne: false
+            referencedRelation: "Documents"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      Documents: {
+        Row: {
+          checksum: string | null
+          created_at: string | null
+          episode: number | null
+          id: number
+          meta: Json | null
+          source: string | null
+        }
+        Insert: {
+          checksum?: string | null
+          created_at?: string | null
+          episode?: number | null
+          id?: number
+          meta?: Json | null
+          source?: string | null
+        }
+        Update: {
+          checksum?: string | null
+          created_at?: string | null
+          episode?: number | null
+          id?: number
+          meta?: Json | null
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_Documents_episode_fkey"
+            columns: ["episode"]
+            isOneToOne: false
+            referencedRelation: "Episodes"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       Episodes: {
         Row: {
           audioUrl: string | null
@@ -23,6 +90,7 @@ export type Database = {
           pubDate: string | null
           rawTranscriptUrl: string | null
           slug: string
+          status: Json | null
           summaryUrl: string | null
           title: string
           transcriptUrl: string | null
@@ -41,6 +109,7 @@ export type Database = {
           pubDate?: string | null
           rawTranscriptUrl?: string | null
           slug: string
+          status?: Json | null
           summaryUrl?: string | null
           title: string
           transcriptUrl?: string | null
@@ -59,6 +128,7 @@ export type Database = {
           pubDate?: string | null
           rawTranscriptUrl?: string | null
           slug?: string
+          status?: Json | null
           summaryUrl?: string | null
           title?: string
           transcriptUrl?: string | null
@@ -74,78 +144,37 @@ export type Database = {
           }
         ]
       }
-      nods_page: {
+      Jobs: {
         Row: {
-          checksum: string | null
+          created_at: string
+          episode: number | null
+          error: string | null
           id: number
-          meta: Json | null
-          parent_page_id: number | null
-          path: string
-          source: string | null
-          type: string | null
+          modified_at: string | null
+          status: string | null
         }
         Insert: {
-          checksum?: string | null
+          created_at?: string
+          episode?: number | null
+          error?: string | null
           id?: number
-          meta?: Json | null
-          parent_page_id?: number | null
-          path: string
-          source?: string | null
-          type?: string | null
+          modified_at?: string | null
+          status?: string | null
         }
         Update: {
-          checksum?: string | null
+          created_at?: string
+          episode?: number | null
+          error?: string | null
           id?: number
-          meta?: Json | null
-          parent_page_id?: number | null
-          path?: string
-          source?: string | null
-          type?: string | null
+          modified_at?: string | null
+          status?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "nods_page_parent_page_id_fkey"
-            columns: ["parent_page_id"]
+            foreignKeyName: "public_Jobs_episode_fkey"
+            columns: ["episode"]
             isOneToOne: false
-            referencedRelation: "nods_page"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      nods_page_section: {
-        Row: {
-          content: string | null
-          embedding: string | null
-          heading: string | null
-          id: number
-          page_id: number
-          slug: string | null
-          token_count: number | null
-        }
-        Insert: {
-          content?: string | null
-          embedding?: string | null
-          heading?: string | null
-          id?: number
-          page_id: number
-          slug?: string | null
-          token_count?: number | null
-        }
-        Update: {
-          content?: string | null
-          embedding?: string | null
-          heading?: string | null
-          id?: number
-          page_id?: number
-          slug?: string | null
-          token_count?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "nods_page_section_page_id_fkey"
-            columns: ["page_id"]
-            isOneToOne: false
-            referencedRelation: "nods_page"
+            referencedRelation: "Episodes"
             referencedColumns: ["id"]
           }
         ]
@@ -252,6 +281,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      chunk_vector_search: {
+        Args: {
+          embedding: string
+          match_threshold: number
+          match_count: number
+          min_content_length: number
+        }
+        Returns: {
+          id: number
+          document: number
+          meta: Json
+          content: string
+          similarity: number
+        }[]
+      }
       get_page_parents: {
         Args: {
           page_id: number
@@ -269,27 +313,25 @@ export type Database = {
         }
         Returns: unknown
       }
+      is_podcast_owner: {
+        Args: {
+          episodeid: number
+          userid: string
+        }
+        Returns: boolean
+      }
+      is_podcast_owner_with_podcast_id: {
+        Args: {
+          podcastId: number
+          userid: string
+        }
+        Returns: boolean
+      }
       ivfflathandler: {
         Args: {
           "": unknown
         }
         Returns: unknown
-      }
-      match_page_sections: {
-        Args: {
-          embedding: string
-          match_threshold: number
-          match_count: number
-          min_content_length: number
-        }
-        Returns: {
-          id: number
-          page_id: number
-          slug: string
-          heading: string
-          content: string
-          similarity: number
-        }[]
       }
       requesting_user_id: {
         Args: Record<PropertyKey, never>

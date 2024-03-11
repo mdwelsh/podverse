@@ -33,6 +33,7 @@ export async function ReadPodcastFeed(podcastUrl: string, podcastSlug?: string):
       rawTranscriptUrl: null,
       summaryUrl: null,
       error: null,
+      status: null,
     };
   });
 

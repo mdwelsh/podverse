@@ -13,7 +13,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { EpisodeIndicators } from '../Indicators';
+import { EpisodeTooltip } from '../Indicators';
+import { useAuth } from '@clerk/nextjs';
 
 export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWithEpisodes; episodes: Episode[] }) {
   const [page, setPage] = useState(1);
@@ -90,13 +91,9 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
   );
 }
 
-export function EpisodeStrip({
-  podcast,
-  episode,
-}: {
-  podcast: PodcastWithEpisodes;
-  episode: Episode;
-}) {
+export function EpisodeStrip({ podcast, episode }: { podcast: PodcastWithEpisodes; episode: Episode }) {
+  const { userId } = useAuth();
+
   return (
     <div className="flex w-full flex-row gap-4 overflow-hidden rounded-lg border bg-gray-700 p-4 font-mono text-white dark:bg-gray-700 dark:text-white">
       <div className="flex size-full flex-row gap-4">
@@ -106,7 +103,7 @@ export function EpisodeStrip({
           <div className="text-muted-foreground text-xs">
             Published {moment(episode.pubDate).format('MMMM Do YYYY')}
           </div>
-          <EpisodeIndicators episode={episode} />
+          {userId && userId === podcast.owner && <EpisodeTooltip episode={episode} />}
         </div>
       </div>
     </div>

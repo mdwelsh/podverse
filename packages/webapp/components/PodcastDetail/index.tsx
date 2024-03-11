@@ -20,7 +20,6 @@ async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
               <ArrowTopRightOnSquareIcon className="text-primary h-4 w-4 ml-1 inline align-super" />
             </Link>
           </div>
-          {user && <div className="text-sm text-muted-foreground">By {user.displayName}</div>}
           <div className="text-sm font-sans">{podcast.description}</div>
           <div className="flex flex-col gap-2">
             <div className="text-sm text-muted-foreground flex flex-row gap-4 font-mono">

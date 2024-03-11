@@ -2,13 +2,15 @@ import Link from 'next/link';
 import supabase from '@/lib/supabase';
 import { EpisodeWithPodcast, GetEpisodeWithPodcastBySlug } from 'podverse-utils';
 import moment from 'moment';
-import { EpisodeIndicators } from '../Indicators';
+import { EpisodeIndicator } from '../Indicators';
 import { ArrowTopRightOnSquareIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { Chat } from '@/components/Chat';
 import { CollapseWithToggle } from '@/components/Collapse';
 import { EpisodeTranscript } from '@/components/EpisodeTranscript';
 import { Owner } from '@/components/Owner';
-import { ProcessEpisodeDialog } from '../ProcessEpisodeDialog';
+import { ManageEpisodeDialog } from '../ManageEpisodeDialog';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: 0 };
@@ -41,9 +43,17 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
                 <div className="text-muted-foreground font-mono text-sm">
                   Published {moment(episode.pubDate).format('MMMM Do YYYY')}
                 </div>
-                <EpisodeIndicators episode={episodeWithoutPodcast} />
                 <div className="w-fit">
-                  <ProcessEpisodeDialog episode={episodeWithoutPodcast} />
+                  <Owner owner={episode.podcast.owner}>
+                    <ManageEpisodeDialog episode={episodeWithoutPodcast}>
+                      <div className={cn(buttonVariants({ variant: 'outline' }))}>
+                        <div className="flex flex-row gap-1 items-center">
+                          <EpisodeIndicator episode={episodeWithoutPodcast} />
+                          Manage
+                        </div>
+                      </div>
+                    </ManageEpisodeDialog>
+                  </Owner>
                 </div>
               </div>
             }
