@@ -86,8 +86,10 @@ export type Database = {
           id: number
           imageUrl: string | null
           modified_at: string | null
+          originalAudioUrl: string | null
           podcast: number
           pubDate: string | null
+          published: boolean | null
           rawTranscriptUrl: string | null
           slug: string
           status: Json | null
@@ -105,8 +107,10 @@ export type Database = {
           id?: number
           imageUrl?: string | null
           modified_at?: string | null
+          originalAudioUrl?: string | null
           podcast: number
           pubDate?: string | null
+          published?: boolean | null
           rawTranscriptUrl?: string | null
           slug: string
           status?: Json | null
@@ -124,8 +128,10 @@ export type Database = {
           id?: number
           imageUrl?: string | null
           modified_at?: string | null
+          originalAudioUrl?: string | null
           podcast?: number
           pubDate?: string | null
+          published?: boolean | null
           rawTranscriptUrl?: string | null
           slug?: string
           status?: Json | null

@@ -93,7 +93,7 @@ export async function TranscribeEpisode({
   if (episode.transcriptUrl !== null && !force) {
     return `Episode ${episode.id} already transcribed.`;
   }
-  if (episode.audioUrl === null) {
+  if (episode.originalAudioUrl === null) {
     return `Episode ${episode.id} has no audio.`;
   }
 
