@@ -28,12 +28,14 @@ export async function ReadPodcastFeed(podcastUrl: string, podcastSlug?: string):
       url: entry.link || null,
       imageUrl: entry.itunes?.image || null,
       pubDate: entry.pubDate || null,
-      audioUrl: entry.enclosure?.url || null,
+      originalAudioUrl: entry.enclosure?.url || null,
+      audioUrl: null,
       transcriptUrl: null,
       rawTranscriptUrl: null,
       summaryUrl: null,
       error: null,
       status: null,
+      published: false,
     };
   });
 

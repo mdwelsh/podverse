@@ -268,12 +268,12 @@ export async function SetEpisodes(supabase: SupabaseClient, episodes: Episode[])
 
 export async function Upload(
   supabase: SupabaseClient,
-  data: string,
+  data: string | Blob,
   bucket: string,
   fileName: string,
 ): Promise<string> {
-  const buf = Buffer.from(data, 'utf8');
-  const { error } = await supabase.storage.from(bucket).upload(fileName, buf, { upsert: true });
+  const toUpload = typeof data === 'string' ? Buffer.from(data, 'utf8') : data;
+  const { error } = await supabase.storage.from(bucket).upload(fileName, toUpload, { upsert: true });
   if (error) {
     console.error('error', error);
     throw new Error(`Error uploading ${fileName} to ${bucket}: ${JSON.stringify(error)}`);

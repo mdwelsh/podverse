@@ -3,7 +3,7 @@
 import { createClient, SyncPrerecordedResponse } from '@deepgram/sdk';
 
 /** Transcribe the given audio file and return the text of the transcript. */
-export async function Transcribe(audioUrl: string): Promise<SyncPrerecordedResponse> {
+export async function Transcribe(audioUrl: string, callbackUrl?: string): Promise<SyncPrerecordedResponse> {
   console.log(`Transcribe audio from ${audioUrl}`);
   const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY || '';
   if (!DEEPGRAM_API_KEY) {
@@ -32,6 +32,7 @@ export async function Transcribe(audioUrl: string): Promise<SyncPrerecordedRespo
       url: finalUrl,
     },
     {
+      callback: callbackUrl,
       model: 'nova-2',
       punctuate: true,
       diarize: true,

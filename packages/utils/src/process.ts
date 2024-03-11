@@ -96,6 +96,35 @@ export async function TranscribeEpisode({
   if (episode.audioUrl === null) {
     return `Episode ${episode.id} has no audio.`;
   }
+
+  // First, download the audio file and stash it in our own bucket.
+  const res = await fetch(episode.audioUrl);
+  if (!res.ok) {
+    throw new Error(`Error fetching audio: ${res.status} ${res.statusText}`);
+  }
+  const audioBlob = await res.blob();
+  const audioUrl = await Upload(
+    supabase,
+    audioBlob,
+    'audio',
+    `${episode.podcast}/${episode.id}/audio.mp3`,
+  );
+
+  const MAX_REDIRECTS = 10;
+  let finalUrl = audioUrl;
+  for (let i = 0; i < MAX_REDIRECTS; i++) {
+    const response = await fetch(finalUrl, { redirect: 'manual' });
+    if (response.status >= 300 && response.status < 400) {
+      finalUrl = response.headers.get('location') || finalUrl;
+    } else {
+      break;
+    }
+  }
+  if (finalUrl !== audioUrl) {
+    console.log(`Following redirects to ${finalUrl}`);
+  }
+
+
   const result = await Transcribe(episode.audioUrl!);
   const rawTranscriptUrl = await Upload(
     supabase,
