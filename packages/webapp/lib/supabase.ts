@@ -13,7 +13,6 @@ export default createClient(
 
 /** Return a Supabase client that is authenticated using the given token. */
 export async function getSupabaseClientWithToken(token: string) {
-  console.log(`Creating supabase client with token: ${token}`);
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL as string, process.env.SUPABASE_API_KEY as string, {
     global: { headers: { Authorization: `Bearer ${token}` } },
   });

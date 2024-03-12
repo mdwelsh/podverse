@@ -38,12 +38,12 @@ export function NewPodcastDialog() {
       }
       setStage(importStage.LOADING);
 
-      fetch('/api/podcast', {
+      fetch('/api/podcast/preview', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url: rssUrl, provisional: true }),
+        body: JSON.stringify({ url: rssUrl }),
       })
         .then((response) => response.json())
         .then((data) => {
@@ -62,9 +62,25 @@ export function NewPodcastDialog() {
   };
 
   const onConfirmClicked = async () => {
-    if (podcast) {
-      toast.success('Podcast imported successfully');
-    }
+    fetch('/api/podcast/import', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url: rssUrl }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Fetched: ', data);
+        setPodcast(null);
+        setStage(importStage.ENTER_URL);
+        toast.success('Podcast imported successfully');
+      })
+      .catch((e) => {
+        setStage(importStage.ENTER_URL);
+        setPodcast(null);
+        setError('Error reading podcast feed: ' + e.message);
+      });
   };
 
   const onCancelClicked = async () => {
@@ -100,9 +116,13 @@ export function NewPodcastDialog() {
           {stage === importStage.LOADING && (
             <div className="text-primary text-sm font-mono">Loading podcast RSS feed...</div>
           )}
-          <div>{error && <div className="text-error">{error}</div>}</div>
+          <div>{error && <div className="text-primary">{error}</div>}</div>
           <div>{stage === importStage.LOADING && <Icons.spinner className="mx-auto h-6 w-6 animate-spin" />}</div>
-          <div>{stage === importStage.VALIDATING && podcast && <PodcastPreview podcast={podcast} onConfirm={onConfirmClicked} onCancel={onCancelClicked} />}</div>
+          <div>
+            {stage === importStage.VALIDATING && podcast && (
+              <PodcastPreview podcast={podcast} onConfirm={onConfirmClicked} onCancel={onCancelClicked} />
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

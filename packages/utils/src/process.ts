@@ -1,7 +1,15 @@
 /* This module has functions for processing individual episodes. */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { GetEpisode, Upload, UpdateEpisode, GetSpeakerMap, UpdateSpeakerMap, GetPodcastByID } from './storage.js';
+import {
+  GetEpisode,
+  Upload,
+  UploadLargeFile,
+  UpdateEpisode,
+  GetSpeakerMap,
+  UpdateSpeakerMap,
+  GetPodcastByID,
+} from './storage.js';
 import { Transcribe } from './transcribe.js';
 import { Summarize } from './summarize.js';
 import { SpeakerID } from './speakerid.js';
@@ -28,68 +36,70 @@ async function updateStatus({
 }
 
 /** Perform processing on the given episode. */
-export async function ProcessEpisode({
-  supabase,
-  episodeId,
-  force,
-}: {
-  supabase: SupabaseClient;
-  episodeId: number;
-  force: boolean;
-}): Promise<string> {
-  console.log(`Processing episode ${episodeId}`);
+// export async function ProcessEpisode({
+//   supabase,
+//   episodeId,
+//   force,
+// }: {
+//   supabase: SupabaseClient;
+//   episodeId: number;
+//   force: boolean;
+// }): Promise<string> {
+//   console.log(`Processing episode ${episodeId}`);
 
-  const episode = await GetEpisode(supabase, episodeId);
-  episode.status = {
-    ...(episode.status as EpisodeStatus),
-    startedAt: new Date().toISOString(),
-    completedAt: null,
-    message: 'Starting processing',
-  };
-  episode.error = null;
-  await UpdateEpisode(supabase, episode);
+//   const episode = await GetEpisode(supabase, episodeId);
+//   episode.status = {
+//     ...(episode.status as EpisodeStatus),
+//     startedAt: new Date().toISOString(),
+//     completedAt: null,
+//     message: 'Starting processing',
+//   };
+//   episode.error = null;
+//   await UpdateEpisode(supabase, episode);
 
-  try {
-    const transcriptResult = await TranscribeEpisode({ supabase, episode, force });
-    console.log(transcriptResult);
-    const summarizeResult = await SummarizeEpisode({ supabase, episode, force });
-    console.log(summarizeResult);
-    const speakerIdResult = await SpeakerIDEpisode({ supabase, episode, force });
-    console.log(speakerIdResult);
-    const embedResult = await EmbedEpisode({ supabase, episode, force });
-    console.log(embedResult);
-    episode.status = {
-      ...(episode.status as EpisodeStatus),
-      message: 'Finished processing',
-      completedAt: new Date().toISOString(),
-    };
-    await UpdateEpisode(supabase, episode);
-    return JSON.stringify({ transcriptResult, summarizeResult, speakerIdResult, embedResult });
-  } catch (error) {
-    console.error(`Error processing episode ${episodeId}`, error);
-    episode.error = error as Json;
-    episode.status = {
-      ...(episode.status as EpisodeStatus),
-      message: `Error: ${JSON.stringify(error)}`,
-      completedAt: new Date().toISOString(),
-    };
-    await UpdateEpisode(supabase, episode);
-    throw error;
-  }
-}
+//   try {
+//     const transcriptResult = await TranscribeEpisode({ supabase, episode, force });
+//     console.log(transcriptResult);
+//     const summarizeResult = await SummarizeEpisode({ supabase, episode, force });
+//     console.log(summarizeResult);
+//     const speakerIdResult = await SpeakerIDEpisode({ supabase, episode, force });
+//     console.log(speakerIdResult);
+//     const embedResult = await EmbedEpisode({ supabase, episode, force });
+//     console.log(embedResult);
+//     episode.status = {
+//       ...(episode.status as EpisodeStatus),
+//       message: 'Finished processing',
+//       completedAt: new Date().toISOString(),
+//     };
+//     await UpdateEpisode(supabase, episode);
+//     return JSON.stringify({ transcriptResult, summarizeResult, speakerIdResult, embedResult });
+//   } catch (error) {
+//     console.error(`Error processing episode ${episodeId}`, error);
+//     episode.error = error as Json;
+//     episode.status = {
+//       ...(episode.status as EpisodeStatus),
+//       message: `Error: ${JSON.stringify(error)}`,
+//       completedAt: new Date().toISOString(),
+//     };
+//     await UpdateEpisode(supabase, episode);
+//     throw error;
+//   }
+// }
 
 /** Transcribe the given episode. */
 export async function TranscribeEpisode({
   supabase,
+  supabaseToken,
   episode,
   force,
 }: {
   supabase: SupabaseClient;
+  supabaseToken: string;
   episode: Episode;
   force: boolean;
 }): Promise<string> {
   console.log(`Transcribing episode ${episode.id}`);
-  updateStatus({supabase, episode, message: 'Transcribing'});
+  updateStatus({ supabase, episode, message: 'Transcribing' });
   if (episode.transcriptUrl !== null && !force) {
     return `Episode ${episode.id} already transcribed.`;
   }
@@ -98,34 +108,29 @@ export async function TranscribeEpisode({
   }
 
   // First, download the audio file and stash it in our own bucket.
-  const res = await fetch(episode.audioUrl);
+  const res = await fetch(episode.originalAudioUrl, {
+    redirect: 'follow',
+    headers: { 'User-Agent': 'Podverse' },
+  });
+  console.log(
+    `Fetched audio for episode ${episode.id}: ${res.status} ${res.statusText} - size is ${res.headers.get('content-length')} bytes.`,
+  );
   if (!res.ok) {
     throw new Error(`Error fetching audio: ${res.status} ${res.statusText}`);
   }
   const audioBlob = await res.blob();
-  const audioUrl = await Upload(
-    supabase,
+
+  const audioUrl = await UploadLargeFile(
+    supabaseToken,
     audioBlob,
+    res.headers.get('content-type') || 'audio/mp3',
     'audio',
     `${episode.podcast}/${episode.id}/audio.mp3`,
   );
 
-  const MAX_REDIRECTS = 10;
-  let finalUrl = audioUrl;
-  for (let i = 0; i < MAX_REDIRECTS; i++) {
-    const response = await fetch(finalUrl, { redirect: 'manual' });
-    if (response.status >= 300 && response.status < 400) {
-      finalUrl = response.headers.get('location') || finalUrl;
-    } else {
-      break;
-    }
-  }
-  if (finalUrl !== audioUrl) {
-    console.log(`Following redirects to ${finalUrl}`);
-  }
+  console.log(`Saved audio for ${episode.id} to: ${audioUrl}`);
 
-
-  const result = await Transcribe(episode.audioUrl!);
+  const result = await Transcribe(audioUrl);
   const rawTranscriptUrl = await Upload(
     supabase,
     JSON.stringify(result, null, 2),
@@ -146,6 +151,7 @@ export async function TranscribeEpisode({
   );
 
   // Update Episode.
+  episode.audioUrl = audioUrl;
   episode.transcriptUrl = transcriptUrl;
   episode.rawTranscriptUrl = rawTranscriptUrl;
   await UpdateEpisode(supabase, episode);
@@ -164,7 +170,7 @@ export async function SummarizeEpisode({
   force: boolean;
 }): Promise<string> {
   console.log(`Summarizing episode ${episode.id}`);
-  updateStatus({supabase, episode, message: 'Summarizing'});
+  updateStatus({ supabase, episode, message: 'Summarizing' });
   const podcast = await GetPodcastByID(supabase, episode.podcast.toString());
   if (episode.summaryUrl !== null && !force) {
     return `Episode ${episode.id} already summarized.`;
@@ -197,7 +203,7 @@ export async function SpeakerIDEpisode({
   force: boolean;
 }): Promise<string> {
   console.log(`Speaker ID for episode ${episode.id}`);
-  updateStatus({supabase, episode, message: 'Determining speaker IDs'});
+  updateStatus({ supabase, episode, message: 'Determining speaker IDs' });
   const podcast = await GetPodcastByID(supabase, episode.podcast.toString());
   if (episode.transcriptUrl === null) {
     return `Episode ${episode.id} has no transcript.`;
@@ -232,7 +238,7 @@ export async function EmbedEpisode({
   force: boolean;
 }): Promise<string> {
   console.log(`Embed for episode ${episode.id}`);
-  updateStatus({supabase, episode, message: 'Generating embeddings'});
+  updateStatus({ supabase, episode, message: 'Generating embeddings' });
   if (episode.rawTranscriptUrl === null) {
     return `Episode ${episode.id} has no JSON transcript.`;
   }

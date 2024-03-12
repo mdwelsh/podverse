@@ -61,7 +61,7 @@ export function ManageEpisodeDialog({ episode, children }: { episode: Episode; c
             {isComplete && <div>Processed</div>}
           </div>
           {errorMessage && (
-            <div className="mx-auto h-[300px] max-h-[300px] max-w-sm overflow-scroll text-wrap rounded-2xl border border-red-500 p-2 md:max-w-2xl">
+            <div className="w-sm md:w-2xl mx-auto max-h-[300px] max-w-sm overflow-scroll text-wrap rounded-2xl border border-red-500 p-2 md:max-w-2xl">
               <div className="text-muted-foreground truncate font-mono text-xs">
                 <p>
                   <pre>{errorMessage}</pre>

@@ -1,15 +1,34 @@
 'use client';
 
 import { PodcastWithEpisodes } from 'podverse-utils';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Button, buttonVariants } from '@/components/ui/button';
 import moment from 'moment';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
+  const router = useRouter();
+
   const handleDelete = async () => {
-    // TODO
+    const res = await fetch(`/api/podcast/${podcast.slug}`, {
+      method: 'DELETE',
+    });
+    if (res.ok) {
+      toast.success(`Deleted podcast ${podcast.title}`);
+    } else {
+      toast.error('Failed to delete podcast: ' + (await res.text()));
+    }
+    router.push('/');
   };
 
   return (
@@ -30,9 +49,11 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
           </div>
         </div>
         <DialogFooter>
-          <Button variant="destructive" className="font-mono" onClick={handleDelete}>
-            Delete
-          </Button>
+          <DialogClose asChild>
+            <Button variant="destructive" className="font-mono" onClick={handleDelete}>
+              Delete
+            </Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>

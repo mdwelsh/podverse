@@ -2,6 +2,7 @@
 
 import { User, Podcast, Episode, EpisodeWithPodcast, PodcastWithEpisodes, Speakers } from './types.js';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { Upload as TusUpload } from 'tus-js-client';
 
 /** Return the User with the given ID. */
 export async function GetUser(supabase: SupabaseClient, userId: string): Promise<User> {
@@ -211,7 +212,67 @@ export async function SetPodcast(supabase: SupabaseClient, podcast: Podcast): Pr
 
 /** Delete the given Podcast. */
 export async function DeletePodcast(supabase: SupabaseClient, slug: string) {
-  await supabase.from('Podcasts').delete().eq('slug', slug);
+  console.log(`Deleting podcast: ${slug}`);
+
+  // First, delete all storage objects associated with this podcast.
+  const podcast = await GetPodcastWithEpisodes(supabase, slug);
+
+  console.log('Deleting audio files...');
+  await supabase.storage.from('audio').remove(
+    podcast.Episodes.map((episode) => {
+      if (episode.audioUrl) {
+        const parts = episode.audioUrl.split('/');
+        return parts.slice(parts.length - 3).join('/');
+      } else {
+        return '';
+      }
+    }).filter((x) => x !== ''),
+  );
+
+  console.log('Deleting transcript files...');
+  await supabase.storage.from('transcripts').remove(
+    podcast.Episodes.map((episode) => {
+      if (episode.transcriptUrl) {
+        const parts = episode.transcriptUrl.split('/');
+        return parts.slice(parts.length - 3).join('/');
+      } else {
+        return '';
+      }
+    }).filter((x) => x !== ''),
+  );
+
+  console.log('Deleting raw transcript files...');
+  await supabase.storage.from('transcripts').remove(
+    podcast.Episodes.map((episode) => {
+      if (episode.rawTranscriptUrl) {
+        const parts = episode.rawTranscriptUrl.split('/');
+        return parts.slice(parts.length - 3).join('/');
+      } else {
+        return '';
+      }
+    }).filter((x) => x !== ''),
+  );
+
+  console.log('Deleting summary files...');
+  await supabase.storage.from('summaries').remove(
+    podcast.Episodes.map((episode) => {
+      if (episode.summaryUrl) {
+        const parts = episode.summaryUrl.split('/');
+        return parts.slice(parts.length - 3).join('/');
+      } else {
+        return '';
+      }
+    }).filter((x) => x !== ''),
+  );
+
+  // Finally delete the Podcast entry itself. This should lead to a cascading deletion
+  // of all of its Episodes and other table entries.
+  const { error } = await supabase.from('Podcasts').delete().eq('id', podcast.id);
+  if (error) {
+    console.error('Error deleting podcast: ', error);
+    throw error;
+  }
+  console.log(`Finished deleting podcast: ${slug}`);
 }
 
 /** Set metadata for the given episode. */
@@ -266,6 +327,7 @@ export async function SetEpisodes(supabase: SupabaseClient, episodes: Episode[])
 //   return podcast.episodes?.map((e: Episode) => e.slug) ?? [];
 // }
 
+/** Use to upload a small file. */
 export async function Upload(
   supabase: SupabaseClient,
   data: string | Blob,
@@ -280,4 +342,59 @@ export async function Upload(
   }
   const { data: publicUrlData } = await supabase.storage.from(bucket).getPublicUrl(fileName);
   return publicUrlData.publicUrl;
+}
+
+/** Use to upload a large file. Calls the Supabase TUS endpoint directly. */
+export async function UploadLargeFile(
+  supabaseToken: string,
+  data: Blob,
+  contentType: string,
+  bucket: string,
+  fileName: string,
+): Promise<string> {
+  const supabaseUrl = process.env.SUPABASE_URL || '';
+  if (!supabaseUrl) {
+    throw new Error('Missing SUPABASE_URL environment variable.');
+  }
+  return new Promise((resolve, reject) => {
+    const upload = new TusUpload(data, {
+      endpoint: `${supabaseUrl}/storage/v1/upload/resumable`,
+      retryDelays: [0, 3000, 5000, 10000, 20000],
+      headers: {
+        authorization: `Bearer ${supabaseToken}`,
+        'x-upsert': 'true',
+      },
+      uploadDataDuringCreation: true,
+      removeFingerprintOnSuccess: true,
+      metadata: {
+        bucketName: bucket,
+        objectName: fileName,
+        contentType,
+        cacheControl: '3600',
+      },
+      chunkSize: 6 * 1024 * 1024, // NOTE: it must be set to 6MB (for now) do not change it
+      // onError: function (error) {
+      //   console.error('Error uploading file: ' + error);
+      //   reject(error);
+      // },
+      // onProgress: function (bytesUploaded, bytesTotal) {
+      //   const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
+      //   console.log(bytesUploaded, bytesTotal, percentage + '%');
+      // },
+      // onSuccess: function () {
+      //   console.log(`Upload complete: ${upload.url}`);
+      //   resolve(upload.url || '');
+      // },
+    });
+
+    // Check if there are any previous uploads to continue.
+    return upload.findPreviousUploads().then(function (previousUploads) {
+      // Found previous uploads so we select the first one.
+      if (previousUploads.length) {
+        upload.resumeFromPreviousUpload(previousUploads[0]);
+      }
+      // Start the upload
+      upload.start();
+    });
+  });
 }

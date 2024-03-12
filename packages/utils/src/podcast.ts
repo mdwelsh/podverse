@@ -6,9 +6,18 @@ import Parser from 'rss-parser';
 
 /** Read the given RSS feed URL and return it as a PodcastWithEpisodes object. */
 export async function ReadPodcastFeed(podcastUrl: string, podcastSlug?: string): Promise<PodcastWithEpisodes> {
+  // First, chase redirects to get the real URL.
+  console.log(`Reading RSS feed: ${podcastUrl}`);
+  const response = await fetch(podcastUrl, { redirect: 'follow' });
+  if (!response.ok) {
+    throw new Error(`Error fetching podcast: ${response.status} ${response.statusText}`);
+  }
+  const finalUrl = response.url;
+  console.log(`Final URL: ${finalUrl}`);
+
   // Read the RSS feed metadata.
   const parser = new Parser();
-  const feed = await parser.parseURL(podcastUrl);
+  const feed = await parser.parseURL(finalUrl);
   if (!feed.title) {
     throw new Error('No title found for podcast.');
   }
@@ -39,10 +48,9 @@ export async function ReadPodcastFeed(podcastUrl: string, podcastSlug?: string):
     };
   });
 
+  // @ts-expect-error owner and createdBy fields will not be populated here.
   const newPodcast: PodcastWithEpisodes = {
     id: 0,
-    created_at: '',
-    owner: null,
     slug: titleSlug,
     title: feed.title,
     description: feed.description || null,
@@ -93,12 +101,13 @@ export async function Ingest({
     // Create it and get the ID.
     const finalPodcast = await SetPodcast(supabase, podcastMeta);
     podcastId = finalPodcast.id;
+    console.log('Created podcast:', finalPodcast);
   }
   await SetEpisodes(
     supabase,
     episodes.map((episode) => {
       return { ...episode, podcast: podcastId };
-    })
+    }),
   );
   return await GetPodcastWithEpisodes(supabase, slug || newPodcast.slug);
 }
