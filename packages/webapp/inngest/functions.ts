@@ -44,13 +44,28 @@ export const processEpisode = inngest.createFunction(
     await UpdateEpisode(supabase, episode);
 
     try {
-      // Transcribe.
+      // Start transcription.
       const transcribeResult = await step.run('transcribe', async () => {
         console.log(`process/episode [${episodeId}] - Transcribing`);
-        const result = await TranscribeEpisode({ supabase, supabaseToken: supabaseAccessToken, episode, force });
+        // TODO (mdw): Fill in URL for callback with correct hostname.
+        const callbackUrl = `https://deepdocks.tailf7e81.ts.net/api/episode/${episode.id}/transcript`;
+        const result = await TranscribeEpisode({
+          supabase,
+          supabaseToken: supabaseAccessToken,
+          episode,
+          callbackUrl,
+          force,
+        });
         console.log(`process/episode [${episodeId}] - Transcribe result: ${result}`);
         return result;
       });
+
+      // Deepgram will call back to our /api/episode/:episodeId/transcript endpoint,
+      // which fires this event to continue processing.
+      console.log(`process/episode [${episodeId}] - Waiting for transcript-received event`);
+      await step.waitForEvent('transcript-received',
+        { event: "process/transcript", timeout: "1h", match: "data.episodeId" });
+      console.log(`process/episode [${episodeId}] - Got transcript-received event, continuing`);
 
       // Summarize.
       const summarizeResult = await step.run('summarize', async () => {

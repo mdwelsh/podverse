@@ -1,16 +1,8 @@
 /* This module has functions for processing individual episodes. */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import {
-  GetEpisode,
-  Upload,
-  UploadLargeFile,
-  UpdateEpisode,
-  GetSpeakerMap,
-  UpdateSpeakerMap,
-  GetPodcastByID,
-} from './storage.js';
-import { Transcribe } from './transcribe.js';
+import { GetEpisode, Upload, UploadLargeFile, UpdateEpisode, GetSpeakerMap, UpdateSpeakerMap, GetPodcastByID } from './storage.js';
+import { TranscribeAsync } from './transcribe.js';
 import { Summarize } from './summarize.js';
 import { SpeakerID } from './speakerid.js';
 import { EmbedTranscript } from './embed.js';
@@ -19,6 +11,7 @@ import { createReadStream, createWriteStream } from 'fs';
 import { withFile } from 'tmp-promise';
 import { Readable } from 'stream';
 import { finished } from 'stream/promises';
+import { SyncPrerecordedResponse } from '@deepgram/sdk';
 
 async function updateStatus({
   supabase,
@@ -95,11 +88,13 @@ export async function TranscribeEpisode({
   supabase,
   supabaseToken,
   episode,
+  callbackUrl,
   force,
 }: {
   supabase: SupabaseClient;
   supabaseToken: string;
   episode: Episode;
+  callbackUrl: string;
   force: boolean;
 }): Promise<string> {
   console.log(`Transcribing episode ${episode.id}`);
@@ -150,7 +145,27 @@ export async function TranscribeEpisode({
   if (!audioUrl) {
     throw new Error('Failed to upload audio');
   }
-  const result = await Transcribe(audioUrl);
+  episode.audioUrl = audioUrl;
+  await UpdateEpisode(supabase, episode);
+
+  const result = await TranscribeAsync(audioUrl, callbackUrl + `?supabaseAccessToken=${supabaseToken}`);
+  console.log(`Starting transcription for episode ${episode.id}: ${JSON.stringify(result, null, 2)}`);
+  return 'Transcription started';
+}
+
+/** Called when the transcript is received. */
+export async function TranscribeEpisodeCallback({
+  supabase,
+  episodeId,
+  result,
+}: {
+  supabase: SupabaseClient;
+  episodeId: number;
+  result: SyncPrerecordedResponse;
+}) {
+  console.log(`Transcription callback for episode ${episodeId}`);
+  const episode = await GetEpisode(supabase, episodeId);
+
   const rawTranscriptUrl = await Upload(
     supabase,
     JSON.stringify(result, null, 2),
@@ -171,7 +186,6 @@ export async function TranscribeEpisode({
   );
 
   // Update Episode.
-  episode.audioUrl = audioUrl;
   episode.transcriptUrl = transcriptUrl;
   episode.rawTranscriptUrl = rawTranscriptUrl;
   await UpdateEpisode(supabase, episode);
