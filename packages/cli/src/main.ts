@@ -23,6 +23,7 @@ import {
   Ingest,
   EmbedText,
   TextSplitter,
+  SuggestQueries,
 } from 'podverse-utils';
 import { dump, load } from 'js-yaml';
 import fs from 'fs';
@@ -289,7 +290,7 @@ program
   });
 
 program
-  .command('speakerid-url <url>')
+  .command('speakerid-url')
   .description('Identify the speakers in the transcript at the given URL.')
   .argument('<url>', 'URL of the text to identify.')
   .action(async (url: string) => {
@@ -298,6 +299,18 @@ program
     const text = await res.text();
     const result = await SpeakerID({ text });
     term.green(result + '\n');
+  });
+
+program
+  .command('suggest-url')
+  .description('Suggest queries based on the transcript at the given URL.')
+  .argument('<url>', 'URL of the text to provide suggested queries for.')
+  .action(async (url: string) => {
+    term(`Suggesting queries for ${url}...`);
+    const res = await fetch(url);
+    const text = await res.text();
+    const result = await SuggestQueries({ text });
+    term.green(JSON.stringify(result, null, 2) + '\n');
   });
 
 program

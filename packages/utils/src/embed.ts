@@ -4,7 +4,12 @@ import { createHash } from 'crypto';
 import { TextSplitter, TextSplit } from './splitters.js';
 
 /** Given a URL pointing to a plain text file, embed it for vector search. Return the Document ID. */
-export async function EmbedText(supabase: SupabaseClient, url: string, episodeId?: number, meta?: object): Promise<number> {
+export async function EmbedText(
+  supabase: SupabaseClient,
+  url: string,
+  episodeId?: number,
+  meta?: object,
+): Promise<number> {
   console.log(`Embedding text from ${url}`);
   const res = await fetch(url);
   const text = await res.text();
@@ -15,7 +20,12 @@ export async function EmbedText(supabase: SupabaseClient, url: string, episodeId
 }
 
 /** Given a URL pointing to a transcript JSON file, embed it for vector search. Return the Document ID. */
-export async function EmbedTranscript(supabase: SupabaseClient, url: string, episodeId?: number, meta?: object): Promise<number> {
+export async function EmbedTranscript(
+  supabase: SupabaseClient,
+  url: string,
+  episodeId?: number,
+  meta?: object,
+): Promise<number> {
   console.log(`Embedding transcript from ${url} for episode ${episodeId}`);
   const res = await fetch(url);
   const text = await res.text();
@@ -40,15 +50,6 @@ async function EmbedChunks(
 
   const embeddings = await Promise.all(chunks.map((chunk) => CreateEmbedding(chunk.text)));
 
-  // XXX MDW DEBUGGING
-  const { data, error: e } = await supabase.from('Episodes').select('*, podcast(*)').eq('id', episodeId).limit(1);
-  if (e) {
-    console.error('error trying to look up episode', e);
-  }
-  if (data && data.length > 0) {
-    console.log('found episode:', data[0]);
-  }
-
   // Create Document entry.
   const { data: document, error } = await supabase
     .from('Documents')
@@ -71,26 +72,29 @@ async function EmbedChunks(
 
   // For each chunk, we create a "page section" entry, with the page created above
   // as a parent. Each section contains the content of the chunk and its vector embedding.
-  for (let i = 0; i < chunks.length; i++) {
-    const embedding = embeddings[i];
-    const { error } = await supabase
-      .from('Chunks')
-      .insert({
-        document: document.id,
-        content: chunks[i].text,
-        embedding,
-        meta: chunks[i].meta,
-      })
-      .select()
-      .limit(1)
-      .single();
-    if (error) {
-      console.error('error inserting Chunk entry', error);
-      throw error;
-    }
+  try {
+    await Promise.all(
+      chunks.map((chunk, i) => {
+        const embedding = embeddings[i];
+        return supabase
+          .from('Chunks')
+          .insert({
+            document: document.id,
+            content: chunk.text,
+            embedding,
+            meta: chunk.meta,
+          })
+          .select()
+          .limit(1)
+          .single();
+      }),
+    );
+    console.log(`Embedded ${chunks.length} chunks for document ID ${document.id}`);
+    return document.id;
+  } catch (error) {
+    console.error('error inserting Chunk entries', error);
+    throw error;
   }
-  console.log(`Embedded ${chunks.length} chunks for document ID ${document.id}`);
-  return document.id;
 }
 
 /** Given the provided text, return an embedding vector. */

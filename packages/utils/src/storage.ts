@@ -403,3 +403,31 @@ export async function UploadLargeFile(
     });
   });
 }
+
+/** Return suggested queries for the given episode. */
+export async function GetSuggestions(supabase: SupabaseClient, episodeId: number): Promise<string[]> {
+  const { data, error } = await supabase.from('Suggestions').select('suggestion').eq('episode', episodeId);
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  return data.map((row) => row.suggestion);
+}
+
+/** Delete all suggestions for the given episode. */
+export async function DeleteSuggestions(supabase: SupabaseClient, episodeId: number) {
+  const { error } = await supabase.from('Suggestions').delete().eq('episode', episodeId);
+  if (error) {
+    throw error;
+  }
+}
+
+/** Add a suggestion. */
+export async function AddSuggestion(supabase: SupabaseClient, episodeId: number, suggestion: string) {
+  const entry = { episode: episodeId, suggestion };
+  const { error } = await supabase.from('Suggestions').insert(entry).eq('episode', episodeId);
+  if (error) {
+    throw error;
+  }
+  return;
+}

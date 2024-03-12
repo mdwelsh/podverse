@@ -11,6 +11,7 @@ import {
   SummarizeEpisode,
   SpeakerIDEpisode,
   EmbedEpisode,
+  SuggestEpisode,
 } from 'podverse-utils';
 
 /** Process a single episode. */
@@ -60,12 +61,21 @@ export const processEpisode = inngest.createFunction(
         return result;
       });
 
+      // Wait for transcript.
+      //
       // Deepgram will call back to our /api/episode/:episodeId/transcript endpoint,
-      // which fires this event to continue processing.
-      console.log(`process/episode [${episodeId}] - Waiting for transcript-received event`);
-      await step.waitForEvent('transcript-received',
-        { event: "process/transcript", timeout: "1h", match: "data.episodeId" });
-      console.log(`process/episode [${episodeId}] - Got transcript-received event, continuing`);
+      // which fires this event to continue processing.ID
+      if (transcribeResult === 'Transcription started') {
+        console.log(`process/episode [${episodeId}] - Waiting for transcript-received event`);
+        await step.waitForEvent('transcript-received', {
+          event: 'process/transcript',
+          timeout: '1h',
+          match: 'data.episodeId',
+        });
+        console.log(`process/episode [${episodeId}] - Got transcript-received event, continuing`);
+      } else {
+        console.log(`process/episode [${episodeId}] - Transcription already complete, continuing`);
+      }
 
       // Summarize.
       const summarizeResult = await step.run('summarize', async () => {
@@ -80,6 +90,14 @@ export const processEpisode = inngest.createFunction(
         console.log(`process/episode [${episodeId}] - Speaker ID`);
         const result = await SpeakerIDEpisode({ supabase, episode, force });
         console.log(`process/episode [${episodeId}] - Speaker ID result: ${result}`);
+        return result;
+      });
+
+      // Generate suggested queries.
+      const suggestionResult = await step.run('suggestions', async () => {
+        console.log(`process/episode [${episodeId}] - Suggesting queries`);
+        const result = await SuggestEpisode({ supabase, episode, force });
+        console.log(`process/episode [${episodeId}] - Suggesting queries result: ${result}`);
         return result;
       });
 
@@ -104,6 +122,7 @@ export const processEpisode = inngest.createFunction(
           transcribeResult: await transcribeResult,
           summarizeResult: await summarizeResult,
           speakerIdResult: await speakerIdResult,
+          suggestionResult: await suggestionResult,
           embedResult: await embedResult,
         },
       };

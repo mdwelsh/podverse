@@ -1,9 +1,21 @@
 /* This module has functions for processing individual episodes. */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { GetEpisode, Upload, UploadLargeFile, UpdateEpisode, GetSpeakerMap, UpdateSpeakerMap, GetPodcastByID } from './storage.js';
+import {
+  GetEpisode,
+  Upload,
+  UploadLargeFile,
+  UpdateEpisode,
+  GetSpeakerMap,
+  UpdateSpeakerMap,
+  GetPodcastByID,
+  GetSuggestions,
+  AddSuggestion,
+  DeleteSuggestions
+} from './storage.js';
 import { TranscribeAsync } from './transcribe.js';
 import { Summarize } from './summarize.js';
+import { SuggestQueries } from './suggest.js';
 import { SpeakerID } from './speakerid.js';
 import { EmbedTranscript } from './embed.js';
 import { Episode, EpisodeStatus } from './types.js';
@@ -259,6 +271,46 @@ export async function SpeakerIDEpisode({
   }
   console.log(`Done speaker ID for episode ${episode.id}`);
   return `SpeakerID on episode ${episode.id} done`;
+}
+
+/** Perform query suggestion for the given episode. */
+export async function SuggestEpisode({
+  supabase,
+  episode,
+  force,
+}: {
+  supabase: SupabaseClient;
+  episode: Episode;
+  force: boolean;
+}): Promise<string> {
+  console.log(`Suggesting queries for episode ${episode.id}`);
+  updateStatus({ supabase, episode, message: 'Generating suggested queries' });
+  const podcast = await GetPodcastByID(supabase, episode.podcast.toString());
+  if (episode.transcriptUrl === null) {
+    return `Episode ${episode.id} has no transcript.`;
+  }
+
+  // Check for existing suggestions.
+  let suggestions = await GetSuggestions(supabase, episode.id);
+  if (Object.keys(suggestions).length > 0) {
+    if (!force) {
+      return `Episode ${episode.id} already has suggestions.`;
+    } else {
+      console.log(`Deleting existing suggestions for episode ${episode.id}`);
+      await DeleteSuggestions(supabase, episode.id);
+    }
+  }
+  const res = await fetch(episode.transcriptUrl);
+  const text = await res.text();
+  suggestions = await SuggestQueries({ text, episode, podcast });
+
+  // Update Suggestions.
+  for (const suggestion of suggestions) {
+    console.log(`Adding suggestion for episode ${episode.id}: ${suggestion}`);
+    await AddSuggestion(supabase, episode.id, suggestion);
+  }
+  console.log(`Generated ${suggestions.length} suggested queries for episode ${episode.id}`);
+  return `Suggested queries for episode ${episode.id} done`;
 }
 
 /** Embed the given episode. */

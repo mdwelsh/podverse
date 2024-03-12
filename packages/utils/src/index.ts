@@ -8,3 +8,4 @@ export * from './embed.js';
 export * from './process.js';
 export * from './podcast.js';
 export * from './inngest.js';
+export * from './suggest.js';
