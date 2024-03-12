@@ -14,7 +14,11 @@ import { Transcribe } from './transcribe.js';
 import { Summarize } from './summarize.js';
 import { SpeakerID } from './speakerid.js';
 import { EmbedTranscript } from './embed.js';
-import { Json, Episode, EpisodeStatus } from './types.js';
+import { Episode, EpisodeStatus } from './types.js';
+import { createReadStream, createWriteStream } from 'fs';
+import { withFile } from 'tmp-promise';
+import { Readable } from 'stream';
+import { finished } from 'stream/promises';
 
 async function updateStatus({
   supabase,
@@ -118,18 +122,34 @@ export async function TranscribeEpisode({
   if (!res.ok) {
     throw new Error(`Error fetching audio: ${res.status} ${res.statusText}`);
   }
-  const audioBlob = await res.blob();
 
-  const audioUrl = await UploadLargeFile(
-    supabaseToken,
-    audioBlob,
-    res.headers.get('content-type') || 'audio/mp3',
-    'audio',
-    `${episode.podcast}/${episode.id}/audio.mp3`,
-  );
+  let audioUrl: string | null = null;
 
-  console.log(`Saved audio for ${episode.id} to: ${audioUrl}`);
+  await withFile(async ({ path }) => {
+    console.log(`Writing audio to ${path}`);
+    const stream = createWriteStream(path);
+    const body = res.body;
+    if (!body) {
+      throw new Error('No body in response');
+    }
+    await finished(Readable.from(body).pipe(stream));
+    console.log(`Finished writing audio to ${path}`);
+    const file = createReadStream(path);
+    audioUrl = await UploadLargeFile(
+      supabase,
+      supabaseToken,
+      file,
+      res.headers.get('content-type') || 'audio/mp3',
+      'audio',
+      `${episode.podcast}/${episode.id}/audio.mp3`,
+    );
 
+    console.log(`Saved audio for ${episode.id} to: ${audioUrl}`);
+  });
+
+  if (!audioUrl) {
+    throw new Error('Failed to upload audio');
+  }
   const result = await Transcribe(audioUrl);
   const rawTranscriptUrl = await Upload(
     supabase,

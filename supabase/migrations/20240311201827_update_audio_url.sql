@@ -35,6 +35,28 @@ INSERT
         )
     );
 
+CREATE POLICY "Allow update by Podcast owner" ON "storage"."objects" FOR
+UPDATE
+    TO public USING (
+        (
+            (bucket_id IN ('transcripts', 'summaries', 'audio'))
+            AND is_podcast_owner_with_podcast_id(
+                ((storage.foldername(name)) [1]) :: bigint,
+                requesting_user_id()
+            )
+        )
+    );
+
+CREATE POLICY "Allow delete by Podcast owner" ON "storage"."objects" FOR DELETE TO public USING (
+    (
+        (bucket_id IN ('transcripts', 'summaries', 'audio'))
+        AND is_podcast_owner_with_podcast_id(
+            ((storage.foldername(name)) [1]) :: bigint,
+            requesting_user_id()
+        )
+    )
+);
+
 -- Add originalAudioUrl field to Episodes.
 ALTER TABLE "public"."Episodes" ADD COLUMN "originalAudioUrl" text;
 

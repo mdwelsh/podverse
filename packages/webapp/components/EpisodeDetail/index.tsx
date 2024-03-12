@@ -47,9 +47,9 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
                   <Owner owner={episode.podcast.owner}>
                     <ManageEpisodeDialog episode={episodeWithoutPodcast}>
                       <div className={cn(buttonVariants({ variant: 'outline' }))}>
-                        <div className="flex flex-row gap-1 items-center">
+                        <div className="flex flex-row gap-2 items-center">
                           <EpisodeIndicator episode={episodeWithoutPodcast} />
-                          Manage
+                          Manage episode
                         </div>
                       </div>
                     </ManageEpisodeDialog>
@@ -73,8 +73,9 @@ async function EpisodeSummary({ episode }: { episode: EpisodeWithPodcast }) {
         <div>
           <h1>Summary</h1>
         </div>
-        <div className="size-full overflow-y-auto border p-4 text-xs">
+        <div className="size-full overflow-y-auto border p-4 text-xs flex flex-col gap-2">
           <div className="text-muted-foreground text-sm">Summary not available</div>
+          <div className="text-muted-foreground text-sm">This episode may still be processing.</div>
         </div>
       </div>
     );

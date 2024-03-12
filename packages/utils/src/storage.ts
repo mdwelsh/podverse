@@ -3,6 +3,7 @@
 import { User, Podcast, Episode, EpisodeWithPodcast, PodcastWithEpisodes, Speakers } from './types.js';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Upload as TusUpload } from 'tus-js-client';
+import { Readable } from 'stream';
 
 /** Return the User with the given ID. */
 export async function GetUser(supabase: SupabaseClient, userId: string): Promise<User> {
@@ -346,8 +347,9 @@ export async function Upload(
 
 /** Use to upload a large file. Calls the Supabase TUS endpoint directly. */
 export async function UploadLargeFile(
+  supabase: SupabaseClient,
   supabaseToken: string,
-  data: Blob,
+  data: Readable,
   contentType: string,
   bucket: string,
   fileName: string,
@@ -357,6 +359,7 @@ export async function UploadLargeFile(
     throw new Error('Missing SUPABASE_URL environment variable.');
   }
   return new Promise((resolve, reject) => {
+    console.log(`Uploading ${fileName} to ${bucket}...`);
     const upload = new TusUpload(data, {
       endpoint: `${supabaseUrl}/storage/v1/upload/resumable`,
       retryDelays: [0, 3000, 5000, 10000, 20000],
@@ -373,18 +376,20 @@ export async function UploadLargeFile(
         cacheControl: '3600',
       },
       chunkSize: 6 * 1024 * 1024, // NOTE: it must be set to 6MB (for now) do not change it
-      // onError: function (error) {
-      //   console.error('Error uploading file: ' + error);
-      //   reject(error);
-      // },
-      // onProgress: function (bytesUploaded, bytesTotal) {
-      //   const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
-      //   console.log(bytesUploaded, bytesTotal, percentage + '%');
-      // },
-      // onSuccess: function () {
-      //   console.log(`Upload complete: ${upload.url}`);
-      //   resolve(upload.url || '');
-      // },
+      onError: function (error) {
+        console.error('Error uploading file: ' + error);
+        reject(error);
+      },
+      onProgress: function (bytesUploaded, bytesTotal) {
+        const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
+        console.log(bytesUploaded, bytesTotal, percentage + '%');
+      },
+      onSuccess: function () {
+        console.log(`Upload complete: ${upload.url}`);
+        const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(fileName);
+        console.log(`Public URL: ${publicUrlData.publicUrl}`);
+        resolve(publicUrlData.publicUrl || '');
+      },
     });
 
     // Check if there are any previous uploads to continue.

@@ -62,5 +62,12 @@ export async function SpeakerID({
   if (typeof parsed !== 'object') {
     throw new Error(`Expected JSON object as response, got: ${result}`);
   }
-  return parsed;
+
+  // For each of the keys, replace "Speaker X" with "X".
+  const updated: Record<string, string> = {};
+  for (const [key, value] of Object.entries(parsed as Record<string, string>)) {
+    const newKey = key.replace('Speaker ', '');
+    updated[newKey] = value;
+  }
+  return updated;
 }
