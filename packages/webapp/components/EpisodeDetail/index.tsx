@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import supabase from '@/lib/supabase';
-import { EpisodeWithPodcast, GetEpisodeWithPodcastBySlug } from 'podverse-utils';
+import { getSupabaseClient } from '@/lib/supabase';
+import { EpisodeWithPodcast, GetEpisodeWithPodcastBySlug, GetSuggestions } from 'podverse-utils';
 import moment from 'moment';
 import { EpisodeIndicator } from '../Indicators';
 import { ArrowTopRightOnSquareIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
@@ -11,6 +11,7 @@ import { Owner } from '@/components/Owner';
 import { ManageEpisodeDialog } from '../ManageEpisodeDialog';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Message } from 'ai';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: 0 };
@@ -94,19 +95,43 @@ async function EpisodeSummary({ episode }: { episode: EpisodeWithPodcast }) {
 }
 
 async function EpisodeChat({ episode }: { episode: EpisodeWithPodcast }) {
+  const supabase = await getSupabaseClient();
+  const suggestedQueries = await GetSuggestions(supabase, episode.id);
+  console.log('suggestedQueries', suggestedQueries);
+  // Pick 3 random ones.
+  const randomSuggestions = suggestedQueries.sort(() => 0.5 - Math.random()).slice(0, 3);
+  console.log('randomSuggestions', randomSuggestions);
+  const botMessages: Message[] = [
+    {
+      content: `Hi there! I\'m the Podverse AI Bot. You can ask me questions about **${episode.title}** or the **${episode.podcast.title}** podcast.`,
+      role: 'assistant',
+    },
+    {
+      content: `Here are some suggestions to get you started:`,
+      role: 'assistant',
+    },
+  ];
+  const initialMessages = botMessages.concat(
+    randomSuggestions.map((s) => {
+      return { content: '*' + s + '*', role: 'assistant' };
+    }),
+  );
+  console.log('initialMessages', initialMessages);
+
   return (
     <div className="mt-8 flex h-[600px] w-2/5 flex-col gap-2">
       <div>
         <h1>Chat</h1>
       </div>
       <div className="size-full overflow-y-auto border p-4 text-xs">
-        <Chat />
+        <Chat initialMessages={initialMessages} />
       </div>
     </div>
   );
 }
 
 export async function EpisodeDetail({ podcastSlug, episodeSlug }: { podcastSlug: string; episodeSlug: string }) {
+  const supabase = await getSupabaseClient();
   const episode = await GetEpisodeWithPodcastBySlug(supabase, podcastSlug, episodeSlug);
 
   return (

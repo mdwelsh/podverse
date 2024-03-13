@@ -1,5 +1,6 @@
 'use client';
 
+import { EpisodeWithPodcast } from 'podverse-utils';
 import Image from 'next/image';
 import { Message } from 'ai';
 import { useChat } from 'ai/react';
@@ -115,7 +116,7 @@ function ChatPanel({
 }
 
 function PodverseIcon() {
-  return <Image src="/images/podverse-logo-black.png" alt="Podverse" width={32} height={32} />;
+  return <Image src="/images/podverse-logo.svg" alt="Podverse" width={32} height={32} />;
 }
 
 function ChatMessage({ message, ...props }: { message: Message }) {
@@ -166,8 +167,8 @@ function EmptyChat() {
   );
 }
 
-export function Chat() {
-  const { messages, append, reload, stop, isLoading, input, setInput } = useChat();
+export function Chat({ initialMessages }: { initialMessages?: Message[] }) {
+  const { messages, append, reload, stop, isLoading, input, setInput } = useChat({ initialMessages });
 
   return (
     <div className="relative flex h-full flex-col">
