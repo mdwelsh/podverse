@@ -123,8 +123,18 @@ export interface VectorSearchResult {
 }
 
 /** Given the provided text, perform a vector search. */
-export async function VectorSearch(supabase: SupabaseClient, input: string): Promise<VectorSearchResult[]> {
-  console.log(`VectorSearch with input: ${input}`);
+export async function VectorSearch({
+  supabase,
+  input,
+  podcastId,
+  episodeId,
+}: {
+  supabase: SupabaseClient;
+  input: string;
+  podcastId?: number;
+  episodeId?: number;
+}): Promise<VectorSearchResult[]> {
+  console.log(`VectorSearch [episodeId=${episodeId}, podcastId=${podcastId}] with input: ${input}`);
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('Missing OPENAI_API_KEY environment variable.');
   }
@@ -168,18 +178,30 @@ export async function VectorSearch(supabase: SupabaseClient, input: string): Pro
   //   limit match_count;
   // end;
 
-  console.log(`Calling chunk_vector_search with queryEmbedding: ${queryEmbedding}`);
-
-  const { data, error } = await supabase.rpc('chunk_vector_search', {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let functionCall: any = {
     embedding: queryEmbedding,
     match_threshold: 0.8,
     match_count: 10,
     min_content_length: 50,
-  });
+  };
+  let functionName = 'chunk_vector_search';
+
+  if (episodeId) {
+    functionCall = { ...functionCall, episode_id: episodeId };
+    functionName = 'chunk_vector_search_episode';
+  } else if (podcastId) {
+    functionCall = { ...functionCall, podcast_id: podcastId };
+    functionName = 'chunk_vector_search_podcast';
+  }
+
+  console.log(`Calling RPC ${functionName} with: `, functionCall);
+  const { data, error } = await supabase.rpc(functionName, functionCall);
   if (error) {
-    console.error('Error with RPC chunk_vector_search: ', error);
+    console.error(`Error with RPC ${functionName}: `, error);
     throw error;
   }
+  console.log(`Got result: ${data.length} rows`);
   return data.map((row: { id: number; document: number; similarity: number; content: string; meta: object }) => {
     return {
       chunkId: row.id,

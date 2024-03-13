@@ -343,9 +343,13 @@ program
   .command('search')
   .description('Perform a vector search for the given query.')
   .argument('<query>', 'Search query.')
-  .action(async (query: string) => {
-    term('Performing vector search for: ').yellow(query);
-    const results = await VectorSearch(supabase, query);
+  .option('--episode <episodeId>', 'Episode ID to query.')
+  .option('--podcast <podcastId>', 'Podcast ID to query.')
+  .action(async (query: string, opts) => {
+    term('Performing vector search for: ').yellow(query)('\n');
+    const episodeId = opts.episode ? parseInt(opts.episode) : undefined;
+    const podcastId = opts.podcast ? parseInt(opts.podcast) : undefined;
+    const results = await VectorSearch({ supabase, input: query, episodeId, podcastId });
     for (const result of results) {
       term.green(JSON.stringify(result, null, 2) + '\n\n');
     }

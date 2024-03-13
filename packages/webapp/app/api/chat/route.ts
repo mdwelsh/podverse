@@ -10,11 +10,14 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-//export const runtime = 'edge';
+type RequestBody = {
+  podcastId?: string;
+  episodeId?: string;
+};
 
 export async function POST(req: Request) {
   // The `messages` array contains an array of user and assistant role messages.
-  const { messages } = await req.json();
+  const { messages, body } = await req.json();
 
   const tools: Tool[] = [
     {
@@ -37,8 +40,10 @@ export async function POST(req: Request) {
 
   const systemMessage = {
     role: 'system',
-    content:
-      'You are an AI assistant that answers questions about a podcast. You should speak casually, and avoid formal speech. Your responses should generally be quite short. When provided context to a question, you should use that context to inform your response.',
+    content: `You are an AI assistant that answers questions about a podcast. You should speak casually,
+      and avoid formal speech. Your responses should generally be quite short.
+      When provided context to a question, you should use that context to inform your response.
+      ALWAYS call the searchKnowledgeBase function when you receive a question.`,
   };
 
   console.log(`/api/chat POST: messages=${JSON.stringify(messages)}`);
@@ -59,7 +64,11 @@ export async function POST(req: Request) {
             const supabase = await getSupabaseClient();
             const args = JSON.parse(toolCall.func.arguments as unknown as string);
             console.log(`searchKnowledgeBase: Calling Vector search: args=${JSON.stringify(args)}`);
-            const chunks = await VectorSearch(supabase, args.query) as { content: string }[];
+            const podcastId = body.podcastId ? parseInt(body.podcastId) : undefined;
+            const episodeId = body.episodeId ? parseInt(body.episodeId) : undefined;
+            const chunks = (await VectorSearch({ supabase, input: args.query, podcastId, episodeId })) as {
+              content: string;
+            }[];
             const chunkResults = chunks.map((chunk, index) => {
               return {
                 role: 'system',

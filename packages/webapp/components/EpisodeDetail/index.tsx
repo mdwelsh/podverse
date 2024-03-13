@@ -11,7 +11,7 @@ import { Owner } from '@/components/Owner';
 import { ManageEpisodeDialog } from '../ManageEpisodeDialog';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Message } from 'ai';
+import { CreateMessage } from 'ai';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: 0 };
@@ -101,7 +101,7 @@ async function EpisodeChat({ episode }: { episode: EpisodeWithPodcast }) {
   // Pick 3 random ones.
   const randomSuggestions = suggestedQueries.sort(() => 0.5 - Math.random()).slice(0, 3);
   console.log('randomSuggestions', randomSuggestions);
-  const botMessages: Message[] = [
+  const botMessages: CreateMessage[] = [
     {
       content: `Hi there! I\'m the Podverse AI Bot. You can ask me questions about **${episode.title}** or the **${episode.podcast.title}** podcast.`,
       role: 'assistant',
@@ -124,7 +124,8 @@ async function EpisodeChat({ episode }: { episode: EpisodeWithPodcast }) {
         <h1>Chat</h1>
       </div>
       <div className="size-full overflow-y-auto border p-4 text-xs">
-        <Chat initialMessages={initialMessages} />
+        {/* Assign an ID to each of the initialMessages. */}
+        <Chat initialMessages={initialMessages.map((m, i) => ({ ...m, id: i.toString() }))} />
       </div>
     </div>
   );

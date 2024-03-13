@@ -167,8 +167,8 @@ function EmptyChat() {
   );
 }
 
-export function Chat({ initialMessages }: { initialMessages?: Message[] }) {
-  const { messages, append, reload, stop, isLoading, input, setInput } = useChat({ initialMessages });
+export function Chat({ initialMessages, body }: { initialMessages?: Message[]; body?: object }) {
+  const { messages, append, reload, stop, isLoading, input, setInput } = useChat({ initialMessages, body });
 
   return (
     <div className="relative flex h-full flex-col">
