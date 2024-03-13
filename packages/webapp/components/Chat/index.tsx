@@ -137,6 +137,13 @@ function ChatMessage({ message, ...props }: { message: Message }) {
               // TODO(mdw): Support code blocks.
               return <code className="font-mono mb-2 last:mb-0">{children}</code>;
             },
+            a({ children, href }) {
+              return (
+                <div className="text-primary underline">
+                  <a href={href}>{children}</a>
+                </div>
+              );
+            },
           }}
         >
           {message.content}

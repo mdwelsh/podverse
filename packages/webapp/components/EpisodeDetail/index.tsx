@@ -125,7 +125,10 @@ async function EpisodeChat({ episode }: { episode: EpisodeWithPodcast }) {
       </div>
       <div className="size-full overflow-y-auto border p-4 text-xs">
         {/* Assign an ID to each of the initialMessages. */}
-        <Chat initialMessages={initialMessages.map((m, i) => ({ ...m, id: i.toString() }))} />
+        <Chat
+          body={{ episodeId: episode.id }}
+          initialMessages={initialMessages.map((m, i) => ({ ...m, id: i.toString() }))}
+        />
       </div>
     </div>
   );

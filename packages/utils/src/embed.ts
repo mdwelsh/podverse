@@ -131,8 +131,8 @@ export async function VectorSearch({
 }: {
   supabase: SupabaseClient;
   input: string;
-  podcastId?: number;
-  episodeId?: number;
+  podcastId?: number | undefined;
+  episodeId?: number | undefined;
 }): Promise<VectorSearchResult[]> {
   console.log(`VectorSearch [episodeId=${episodeId}, podcastId=${podcastId}] with input: ${input}`);
   if (!process.env.OPENAI_API_KEY) {
@@ -181,16 +181,16 @@ export async function VectorSearch({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let functionCall: any = {
     embedding: queryEmbedding,
-    match_threshold: 0.8,
+    match_threshold: 0.5,
     match_count: 10,
     min_content_length: 50,
   };
   let functionName = 'chunk_vector_search';
 
-  if (episodeId) {
+  if (episodeId !== undefined) {
     functionCall = { ...functionCall, episode_id: episodeId };
     functionName = 'chunk_vector_search_episode';
-  } else if (podcastId) {
+  } else if (podcastId !== undefined) {
     functionCall = { ...functionCall, podcast_id: podcastId };
     functionName = 'chunk_vector_search_podcast';
   }
