@@ -41,6 +41,22 @@ export async function GetPodcastWithEpisodes(supabase: SupabaseClient, slug: str
   return podcast;
 }
 
+/** Return podcasts with episodes by podcast ID. */
+export async function GetPodcastWithEpisodesByID(supabase: SupabaseClient, podcastId: string): Promise<PodcastWithEpisodes> {
+  const { data, error } = await supabase.from('Podcasts').select('*, Episodes (*)').eq('id', podcastId).limit(1);
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  if (!data || data.length === 0) {
+    throw new Error(`Podcast with ID ${podcastId} not found.`);
+  }
+  const podcast = data[0];
+  // Sort the podcast.Episodes list by pubDate.
+  podcast.Episodes?.sort((a: Episode, b: Episode) => ((a.pubDate || 0) > (b.pubDate || 0) ? -1 : 1));
+  return podcast;
+}
+
 /** This is the return value of GetLatestEpisodes. */
 export type LatestEpisode = Omit<Episode, 'podcast'> & { podcast: { slug: string; title: string } };
 

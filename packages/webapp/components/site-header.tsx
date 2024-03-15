@@ -15,11 +15,11 @@ export function SiteHeader() {
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-1">
             { userId && (
-              <Link href="/dashboard">
+              <Link href="/dashboard" className="mx-4">
                 <Button variant="secondary">Dashboard</Button>
               </Link>
             )}
-            <ThemeToggle />
+            {/* <ThemeToggle /> */}
             <SignupOrLogin />
           </nav>
         </div>

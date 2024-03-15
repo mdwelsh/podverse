@@ -33,7 +33,7 @@ export async function ReadPodcastFeed(podcastUrl: string, podcastSlug?: string):
     throw new Error('No title found for podcast.');
   }
   const titleSlug = podcastSlug ?? slug(feed.title!.trim().slice(0, 25));
-  const episodes: EpisodeMetadata[] = feed.items.slice(0, 10).map((entry) => {
+  const episodes: EpisodeMetadata[] = feed.items.map((entry) => {
     return {
       // This field should be populated in RSS feeds used by Apple Podcasts,
       // at least, but we have a fallback in case it is not.

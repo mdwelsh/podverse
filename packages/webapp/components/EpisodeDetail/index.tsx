@@ -118,10 +118,8 @@ async function EpisodeChat({ episode }: { episode: EpisodeWithPodcast }) {
   }
 
   const suggestedQueries = await GetEpisodeSuggestions(supabase, episode.id);
-  console.log('suggestedQueries', suggestedQueries);
   // Pick 3 random ones.
   const randomSuggestions = suggestedQueries.sort(() => 0.5 - Math.random()).slice(0, 3);
-  console.log('randomSuggestions', randomSuggestions);
   const botMessages: CreateMessage[] = [
     {
       content: `Hi there! I\'m the Podverse AI Bot. You can ask me questions about **${episode.title}** or the **${episode.podcast.title}** podcast.`,
@@ -137,7 +135,6 @@ async function EpisodeChat({ episode }: { episode: EpisodeWithPodcast }) {
       return { content: '*' + s + '*', role: 'assistant' };
     }),
   );
-  console.log('initialMessages', initialMessages);
 
   return (
     <div className="mt-8 flex h-[600px] w-2/5 flex-col gap-2">
@@ -154,6 +151,7 @@ async function EpisodeChat({ episode }: { episode: EpisodeWithPodcast }) {
 
 export async function EpisodeDetail({ podcastSlug, episodeSlug }: { podcastSlug: string; episodeSlug: string }) {
   const supabase = await getSupabaseClient();
+  console.log(`FETCHING: podcastSlug=${podcastSlug}, episodeSlug=${episodeSlug}`);
   const episode = await GetEpisodeWithPodcastBySlug(supabase, podcastSlug, episodeSlug);
 
   return (

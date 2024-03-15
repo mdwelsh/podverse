@@ -15,7 +15,10 @@ import moment from 'moment';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon, TrashIcon, BoltIcon } from '@heroicons/react/24/outline';
+import { useState } from 'react';
+import { isReady } from '@/lib/episode';
+import { Checkbox } from '@/components/ui/checkbox';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const router = useRouter();
@@ -36,7 +39,8 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
     <Dialog>
       <DialogTrigger>
         <Button className="font-mono" variant="destructive">
-          Delete podcast
+          <TrashIcon className="size-5 mr-2 inline" />
+          Delete
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -51,7 +55,13 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
         </div>
         <DialogFooter>
           <DialogClose asChild>
+            <Button variant="secondary" className="font-mono">
+              Cancel
+            </Button>
+          </DialogClose>
+          <DialogClose asChild>
             <Button variant="destructive" className="font-mono" onClick={handleDelete}>
+              <TrashIcon className="size-5 mr-2 inline" />
               Delete
             </Button>
           </DialogClose>
@@ -61,19 +71,87 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   );
 }
 
+function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
+  const [force, setForce] = useState(false);
+  const numProcessed = podcast.Episodes.filter((episode) => isReady(episode)).length;
+  const numToProcess = podcast.Episodes.filter((episode) => !isReady(episode)).length;
+
+  const onProcess = async () => {
+    setForce(false);
+    const res = await fetch(`/api/podcast/${podcast.slug}`, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'process', force }),
+    });
+    if (res.ok) {
+      toast.success(`Started processing for ${podcast.title}`);
+    } else {
+      toast.error('Failed to start processing: ' + (await res.text()));
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger>
+        <Button className="font-mono">
+          <BoltIcon className="size-5 mr-2 inline" />
+          Process
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="font-mono">Process episodes</DialogTitle>
+        </DialogHeader>
+        <div>
+          <div className="text-sm text-muted-foreground flex flex-col gap-1 font-mono">
+            <div>
+              This will start processing <span className="text-primary">{numToProcess}</span> episodes for this podcast.
+            </div>
+          </div>
+          <div className="items-top mt-4 flex space-x-2">
+            <Checkbox id="force" className="mt-1" checked={force} onCheckedChange={(val: boolean) => setForce(val)} />
+            <div className="flex flex-col gap-1">
+              <label htmlFor="force" className="text-muted-foreground font-mono">
+                Also re-process existing episodes
+              </label>
+              <div className="text-muted-foreground text-sm">
+                Checking this box will also re-process <span className="text-primary">{numProcessed}</span> episodes that
+                have already been processed.
+              </div>
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="secondary" className="font-mono">
+              Cancel
+            </Button>
+          </DialogClose>
+          <DialogClose asChild>
+            <Button className="font-mono" onClick={onProcess}>
+              <BoltIcon className="size-5 mr-2 inline" />
+              Process
+            </Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function ManagePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
-  const numEpisodes = podcast.Episodes.length;
-  const numTranscribed = podcast.Episodes.filter((episode) => episode.transcriptUrl !== null).length;
-  const numSummarized = podcast.Episodes.filter((episode) => episode.summaryUrl !== null).length;
+  const [refreshing, setRefreshing] = useState(false);
   const mostRecentlyPublished = podcast.Episodes
     ? podcast.Episodes.reduce((a, b) => ((a.pubDate || 0) > (b.pubDate || 0) ? a : b))
     : null;
 
-  const handleRefresh = async () => {
+  const doRefresh = async () => {
+    setRefreshing(true);
+    console.log('STarting refresh');
     const res = await fetch(`/api/podcast/${podcast.slug}`, {
       method: 'POST',
       body: JSON.stringify({ refresh: true }),
     });
+    setRefreshing(false);
     if (!res.ok) {
       toast.error('Failed to refresh podcast: ' + (await res.text()));
       return;
@@ -87,7 +165,7 @@ export function ManagePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes 
       <DialogTrigger>
         <div className={cn(buttonVariants({ variant: 'secondary' }))}>Manage podcast</div>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-md md:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="font-mono">
             Manage Podcast <span className="text-primary">{podcast.title}</span>
@@ -102,29 +180,22 @@ export function ManagePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes 
               </div>
             )}
             <div>
-              <span className="text-primary">{podcast.Episodes.length}</span> episodes total
+              <span className="text-primary">{podcast.Episodes.filter((episode) => isReady(episode)).length}</span>{' '}
+              episodes processed / <span className="text-primary">{podcast.Episodes.length}</span> total
             </div>
-            <div>
-              <span className="text-primary">
-                {podcast.Episodes.filter((episode) => episode.transcriptUrl !== null).length}
-              </span>{' '}
-              transcribed
-            </div>
-            <div>
-              <span className="text-primary">
-                {podcast.Episodes.filter((episode) => episode.summaryUrl !== null).length}
-              </span>{' '}
-              summarized
-            </div>
+            <div></div>
           </div>
         </div>
         <DialogFooter>
-          <DialogClose>
-            <Button className="font-mono" variant="secondary" onClick={handleRefresh}>
+          <Button className="font-mono" variant="secondary" onClick={doRefresh} disabled={refreshing}>
+            {refreshing ? (
+              <ArrowPathIcon className="size-5 mr-2 inline animate-spin" />
+            ) : (
               <ArrowPathIcon className="size-5 mr-2 inline" />
-              Refresh
-            </Button>
-          </DialogClose>
+            )}
+            Refresh
+          </Button>
+          <ProcessPodcastDialog podcast={podcast} />
           <DeletePodcastDialog podcast={podcast} />
         </DialogFooter>
       </DialogContent>

@@ -1,4 +1,4 @@
-import { getSupabaseClient, getSupabaseClientWithToken } from '@/lib/supabase';
+import { getSupabaseClientWithToken } from '@/lib/supabase';
 import { GetEpisodeWithPodcast } from 'podverse-utils';
 import { auth } from '@clerk/nextjs';
 import { inngest } from '@/inngest/client';

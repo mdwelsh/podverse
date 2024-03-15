@@ -37,9 +37,7 @@ export default async function HomePage() {
               Sign up now
             </Link>
             <Link
-              target="_blank"
-              rel="noreferrer"
-              href="/learn-more"
+              href="/about"
               className={cn('font-mono', buttonVariants({ variant: 'outline' }))}
             >
               Learn more
