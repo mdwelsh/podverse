@@ -97,7 +97,6 @@ export async function POST(req: Request) {
     },
   ];
 
-  console.log(`/api/chat POST: messages=${JSON.stringify(messages)}`);
   const response = await openai.chat.completions.create({
     model: 'gpt-4-turbo-preview',
     stream: true,
@@ -128,7 +127,7 @@ export async function POST(req: Request) {
               function_name: 'searchKnowledgeBase',
               tool_call_result: chunkResults,
             });
-            console.log(`onToolCall: newMessages=${JSON.stringify(newMessages, null, 2)}`);
+            console.log(`onToolCall: got ${newMessages.length} new messages`);
             return openai.chat.completions.create({
               messages: [ANSWER_QUERY_PROMPT, ...messages, ...newMessages],
               model: 'gpt-4-turbo-preview',

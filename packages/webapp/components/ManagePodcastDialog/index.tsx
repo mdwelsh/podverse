@@ -15,6 +15,7 @@ import moment from 'moment';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const router = useRouter();
@@ -64,16 +65,27 @@ export function ManagePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes 
   const numEpisodes = podcast.Episodes.length;
   const numTranscribed = podcast.Episodes.filter((episode) => episode.transcriptUrl !== null).length;
   const numSummarized = podcast.Episodes.filter((episode) => episode.summaryUrl !== null).length;
-  const mostRecentlyPublished = podcast.Episodes.reduce((a, b) => ((a.pubDate || 0) > (b.pubDate || 0) ? a : b));
+  const mostRecentlyPublished = podcast.Episodes
+    ? podcast.Episodes.reduce((a, b) => ((a.pubDate || 0) > (b.pubDate || 0) ? a : b))
+    : null;
 
-  const handleProcess = async () => {
-    toast.success(`Started processing for ${podcast.title}`);
+  const handleRefresh = async () => {
+    const res = await fetch(`/api/podcast/${podcast.slug}`, {
+      method: 'POST',
+      body: JSON.stringify({ refresh: true }),
+    });
+    if (!res.ok) {
+      toast.error('Failed to refresh podcast: ' + (await res.text()));
+      return;
+    }
+    const updated = await res.json();
+    toast.success(`Updated podcast - ${updated.Episodes.length} episodes processed`);
   };
 
   return (
     <Dialog>
       <DialogTrigger>
-        <div className={cn(buttonVariants({ variant: 'secondary' }))}>Manage</div>
+        <div className={cn(buttonVariants({ variant: 'secondary' }))}>Manage podcast</div>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -83,10 +95,12 @@ export function ManagePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes 
         </DialogHeader>
         <div>
           <div className="text-sm text-muted-foreground flex flex-col gap-1 font-mono">
-            <div>
-              Most recent episode:{' '}
-              <span className="text-primary">{moment(mostRecentlyPublished.pubDate).format('MMMM Do YYYY')}</span>
-            </div>
+            {mostRecentlyPublished && (
+              <div>
+                Most recent episode:{' '}
+                <span className="text-primary">{moment(mostRecentlyPublished.pubDate).format('MMMM Do YYYY')}</span>
+              </div>
+            )}
             <div>
               <span className="text-primary">{podcast.Episodes.length}</span> episodes total
             </div>
@@ -105,13 +119,12 @@ export function ManagePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes 
           </div>
         </div>
         <DialogFooter>
-          <Button
-            className="font-mono"
-            onClick={handleProcess}
-            disabled={numEpisodes === 0 || (numTranscribed === numEpisodes && numSummarized === numEpisodes)}
-          >
-            Process episodes
-          </Button>
+          <DialogClose>
+            <Button className="font-mono" variant="secondary" onClick={handleRefresh}>
+              <ArrowPathIcon className="size-5 mr-2 inline" />
+              Refresh
+            </Button>
+          </DialogClose>
           <DeletePodcastDialog podcast={podcast} />
         </DialogFooter>
       </DialogContent>

@@ -187,6 +187,8 @@ export type Database = {
       }
       Podcasts: {
         Row: {
+          author: string | null
+          copyright: string | null
           created_at: string
           description: string | null
           id: number
@@ -198,6 +200,8 @@ export type Database = {
           url: string | null
         }
         Insert: {
+          author?: string | null
+          copyright?: string | null
           created_at?: string
           description?: string | null
           id?: number
@@ -209,6 +213,8 @@ export type Database = {
           url?: string | null
         }
         Update: {
+          author?: string | null
+          copyright?: string | null
           created_at?: string
           description?: string | null
           id?: number
@@ -264,6 +270,32 @@ export type Database = {
           }
         ]
       }
+      Suggestions: {
+        Row: {
+          episode: number
+          id: number
+          suggestion: string | null
+        }
+        Insert: {
+          episode: number
+          id?: number
+          suggestion?: string | null
+        }
+        Update: {
+          episode?: number
+          id?: number
+          suggestion?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_Suggestions_episode_fkey"
+            columns: ["episode"]
+            isOneToOne: false
+            referencedRelation: "Episodes"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       Users: {
         Row: {
           created_at: string
@@ -293,6 +325,38 @@ export type Database = {
           match_threshold: number
           match_count: number
           min_content_length: number
+        }
+        Returns: {
+          id: number
+          document: number
+          meta: Json
+          content: string
+          similarity: number
+        }[]
+      }
+      chunk_vector_search_episode: {
+        Args: {
+          embedding: string
+          match_threshold: number
+          match_count: number
+          min_content_length: number
+          episode_id: number
+        }
+        Returns: {
+          id: number
+          document: number
+          meta: Json
+          content: string
+          similarity: number
+        }[]
+      }
+      chunk_vector_search_podcast: {
+        Args: {
+          embedding: string
+          match_threshold: number
+          match_count: number
+          min_content_length: number
+          podcast_id: number
         }
         Returns: {
           id: number

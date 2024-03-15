@@ -13,7 +13,10 @@ export function MainNav({ items }: MainNavProps) {
   return (
     <div className="flex flex-row gap-10">
       <Link href="/" className="flex items-center">
-        <Image src="/images/podverse-logo.svg" alt="Podverse" width={50} height={50} />
+        <div class="relative group cursor-pointer">
+          <div class="z-5 absolute -inset-1 bg-gradient-to-tr from-primary to-primary rounded-full blur opacity-35 group-hover:opacity-80 transition duration-1000 group-hover:duration-200"></div>
+          <Image src="/images/podverse-logo.svg" alt="Podverse" width={50} height={50} className="relative z-10" />
+        </div>
         <span className="font-mono inline-block font-bold text-2xl text-primary ml-4">Podverse</span>
       </Link>
       {items?.length ? (
@@ -26,12 +29,12 @@ export function MainNav({ items }: MainNavProps) {
                   href={item.href}
                   className={cn(
                     'flex items-center text-sm font-medium text-muted-foreground',
-                    item.disabled && 'cursor-not-allowed opacity-80'
+                    item.disabled && 'cursor-not-allowed opacity-80',
                   )}
                 >
                   {item.title}
                 </Link>
-              )
+              ),
           )}
         </nav>
       ) : null}

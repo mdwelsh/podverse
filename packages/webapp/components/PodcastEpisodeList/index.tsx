@@ -50,7 +50,7 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
               </PaginationItem>
               {page > 1 && (
                 <PaginationItem>
-                  <PaginationLink onClick={() => gotoPage(1)}>1</PaginationLink>
+                  <PaginationLink key={1} onClick={() => gotoPage(1)}>1</PaginationLink>
                 </PaginationItem>
               )}
               {page > 2 && (
@@ -59,7 +59,7 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
                 </PaginationItem>
               )}
               <PaginationItem>
-                <PaginationLink className="text-primary" onClick={() => gotoPage(page)}>
+                <PaginationLink key={page} className="text-primary" onClick={() => gotoPage(page)}>
                   {page}
                 </PaginationLink>
               </PaginationItem>
@@ -70,7 +70,7 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
               )}
               {page < numPages && (
                 <PaginationItem>
-                  <PaginationLink onClick={() => gotoPage(numPages)}>{numPages}</PaginationLink>
+                  <PaginationLink key={numPages} onClick={() => gotoPage(numPages)}>{numPages}</PaginationLink>
                 </PaginationItem>
               )}
               <PaginationItem>
@@ -82,7 +82,7 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
       </div>
       <div className="flex size-full flex-col gap-2 overflow-y-auto p-2 text-xs">
         {episodesToShow.map((episode, index) => (
-          <Link href={`/podcast/${podcast.slug}/episode/${episode.slug}`} className="hover:ring-primary hover:ring-4">
+          <Link key={index} href={`/podcast/${podcast.slug}/episode/${episode.slug}`} className="hover:ring-primary hover:ring-4">
             <EpisodeStrip key={index} podcast={podcast} episode={episode} />
           </Link>
         ))}

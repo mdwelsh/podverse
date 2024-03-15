@@ -1,6 +1,6 @@
 /** This module has functions for accessing tables in Supabase. */
 
-import { User, Podcast, Episode, EpisodeWithPodcast, PodcastWithEpisodes, Speakers } from './types.js';
+import { User, Podcast, Episode, EpisodeMetadata, EpisodeWithPodcast, PodcastWithEpisodes, Speakers, PodcastMetadata } from './types.js';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Upload as TusUpload } from 'tus-js-client';
 import { Readable } from 'stream';
@@ -196,10 +196,8 @@ export async function GetPodcastByID(supabase: SupabaseClient, podcastId: string
 }
 
 /** Set metadata for the given podcast. */
-export async function SetPodcast(supabase: SupabaseClient, podcast: Podcast): Promise<Podcast> {
-  // Take podcast and remove the id and created_at fields.
-  const { id, created_at, ...podcastData } = podcast;
-  const { data, error } = await supabase.from('Podcasts').insert(podcastData).select('*');
+export async function SetPodcast(supabase: SupabaseClient, podcast: Podcast | PodcastMetadata): Promise<Podcast> {
+  const { data, error } = await supabase.from('Podcasts').insert(podcast).select('*');
   if (error) {
     console.error('Error setting podcast: ', error);
     throw error;
@@ -304,12 +302,13 @@ export async function UpdateEpisode(supabase: SupabaseClient, episode: Episode):
 }
 
 /** Set metadata for a set of Episodes. */
-export async function SetEpisodes(supabase: SupabaseClient, episodes: Episode[]) {
+export async function SetEpisodes(supabase: SupabaseClient, episodes: Episode[] | EpisodeMetadata[]) {
   const { error } = await supabase.from('Episodes').upsert(
     episodes.map((e) => {
       const { id, created_at, ...episodeData } = e;
       return episodeData;
     }),
+    { onConflict: 'guid', ignoreDuplicates: false },
   );
   if (error) {
     throw error;
@@ -404,9 +403,29 @@ export async function UploadLargeFile(
   });
 }
 
+/** Return suggested queries for all podcasts. */
+export async function GetSuggestions(supabase: SupabaseClient): Promise<string[]> {
+  const { data, error } = await supabase.from('Suggestions').select('suggestion');
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  return data.map((row) => row.suggestion);
+}
+
 /** Return suggested queries for the given episode. */
-export async function GetSuggestions(supabase: SupabaseClient, episodeId: number): Promise<string[]> {
+export async function GetEpisodeSuggestions(supabase: SupabaseClient, episodeId: number): Promise<string[]> {
   const { data, error } = await supabase.from('Suggestions').select('suggestion').eq('episode', episodeId);
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  return data.map((row) => row.suggestion);
+}
+
+/** Return suggested queries for the given podcast . */
+export async function GetPodcastSuggestions(supabase: SupabaseClient, podcastId: number): Promise<string[]> {
+  const { data, error } = await supabase.from('Suggestions').select('suggestion, Episodes!inner(podcast)').eq('Episodes.podcast', podcastId);
   if (error) {
     console.error('error', error);
     throw error;

@@ -13,7 +13,6 @@ import { cn } from '@/lib/utils';
 
 export default async function HomePage() {
   const { userId } = auth();
-  console.log('HomePage', { userId });
 
   return (
     <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">

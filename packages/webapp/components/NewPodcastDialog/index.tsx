@@ -143,7 +143,7 @@ function PodcastPreview({
       <div className="text-primary text-sm">Here&apos;s a preview of your podcast:</div>
       <PodcastStrip podcast={podcast} />
       <div className="text-primary text-sm">Newest episodes</div>
-      {podcast.Episodes.slice(0, 5).map((episode) => (
+      {podcast.Episodes.slice(0, 3).map((episode) => (
         <EpisodeStrip key={episode.id} podcast={podcast} episode={episode} />
       ))}
       <div className="flex flex-row gap-2 justify-end">
