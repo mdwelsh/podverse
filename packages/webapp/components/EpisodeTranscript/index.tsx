@@ -114,7 +114,8 @@ function ParagraphView({
   selfRef: React.Ref<HTMLDivElement>;
   highlight: boolean;
 }) {
-  const speakerColors = ['text-teal-400', 'text-sky-400', 'text-[#0000FF]'];
+  const speakerColors = ['text-blue-300', 'text-gray-300', 'text-green-300', 'text-red-200',
+    'text-yellow-200', 'text-indigo-200', 'text-pink-200', 'text-purple-200'];
 
   const start = paragraph.start;
   const startHours = Math.floor(start / 3600);
@@ -129,15 +130,13 @@ function ParagraphView({
   const speakerColor = speakerColors[paragraph.speaker % speakerColors.length];
 
   return (
-    <div className={`group flex flex-row gap-2 ${highlight && 'bg-secondary'}`} ref={selfRef}>
+    <div className={`pb-2 border-b group flex flex-row gap-2 ${highlight && 'bg-secondary'}`} ref={selfRef}>
       <div className="flex w-1/5 flex-col gap-2 overflow-hidden text-wrap text-xs">
-        <div className="text-primary">
-          {speaker}
-          <div className="hidden text-xs group-hover:block">
-            <EditSpeakersDialog episode={episode} speaker={paragraph.speaker} />
-          </div>
-        </div>
+        <div className="text-primary">{speaker}</div>
         <div className="text-muted-foreground">{startString}</div>
+        <div className="hidden text-xs group-hover:block">
+          <EditSpeakersDialog episode={episode} speaker={paragraph.speaker} />
+        </div>
       </div>
       <ParagraphText startTime={start} sentences={sentences} speakerColor={speakerColor} />
     </div>

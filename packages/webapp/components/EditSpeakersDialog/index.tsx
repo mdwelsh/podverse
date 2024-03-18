@@ -40,7 +40,7 @@ export function EditSpeakersDialog({ episode, speaker }: { episode: EpisodeWithP
       <DialogTrigger>
         <div className="text-muted-foreground flex flex-row gap-2 font-mono text-xs">
           <PencilSquareIcon className="size-4" />
-          Edit
+          Edit name
         </div>
       </DialogTrigger>
       <DialogContent className="max-h-[800px] w-4/5 overflow-y-auto">

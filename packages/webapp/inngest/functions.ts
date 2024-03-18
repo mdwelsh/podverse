@@ -174,7 +174,7 @@ export const processEpisode = inngest.createFunction(
 // );
 
 /** Scan for unprocessed episodes and fire off events to process them. */
-export const processEpisodes = inngest.createFunction(
+export const processPodcast = inngest.createFunction(
   {
     id: 'process-podcast',
     retries: 0,
@@ -191,7 +191,7 @@ export const processEpisodes = inngest.createFunction(
     const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
     const podcast = await GetPodcastWithEpisodesByID(supabase, podcastId);
     // XXX MDW - For now, only do 10 episodes.
-    const episodesToProcess = (force ? podcast.Episodes : podcast.Episodes.filter((episode) => isReady(episode))).slice(0, 10);
+    const episodesToProcess = (force ? podcast.Episodes : podcast.Episodes.filter((episode) => !isReady(episode))).slice(0, 10);
 
     const results = await Promise.all(
       episodesToProcess.map(async (episode) => {

@@ -11,14 +11,16 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button, buttonVariants } from '@/components/ui/button';
-import moment from 'moment';
+import moment, { max } from 'moment';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { ArrowPathIcon, TrashIcon, BoltIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+import { ArrowPathIcon, TrashIcon, BoltIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 import { isReady } from '@/lib/episode';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Usage } from '@/lib/plans';
+import Link from 'next/link';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const router = useRouter();
@@ -72,9 +74,55 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
 }
 
 function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
+  const [usage, setUsage] = useState<Usage | null>(null);
   const [force, setForce] = useState(false);
-  const numProcessed = podcast.Episodes.filter((episode) => isReady(episode)).length;
-  const numToProcess = podcast.Episodes.filter((episode) => !isReady(episode)).length;
+  const [numToProcess, setNumToProcess] = useState(0);
+
+  const total = podcast.Episodes.length;
+  const processed = podcast.Episodes.filter((episode) => isReady(episode)).length;
+
+  useEffect(() => {
+    fetch('/api/usage')
+      .then((res) => res.json())
+      .then((usageRecord) => {
+        setUsage(usageRecord);
+        const plan = usageRecord?.plan;
+        const limit = Math.min(total, plan.maxEpisodesPerPodcast || total);
+        const available = force ? limit : Math.max(0, limit - processed);
+        setNumToProcess(available);
+      })
+      .catch((e) => console.error(e));
+  }, [force, podcast.Episodes, processed, total]);
+
+  let message = (
+    <div>
+      This will start processing <span className="text-primary">{numToProcess}</span> episodes for this podcast.
+    </div>
+  );
+
+  if (numToProcess === 0) {
+    if (processed === total) {
+      message = <div>No episodes to process.</div>;
+    } else if (usage && usage.plan.maxEpisodesPerPodcast !== null) {
+      message = (
+        <div className="flex flex-row items-center gap-4">
+          <ExclamationTriangleIcon className="size-20 text-primary" />
+          <div>
+            Your current plan has a limit of{' '}
+            <span className="text-primary">{usage.plan.maxEpisodesPerPodcast} episodes</span> per podcast. You can{' '}
+            <Link href="/plans" className="underline text-primary">
+              upgrade your plan
+            </Link>{' '}
+            to process more episodes.
+          </div>
+        </div>
+      );
+    } else {
+      message = <div>Calculating...</div>;
+    }
+  }
+  const processEnabled = numToProcess > 0;
+  const forceEnabled = processEnabled && processed > 0;
 
   const onProcess = async () => {
     setForce(false);
@@ -102,21 +150,25 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
           <DialogTitle className="font-mono">Process episodes</DialogTitle>
         </DialogHeader>
         <div>
-          <div className="text-sm text-muted-foreground flex flex-col gap-1 font-mono">
-            <div>
-              This will start processing <span className="text-primary">{numToProcess}</span> episodes for this podcast.
-            </div>
-          </div>
+          <div className="text-sm text-muted-foreground flex flex-col gap-1 font-mono">{message}</div>
           <div className="items-top mt-4 flex space-x-2">
-            <Checkbox id="force" className="mt-1" checked={force} onCheckedChange={(val: boolean) => setForce(val)} />
+            <Checkbox
+              id="force"
+              className="mt-1"
+              disabled={!forceEnabled}
+              checked={force}
+              onCheckedChange={(val: boolean) => setForce(val)}
+            />
             <div className="flex flex-col gap-1">
               <label htmlFor="force" className="text-muted-foreground font-mono">
-                Also re-process existing episodes
+                Re-process existing episodes
               </label>
-              <div className="text-muted-foreground text-sm">
-                Checking this box will also re-process <span className="text-primary">{numProcessed}</span> episodes that
-                have already been processed.
-              </div>
+              {processed > 0 && (
+                <div className="text-muted-foreground text-sm">
+                  Checking this box will also re-process <span className="text-primary">{processed}</span> episodes that
+                  have already been processed.
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -127,7 +179,7 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
             </Button>
           </DialogClose>
           <DialogClose asChild>
-            <Button className="font-mono" onClick={onProcess}>
+            <Button className="font-mono" onClick={onProcess} disabled={!processEnabled}>
               <BoltIcon className="size-5 mr-2 inline" />
               Process
             </Button>
@@ -146,7 +198,6 @@ export function ManagePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes 
 
   const doRefresh = async () => {
     setRefreshing(true);
-    console.log('STarting refresh');
     const res = await fetch(`/api/podcast/${podcast.slug}`, {
       method: 'POST',
       body: JSON.stringify({ refresh: true }),
@@ -172,16 +223,22 @@ export function ManagePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes 
           </DialogTitle>
         </DialogHeader>
         <div>
-          <div className="text-sm text-muted-foreground flex flex-col gap-1 font-mono">
+          <div className="text-sm text-muted-foreground flex flex-col gap-4 font-mono">
             {mostRecentlyPublished && (
-              <div>
-                Most recent episode:{' '}
-                <span className="text-primary">{moment(mostRecentlyPublished.pubDate).format('MMMM Do YYYY')}</span>
+              <div className="flex flex-col gap-2">
+                <div>
+                  Most recent episode:{' '}
+                  <span className="text-primary">{mostRecentlyPublished.title}</span>
+                </div>
+                <div>
+                  published{' '}
+                  <span className="text-primary">{moment(mostRecentlyPublished.pubDate).format('MMMM Do YYYY')}</span>
+                </div>
               </div>
             )}
             <div>
               <span className="text-primary">{podcast.Episodes.filter((episode) => isReady(episode)).length}</span>{' '}
-              episodes processed / <span className="text-primary">{podcast.Episodes.length}</span> total
+              episodes processed out of <span className="text-primary">{podcast.Episodes.length}</span> total
             </div>
             <div></div>
           </div>

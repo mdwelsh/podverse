@@ -12,7 +12,7 @@ export type Speakers = Record<string, string>;
 export type EpisodeWithPodcast = Omit<Episode, 'podcast'> & { podcast: Podcast; speakers?: Speakers };
 
 /** Podcast metadata (that is, RSS feed data) only. */
-export type PodcastMetadata = Omit<Podcast, 'id' | 'created_at' | 'modified_at' | 'owner' > & {
+export type PodcastMetadata = Omit<Podcast, 'id' | 'created_at' | 'modified_at' | 'owner'> & {
   id?: number;
   created_at?: string;
   modified_at?: string;
