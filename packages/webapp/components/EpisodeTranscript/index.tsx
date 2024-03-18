@@ -3,9 +3,8 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { EpisodeWithPodcast } from 'podverse-utils';
 import { EditSpeakersDialog } from '../EditSpeakersDialog';
-import { AudioPlayer, AudioPlayerProvider } from '@/components/AudioPlayer';
+import { AudioPlayer, AudioPlayerProvider, useAudioPlayer } from '@/components/AudioPlayer';
 import { PlayCircleIcon } from '@heroicons/react/24/outline';
-import { useAudioPlayer } from '@/components/AudioPlayer';
 
 /** Top level transcript component. Includes the AudioPlayer. */
 export function EpisodeTranscript({ episode }: { episode: EpisodeWithPodcast }) {
@@ -114,8 +113,19 @@ function ParagraphView({
   selfRef: React.Ref<HTMLDivElement>;
   highlight: boolean;
 }) {
-  const speakerColors = ['text-blue-300', 'text-gray-300', 'text-green-300', 'text-red-200',
-    'text-yellow-200', 'text-indigo-200', 'text-pink-200', 'text-purple-200'];
+  const speakerColors = [
+    'text-gray-300',
+    'text-sky-300',
+    'text-rose-200',
+    'text-indigo-200',
+    'text-lime-200',
+    'text-yellow-200',
+    'text-indigo-200',
+    'text-amber-200',
+    'text-pink-200',
+    'text-emerald-200',
+    'text-purple-200',
+  ];
 
   const start = paragraph.start;
   const startHours = Math.floor(start / 3600);
@@ -130,8 +140,8 @@ function ParagraphView({
   const speakerColor = speakerColors[paragraph.speaker % speakerColors.length];
 
   return (
-    <div className={`pb-2 border-b group flex flex-row gap-2 ${highlight && 'bg-secondary'}`} ref={selfRef}>
-      <div className="flex w-1/5 flex-col gap-2 overflow-hidden text-wrap text-xs">
+    <div className={`group flex flex-row items-start gap-2 border-b pb-2 ${highlight && 'bg-secondary'}`} ref={selfRef}>
+      <div className="flex pt-1 w-1/5 flex-col gap-2 overflow-hidden text-wrap text-xs">
         <div className="text-primary">{speaker}</div>
         <div className="text-muted-foreground">{startString}</div>
         <div className="hidden text-xs group-hover:block">
@@ -165,9 +175,9 @@ export function ParagraphText({
 
   return (
     <div className="flex w-4/5 flex-row gap-1">
-      <div className={`font-mono text-base ${speakerColor}`}>
+      <div className={`font-sans text-base ${speakerColor}`}>
         {sentences.map((sentence: any, index: number) => (
-          <div key={index}>{sentence.text}</div>
+          <span key={index}>{sentence.text}&nbsp;&nbsp;</span>
         ))}
       </div>
       <div className="text-primary hidden group-hover:block" onClick={doSeek}>

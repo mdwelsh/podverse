@@ -26,8 +26,16 @@ const ANSWER_QUERY_PROMPT = {
       short sentences at most. Use the provided context to answer the user's question. 
 
       The following context is provided to you to help you answer the user's question.
-      PLEASE INCLUDE THE LINKS PROVIDED IN THE CONTEXT IN YOUR RESPONSE.
-      DO NOT INCLUDE LINKS TO OTHER INFORMATION OTHER THAN THE LINKS PROVIDED BELOW.
+      If you use this information to reply to the user, you should include a
+      Markdown link in your reply that contains the start time of the audio clip
+      that corresponds to the context provided. For example, with the input
+
+      AUDIO START TIME: 123.45
+
+      your reply should include the following Markdown:
+
+      [Listen](/?seek=123.45)
+
       You may respond in Markdown format. Please remember to keep your answer short.`,
 };
 
@@ -52,22 +60,25 @@ async function processChunk(chunk: Chunk, index: number, supabase: SupabaseClien
   let message = `Here is context entry ${index + 1}. This is a chunk of text from the podcast
   episode that you should use as context when answering the user's question.`;
   message += '\n\nBEGINNING OF TEXT:\n"' + chunk.content + '"\nEND OF TEXT.\n\n';
-  if (chunk.documentId) {
-    // Look up the episode and podcast for the documentId.
-    const { data, error } = await supabase.from('Documents').select('id, episode').eq('id', chunk.documentId);
-    if (!error && data && data.length > 0) {
-      const episodeId = data![0].episode as string;
-      const episode = await GetEpisodeWithPodcast(supabase, parseInt(episodeId));
-      const episodeLink = `https://podverse.ai/podcast/${episode.podcast.slug}/episode/${episode.slug}`;
-      const podcastLink = `https://podverse.ai/podcast/${episode.podcast.slug}`;
-      message += `The preceeding text is from the episode titled "${episode.title}" of the podcast "${episode.podcast.title}".
-        Here is a link to the episode: ${episodeLink}.
-        Here is a link to the podcast itself: ${podcastLink}.
-        Feel free to use these links in your response to the user.\n`;
-    } else {
-      console.error(`Error looking up episode for documentId=${chunk.documentId}: ${error}`);
-    }
+  if (chunk.meta) {
+    message += `AUDIO START TIME: ${chunk.meta.startTime}\n\n`;
   }
+  // if (chunk.documentId) {
+  //   // Look up the episode and podcast for the documentId.
+  //   const { data, error } = await supabase.from('Documents').select('id, episode').eq('id', chunk.documentId);
+  //   if (!error && data && data.length > 0) {
+  //     const episodeId = data![0].episode as string;
+  //     const episode = await GetEpisodeWithPodcast(supabase, parseInt(episodeId));
+  //     const episodeLink = `https://podverse.ai/podcast/${episode.podcast.slug}/episode/${episode.slug}`;
+  //     const podcastLink = `https://podverse.ai/podcast/${episode.podcast.slug}`;
+  //     message += `The preceeding text is from the episode titled "${episode.title}" of the podcast "${episode.podcast.title}".
+  //       Here is a link to the episode: ${episodeLink}.
+  //       Here is a link to the podcast itself: ${podcastLink}.
+  //       Feel free to use these links in your response to the user.\n`;
+  //   } else {
+  //     console.error(`Error looking up episode for documentId=${chunk.documentId}: ${error}`);
+  //   }
+  // }
   return {
     role: 'system',
     content: message,
@@ -122,6 +133,9 @@ export async function POST(req: Request) {
             const chunkResults = await Promise.all(
               chunks.map(async (chunk, index) => await processChunk(chunk, index, supabase)),
             );
+
+            console.log(`CHUNK RESULTS:\n${JSON.stringify(chunkResults, null, 2)}`);
+
             const newMessages = appendToolCallMessage({
               tool_call_id: toolCall.id,
               function_name: 'searchKnowledgeBase',
