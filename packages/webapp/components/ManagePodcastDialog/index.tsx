@@ -99,6 +99,23 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
       This will start processing <span className="text-primary">{numToProcess}</span> episodes for this podcast.
     </div>
   );
+  if (usage && usage.plan.maxEpisodesPerPodcast !== null) {
+    message = (
+      <div>
+        <div>
+          This will start processing <span className="text-primary">{numToProcess}</span> episodes for this podcast.
+        </div>
+        <div>
+          Your current plan has a limit of{' '}
+          <span className="text-primary">{usage.plan.maxEpisodesPerPodcast} episodes</span> per podcast. You can{' '}
+          <Link href="/plans" className="underline text-primary">
+            upgrade your plan
+          </Link>{' '}
+          to process more episodes.
+        </div>
+      </div>
+    );
+  }
 
   if (numToProcess === 0) {
     if (processed === total) {
@@ -227,8 +244,7 @@ export function ManagePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes 
             {mostRecentlyPublished && (
               <div className="flex flex-col gap-2">
                 <div>
-                  Most recent episode:{' '}
-                  <span className="text-primary">{mostRecentlyPublished.title}</span>
+                  Most recent episode: <span className="text-primary">{mostRecentlyPublished.title}</span>
                 </div>
                 <div>
                   published{' '}

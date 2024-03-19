@@ -15,21 +15,17 @@ export function EpisodeChat({
   suggestedQueries: string[];
   chatAvailable: boolean;
 }) {
-  const botMessages: CreateMessage[] = [
+  const initialMessages: CreateMessage[] = [
     {
       content: `Hi there! I\'m the Podverse AI Bot. You can ask me questions about **${episode.title}** or the **${episode.podcast.title}** podcast.`,
       role: 'assistant',
     },
     {
-      content: `Here are some suggestions to get you started:`,
+      content: 'Here are some suggestions to get you started:\n' + suggestedQueries.map((s) => `[${s}](/?suggest)`).join(' '),
       role: 'assistant',
     },
   ];
-  const initialMessages = botMessages.concat(
-    suggestedQueries.map((s) => {
-      return { content: `[${s}](/?suggest)`, role: 'assistant' };
-    }),
-  );
+  console.log('initialMessages:', initialMessages);
 
   return (
     <div className="mt-8 flex h-[600px] w-2/5 flex-col gap-2">

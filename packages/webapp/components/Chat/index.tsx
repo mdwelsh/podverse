@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Message } from 'ai';
+import { CreateMessage, Message } from 'ai';
 import { useChat } from 'ai/react';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef, type RefObject } from 'react';
@@ -127,15 +127,59 @@ function timeString(seconds: number) {
   return `${hours}:${minutes.toString().padStart(2, '0')}:${secondsRemainder.toString().padStart(2, '0')}`;
 }
 
-function ChatMessage({ message, ...props }: { message: Message }) {
+function ChatSuggestion({ text, onClick }: { text: string; onClick: () => void }) {
+  return (
+    <div
+      className={
+        'my-4 rounded-2xl font-mono bg-secondary text-secondary-foreground cursor-pointer hover:bg-secondary/80 hover:border-primary hover:border'
+      }
+      onClick={onClick}
+    >
+      <div className="flex flex-row gap-2 items-start">
+        <div className="w-20">
+          <QuestionMarkCircleIcon className="size-14 px-4" />
+        </div>
+        <div className="text-sm p-4 font-mono">{text}</div>
+      </div>
+    </div>
+  );
+}
+
+function ChatPlay({ time, onClick }: { time: number; onClick: () => void }) {
+  return (
+    <div className="mt-4">
+      <Button onClick={onClick}>
+        <PlayCircleIcon className="size-6" />
+        Listen at {timeString(time)}
+      </Button>
+    </div>
+  );
+}
+
+function ChatMessage({ message, append, ...props }: { message: Message; append: (m: CreateMessage) => void }) {
   const color = message.role === 'user' ? 'text-sky-200' : 'text-foreground-muted';
   const audioPlayer = useAudioPlayer();
-  if (!audioPlayer) {
-    return null;
+  let play: (() => void) | undefined = undefined;
+  let seek: ((n: number) => void) | undefined = undefined;
+  if (audioPlayer) {
+    play = audioPlayer.play;
+    seek = audioPlayer.seek;
   }
-  const { play, seek } = audioPlayer;
 
-  const doQuery = (query: string) => {};
+  const doPlay = (time: number) => {
+    if (!play || !seek) {
+      return;
+    }
+    seek(time);
+    play();
+  };
+
+  const doQuery = async (query: string) => {
+    await append({
+      content: query,
+      role: 'user',
+    });
+  };
 
   return (
     <div className={cn('group relative mb-4 flex items-start font-sans text-base')} {...props}>
@@ -161,31 +205,15 @@ function ChatMessage({ message, ...props }: { message: Message }) {
             a({ children, href }) {
               if (href?.startsWith('/?suggest')) {
                 const suggestion = children as string;
-                return (
-                  <div className={cn(buttonVariants({ variant: 'secondary' }), 'hover:text-primary w-fit font-mono p-8')} onClick={() => doQuery(suggestion)}>
-                    <div className="flex flex-row gap-2 items-center">
-                      <QuestionMarkCircleIcon className="size-10" />
-                      <div className="font-sans">{suggestion}</div>
-                    </div>
-                  </div>
-                );
+                return <ChatSuggestion text={suggestion} onClick={() => doQuery(suggestion)} />;
               } else if (href?.startsWith('/?seek=')) {
                 const time = parseFloat(href.split('=')[1]);
-                return (
-                  <div className="mt-4">
-                    <Button onClick={() => seek(time)}>
-                      <PlayCircleIcon className="size-6" />
-                      Listen at {timeString(time)}
-                    </Button>
-                  </div>
-                );
+                return <ChatPlay time={time} onClick={() => doPlay(time)} />;
               } else {
                 return (
-                  <div>
-                    <span className="text-primary underline">
-                      <a href={href}>{children}</a>
-                    </span>
-                  </div>
+                  <span className="text-primary underline">
+                    <a href={href}>{children}</a>
+                  </span>
                 );
               }
             },
@@ -199,11 +227,11 @@ function ChatMessage({ message, ...props }: { message: Message }) {
   );
 }
 
-function ChatList({ messages }: { messages: any[] }) {
+function ChatList({ messages, append }: { messages: any[]; append: (m: CreateMessage) => void }) {
   return (
     <div className="flex flex-col gap-2">
       {messages.map((m) => (
-        <ChatMessage key={m.id} message={m} />
+        <ChatMessage key={m.id} message={m} append={append} />
       ))}
     </div>
   );
@@ -238,7 +266,7 @@ export function Chat({
       <div className="overflow-y-auto pb-[100px]">
         {messages.length ? (
           <>
-            <ChatList messages={messages} />
+            <ChatList messages={messages} append={append} />
           </>
         ) : (
           <EmptyChat />

@@ -19,7 +19,28 @@ const INITIAL_QUERY_PROMPT = {
       ALWAYS call the searchKnowledgeBase function when you receive a question.`,
 };
 
-const ANSWER_QUERY_PROMPT = {
+const PODCAST_ANSWER_PROMPT = {
+  role: 'system',
+  content: `You are an AI assistant that answers questions about a podcast. You should speak casually,
+      and avoid formal speech. Your responses should be quite short - two or three
+      short sentences at most. Use the provided context to answer the user's question. 
+
+      The following context is provided to you to help you answer the user's question.
+      If you use this information to reply to the user, you should include a
+      Markdown link in your reply that contains a link to the podcast episode that corresponds
+      to the context provided. For example, with the input
+
+      EPISODE LINK: /podcast/foo/episode/123
+      EPISODE TITLE: How come bears eat no food?
+
+      your reply should include the following Markdown:
+
+      According to the episode [How come bears eat no food?](/podcast/foo/episode/123), ...
+
+      You may respond in Markdown format. Please remember to keep your answer short.`,
+};
+
+const EPISODE_ANSWER_PROMPT = {
   role: 'system',
   content: `You are an AI assistant that answers questions about a podcast. You should speak casually,
       and avoid formal speech. Your responses should be quite short - two or three
@@ -63,22 +84,20 @@ async function processChunk(chunk: Chunk, index: number, supabase: SupabaseClien
   if (chunk.meta) {
     message += `AUDIO START TIME: ${chunk.meta.startTime}\n\n`;
   }
-  // if (chunk.documentId) {
-  //   // Look up the episode and podcast for the documentId.
-  //   const { data, error } = await supabase.from('Documents').select('id, episode').eq('id', chunk.documentId);
-  //   if (!error && data && data.length > 0) {
-  //     const episodeId = data![0].episode as string;
-  //     const episode = await GetEpisodeWithPodcast(supabase, parseInt(episodeId));
-  //     const episodeLink = `https://podverse.ai/podcast/${episode.podcast.slug}/episode/${episode.slug}`;
-  //     const podcastLink = `https://podverse.ai/podcast/${episode.podcast.slug}`;
-  //     message += `The preceeding text is from the episode titled "${episode.title}" of the podcast "${episode.podcast.title}".
-  //       Here is a link to the episode: ${episodeLink}.
-  //       Here is a link to the podcast itself: ${podcastLink}.
-  //       Feel free to use these links in your response to the user.\n`;
-  //   } else {
-  //     console.error(`Error looking up episode for documentId=${chunk.documentId}: ${error}`);
-  //   }
-  // }
+  if (chunk.documentId) {
+    // Look up the episode and podcast for the documentId.
+    const { data, error } = await supabase.from('Documents').select('id, episode').eq('id', chunk.documentId);
+    if (!error && data && data.length > 0) {
+      const episodeId = data![0].episode as string;
+      const episode = await GetEpisodeWithPodcast(supabase, parseInt(episodeId));
+      const episodeLink = `/podcast/${episode.podcast.slug}/episode/${episode.slug}`;
+      message += `EPISODE LINK: ${episodeLink}\n`;
+      message += `EPISODE TITLE: ${episode.title}\n`;
+    } else {
+      console.error(`Error looking up episode for documentId=${chunk.documentId}: ${error}`);
+      // Ignore.
+    }
+  }
   return {
     role: 'system',
     content: message,
@@ -143,7 +162,11 @@ export async function POST(req: Request) {
             });
             console.log(`onToolCall: got ${newMessages.length} new messages`);
             return openai.chat.completions.create({
-              messages: [ANSWER_QUERY_PROMPT, ...messages, ...newMessages],
+              messages: [
+                episodeId !== undefined ? EPISODE_ANSWER_PROMPT : PODCAST_ANSWER_PROMPT,
+                ...messages,
+                ...newMessages,
+              ],
               model: 'gpt-4-turbo-preview',
               stream: true,
               tools,

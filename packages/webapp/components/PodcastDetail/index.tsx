@@ -71,7 +71,7 @@ async function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
   const suggestedQueries = await GetPodcastSuggestions(supabase, podcast.id);
   if (!suggestedQueries || suggestedQueries.length === 0) {
     return (
-      <div className="mt-8 flex h-[600px] w-2/5 flex-col gap-2">
+      <div className="mt-8 flex h-[800px] w-2/5 flex-col gap-2">
         <div>
           <h1>Chat</h1>
         </div>
@@ -80,26 +80,21 @@ async function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
     );
   }
 
-  // Pick 3 random ones.
   const randomSuggestions = suggestedQueries.sort(() => 0.5 - Math.random()).slice(0, 3);
-  const botMessages: CreateMessage[] = [
+  const initialMessages: CreateMessage[] = [
     {
       content: `Hi there! I\'m the Podverse AI Bot. You can ask me questions about the **${podcast.title}** podcast.`,
       role: 'assistant',
     },
     {
-      content: `Here are some suggestions to get you started:`,
+      content: 'Here are some suggestions to get you started:\n' + randomSuggestions.map((s) => `[${s}](/?suggest)`).join(' '),
       role: 'assistant',
     },
   ];
-  const initialMessages = botMessages.concat(
-    randomSuggestions.map((s) => {
-      return { content: '*' + s + '*', role: 'assistant' };
-    }),
-  );
+  console.log('initialMessages:', initialMessages);
 
   return (
-    <div className="mt-8 flex h-[600px] w-2/5 flex-col gap-2">
+    <div className="mt-8 flex h-[800px] w-2/5 flex-col gap-2">
       <div>
         <h1>Chat</h1>
       </div>

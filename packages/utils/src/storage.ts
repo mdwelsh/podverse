@@ -436,7 +436,9 @@ export async function GetEpisodeSuggestions(supabase: SupabaseClient, episodeId:
     console.error('error', error);
     throw error;
   }
-  return data.map((row) => row.suggestion);
+  const result = data.map((row) => row.suggestion);
+  console.log(`RESULT: ${JSON.stringify(result)}`);
+  return result;
 }
 
 /** Return suggested queries for the given podcast . */
