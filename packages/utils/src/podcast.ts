@@ -34,6 +34,31 @@ export async function ReadPodcastFeed(podcastUrl: string, podcastSlug?: string):
   }
   const titleSlug = podcastSlug ?? slug(feed.title!.trim().slice(0, 25));
   const episodes: EpisodeMetadata[] = feed.items.map((entry) => {
+    const duration = entry.itunes?.duration;
+    let durationSec: number | null = null;
+    if (duration) {
+      try {
+        const parts = duration.split(':');
+        // The duration can be in the format "HH:MM:SS", "MM:SS", or "SS".
+        if (parts.length === 3) {
+          const hours = parseInt(parts[0], 10);
+          const minutes = parseInt(parts[1], 10);
+          const seconds = parseInt(parts[2], 10);
+          durationSec = hours * 3600 + minutes * 60 + seconds;
+        } else if (parts.length === 2) {
+          const minutes = parseInt(parts[0], 10);
+          const seconds = parseInt(parts[1], 10);
+          durationSec = minutes * 60 + seconds;
+        } else if (parts.length === 1) {
+          const seconds = parseInt(parts[0], 10);
+          durationSec = seconds;
+        }
+      } catch (err) {
+        console.error('Error parsing duration:', err);
+        // Ignore.
+      }
+    }
+
     return {
       // This field should be populated in RSS feeds used by Apple Podcasts,
       // at least, but we have a fallback in case it is not.
@@ -51,6 +76,7 @@ export async function ReadPodcastFeed(podcastUrl: string, podcastSlug?: string):
       imageUrl: entry.itunes?.image || null,
       pubDate: entry.pubDate || null,
       originalAudioUrl: entry.enclosure?.url || null,
+      duration: durationSec,
     };
   });
 
@@ -137,6 +163,7 @@ export async function Ingest({
           return { ...episode, podcast: oldPodcast!.id };
         }),
       );
+      console.log(`Inserted ${newEpisodes.length} new episodes`);
     } catch (err) {
       console.error('Error inserting new episodes:', err);
       throw err;
@@ -148,7 +175,9 @@ export async function Ingest({
         return oldEpisode.guid === episode.guid;
       });
       if (oldEpisode) {
+        console.log(`Updating episode ${oldEpisode.id}`);
         const mergedEpisode = UpdateEpisode(oldEpisode, episode);
+        console.log('Merged episode:', mergedEpisode);
         const { error } = await supabase.from('Episodes').upsert(mergedEpisode);
         if (error) {
           console.error('Error updating episode: ', error);
@@ -156,6 +185,7 @@ export async function Ingest({
         }
       }
     }
+    console.log(`Updated ${updatedEpisodes.length} episodes`);
 
     // Update podcast metadata.
     const { Episodes, ...podcastMetadata } = newPodcast;
@@ -164,7 +194,7 @@ export async function Ingest({
       console.error('Error updating podcast metadata: ', error);
       throw error;
     }
-
+    console.log(`Updated podcast metadata`);
   } else {
     // The easy case is that we're just creating a new podcast.
     const { Episodes, ...podcastMetadata } = newPodcast;

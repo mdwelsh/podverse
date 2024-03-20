@@ -217,7 +217,7 @@ export function ManagePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes 
     setRefreshing(true);
     const res = await fetch(`/api/podcast/${podcast.slug}`, {
       method: 'POST',
-      body: JSON.stringify({ refresh: true }),
+      body: JSON.stringify({ action: 'refresh' }),
     });
     setRefreshing(false);
     if (!res.ok) {

@@ -1,6 +1,15 @@
 /** This module has functions for accessing tables in Supabase. */
 
-import { User, Podcast, Episode, EpisodeMetadata, EpisodeWithPodcast, PodcastWithEpisodes, Speakers, PodcastMetadata } from './types.js';
+import {
+  User,
+  Podcast,
+  Episode,
+  EpisodeMetadata,
+  EpisodeWithPodcast,
+  PodcastWithEpisodes,
+  Speakers,
+  PodcastMetadata,
+} from './types.js';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Upload as TusUpload } from 'tus-js-client';
 import { Readable } from 'stream';
@@ -27,7 +36,12 @@ export async function GetPodcasts(supabase: SupabaseClient): Promise<Podcast[]> 
 
 /** Return podcasts with episodes. */
 export async function GetPodcastWithEpisodes(supabase: SupabaseClient, slug: string): Promise<PodcastWithEpisodes> {
-  const { data, error } = await supabase.from('Podcasts').select('*, Episodes (*)').eq('slug', slug).limit(1);
+  const { data, error } = await supabase
+    .from('Podcasts')
+    .select('*, Episodes (*)')
+    .eq('slug', slug)
+    .order('pubDate', { referencedTable: 'Episodes', ascending: false })
+    .limit(1);
   if (error) {
     console.error('error', error);
     throw error;
@@ -37,13 +51,21 @@ export async function GetPodcastWithEpisodes(supabase: SupabaseClient, slug: str
   }
   const podcast = data[0];
   // Sort the podcast.Episodes list by pubDate.
-  podcast.Episodes?.sort((a: Episode, b: Episode) => ((a.pubDate || 0) > (b.pubDate || 0) ? -1 : 1));
+  //podcast.Episodes?.sort((a: Episode, b: Episode) => ((a.pubDate || 0) > (b.pubDate || 0) ? -1 : 1));
   return podcast;
 }
 
 /** Return podcasts with episodes by podcast ID. */
-export async function GetPodcastWithEpisodesByID(supabase: SupabaseClient, podcastId: string): Promise<PodcastWithEpisodes> {
-  const { data, error } = await supabase.from('Podcasts').select('*, Episodes (*)').eq('id', podcastId).limit(1);
+export async function GetPodcastWithEpisodesByID(
+  supabase: SupabaseClient,
+  podcastId: string,
+): Promise<PodcastWithEpisodes> {
+  const { data, error } = await supabase
+    .from('Podcasts')
+    .select('*, Episodes (*)')
+    .eq('id', podcastId)
+    .order('pubDate', { referencedTable: 'Episodes', ascending: false })
+    .limit(1);
   if (error) {
     console.error('error', error);
     throw error;
@@ -53,7 +75,7 @@ export async function GetPodcastWithEpisodesByID(supabase: SupabaseClient, podca
   }
   const podcast = data[0];
   // Sort the podcast.Episodes list by pubDate.
-  podcast.Episodes?.sort((a: Episode, b: Episode) => ((a.pubDate || 0) > (b.pubDate || 0) ? -1 : 1));
+  //podcast.Episodes?.sort((a: Episode, b: Episode) => ((a.pubDate || 0) > (b.pubDate || 0) ? -1 : 1));
   return podcast;
 }
 
@@ -76,7 +98,7 @@ export async function GetLatestEpisodes(supabase: SupabaseClient, limit: number 
 
 /** Return list of Episodes with corresponding Podcast info. */
 export async function GetEpisodesWithPodcast(supabase: SupabaseClient): Promise<EpisodeWithPodcast[]> {
-  const { data, error } = await supabase.from('Episodes').select('*, podcast (*)');
+  const { data, error } = await supabase.from('Episodes').select('*, podcast (*)').order('pubDate', { ascending: false });
   if (error) {
     console.error('error', error);
     throw error;
@@ -443,7 +465,10 @@ export async function GetEpisodeSuggestions(supabase: SupabaseClient, episodeId:
 
 /** Return suggested queries for the given podcast . */
 export async function GetPodcastSuggestions(supabase: SupabaseClient, podcastId: number): Promise<string[]> {
-  const { data, error } = await supabase.from('Suggestions').select('suggestion, Episodes!inner(podcast)').eq('Episodes.podcast', podcastId);
+  const { data, error } = await supabase
+    .from('Suggestions')
+    .select('suggestion, Episodes!inner(podcast)')
+    .eq('Episodes.podcast', podcastId);
   if (error) {
     console.error('error', error);
     throw error;

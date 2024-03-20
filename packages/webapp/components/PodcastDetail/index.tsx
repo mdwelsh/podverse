@@ -17,7 +17,7 @@ async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
       <div className="flex w-full flex-row gap-4">
         <div className="w-[250px]">{podcast.imageUrl && <img src={podcast.imageUrl} />}</div>
         <div className="flex w-full flex-col gap-4">
-          <div className="text-primary text-xl font-bold">
+          <div className="text-primary text-2xl font-bold">
             <Link href={podcast.url || `/podcast/${podcast.slug}`}>
               {podcast.title}
               <ArrowTopRightOnSquareIcon className="text-primary ml-1 inline size-4 align-super" />

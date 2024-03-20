@@ -11,6 +11,7 @@ import { FC, memo } from 'react';
 import ReactMarkdown, { Options } from 'react-markdown';
 import { useAudioPlayer } from '@/components/AudioPlayer';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { timeString } from '@/lib/time';
 
 export const MemoizedReactMarkdown: FC<Options> = memo(
   ReactMarkdown,
@@ -120,12 +121,7 @@ function PodverseIcon() {
   return <Image src="/images/podverse-logo.svg" alt="Podverse" width={32} height={32} />;
 }
 
-function timeString(seconds: number) {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secondsRemainder = Math.floor(seconds % 60);
-  return `${hours}:${minutes.toString().padStart(2, '0')}:${secondsRemainder.toString().padStart(2, '0')}`;
-}
+
 
 function ChatSuggestion({ text, onClick }: { text: string; onClick: () => void }) {
   return (
