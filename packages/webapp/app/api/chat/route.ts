@@ -37,6 +37,9 @@ const PODCAST_ANSWER_PROMPT = {
 
       According to the episode [How come bears eat no food?](/podcast/foo/episode/123), ...
 
+      You should only include the link from in the EPISODE LINK, not any other links that
+      you may have.
+
       You may respond in Markdown format. Please remember to keep your answer short.`,
 };
 
@@ -152,9 +155,6 @@ export async function POST(req: Request) {
             const chunkResults = await Promise.all(
               chunks.map(async (chunk, index) => await processChunk(chunk, index, supabase)),
             );
-
-            console.log(`CHUNK RESULTS:\n${JSON.stringify(chunkResults, null, 2)}`);
-
             const newMessages = appendToolCallMessage({
               tool_call_id: toolCall.id,
               function_name: 'searchKnowledgeBase',

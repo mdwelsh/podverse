@@ -38,10 +38,9 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
     setPage(value);
   };
 
+  // TODO(mdw): Have toggle to restrict to published episodes.
   const episodesToShow = episodes.filter(isReady).slice((page - 1) * ENTRIES_PER_PAGE, page * ENTRIES_PER_PAGE);
   //const episodesToShow = episodes.slice((page - 1) * ENTRIES_PER_PAGE, page * ENTRIES_PER_PAGE);
-  console.log('episodes', episodes);
-  console.log('episodesToShow', episodesToShow);
 
   return (
     <div className="mt-8 flex h-[800px] w-3/5 flex-col gap-2">

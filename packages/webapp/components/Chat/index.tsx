@@ -6,12 +6,20 @@ import { useChat } from 'ai/react';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef, type RefObject } from 'react';
 import Textarea from 'react-textarea-autosize';
-import { UserIcon, PlayCircleIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowDownIcon,
+  PaperAirplaneIcon,
+  UserIcon,
+  PlayCircleIcon,
+  QuestionMarkCircleIcon,
+} from '@heroicons/react/24/outline';
 import { FC, memo } from 'react';
 import ReactMarkdown, { Options } from 'react-markdown';
 import { useAudioPlayer } from '@/components/AudioPlayer';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { timeString } from '@/lib/time';
+import { useScrollAnchor } from '@/lib/use-scroll-anchor';
+import { Icons } from '@/components/icons';
 
 export const MemoizedReactMarkdown: FC<Options> = memo(
   ReactMarkdown,
@@ -65,7 +73,8 @@ export function PromptForm({
       }}
       ref={formRef}
     >
-      <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden">
+      <div className="relative flex max-h-60 w-full grow flex-row justify-between items-center">
+        {isLoading && <div className="bg-background absolute inset-0 z-10 opacity-50" />}
         <Textarea
           ref={inputRef}
           tabIndex={0}
@@ -73,11 +82,20 @@ export function PromptForm({
           rows={1}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Send a message."
+          placeholder="Send a message"
           spellCheck={false}
           className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
         />
-        <div className="absolute right-0 top-4 sm:right-4"></div>
+        <div className="w-12">
+          {isLoading ? (
+            <Icons.spinner className="mx-auto text-primary size-6 animate-spin" />
+          ) : (
+            <Button variant="ghost" type="submit" size="icon" disabled={input === ''}>
+              <PaperAirplaneIcon className="text-primary size-6" />
+              <span className="sr-only">Send message</span>
+            </Button>
+          )}
+        </div>
       </div>
     </form>
   );
@@ -91,6 +109,8 @@ function ChatPanel({
   input,
   setInput,
   messages,
+  scrollToBottom,
+  isAtBottom,
 }: {
   isLoading: boolean;
   stop?: () => void;
@@ -99,20 +119,29 @@ function ChatPanel({
   input: string;
   setInput: (value: string) => void;
   messages?: any[];
+  scrollToBottom: () => void;
+  isAtBottom: boolean;
 }) {
   return (
-    <div className="absolute bottom-0 w-full bg-background border-t">
-      <PromptForm
-        onSubmit={async (value) => {
-          await append({
-            content: value,
-            role: 'user',
-          });
-        }}
-        input={input}
-        setInput={setInput}
-        isLoading={isLoading}
-      />
+    <div className="bg-background absolute bottom-0 w-full flex flex-col gap-2">
+      <div className="ml-auto text-muted-foreground">
+        <Button variant="ghost" onClick={scrollToBottom}>
+          <ArrowDownIcon className="mr-2 size-4" /> Scroll to bottom
+        </Button>
+      </div>
+      <div className="border-t">
+        <PromptForm
+          onSubmit={async (value) => {
+            await append({
+              content: value,
+              role: 'user',
+            });
+          }}
+          input={input}
+          setInput={setInput}
+          isLoading={isLoading}
+        />
+      </div>
     </div>
   );
 }
@@ -121,21 +150,19 @@ function PodverseIcon() {
   return <Image src="/images/podverse-logo.svg" alt="Podverse" width={32} height={32} />;
 }
 
-
-
 function ChatSuggestion({ text, onClick }: { text: string; onClick: () => void }) {
   return (
     <div
       className={
-        'my-4 rounded-2xl font-mono bg-secondary text-secondary-foreground cursor-pointer hover:bg-secondary/80 hover:border-primary hover:border'
+        'bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:border-primary my-4 cursor-pointer rounded-2xl font-mono hover:border'
       }
       onClick={onClick}
     >
-      <div className="flex flex-row gap-2 items-start">
+      <div className="flex flex-row items-start gap-2">
         <div className="w-20">
           <QuestionMarkCircleIcon className="size-14 px-4" />
         </div>
-        <div className="text-sm p-4 font-mono">{text}</div>
+        <div className="p-4 font-mono text-sm">{text}</div>
       </div>
     </div>
   );
@@ -196,7 +223,7 @@ function ChatMessage({ message, append, ...props }: { message: Message; append: 
             },
             code({ children }) {
               // TODO(mdw): Support code blocks.
-              return <code className="font-mono mb-2 last:mb-0">{children}</code>;
+              return <code className="mb-2 font-mono last:mb-0">{children}</code>;
             },
             a({ children, href }) {
               if (href?.startsWith('/?suggest')) {
@@ -217,18 +244,18 @@ function ChatMessage({ message, append, ...props }: { message: Message; append: 
         >
           {message.content}
         </MemoizedReactMarkdown>
-        {/* <ChatMessageActions message={message} /> */}
       </div>
     </div>
   );
 }
 
-function ChatList({ messages, append }: { messages: any[]; append: (m: CreateMessage) => void }) {
+function ChatList({ messages, append, endRef }: { messages: any[]; append: (m: CreateMessage) => void; endRef: any }) {
   return (
     <div className="flex flex-col gap-2">
       {messages.map((m) => (
         <ChatMessage key={m.id} message={m} append={append} />
       ))}
+      <div className="h-px w-full" ref={endRef} />
     </div>
   );
 }
@@ -256,17 +283,19 @@ export function Chat({
     initialMessages,
     body: { episodeId, podcastId },
   });
+  const { messagesRef, scrollRef, visibilityRef, isAtBottom, scrollToBottom } = useScrollAnchor();
 
   return (
-    <div className="relative flex h-full flex-col">
+    <div className="relative flex h-full flex-col" ref={scrollRef}>
       <div className="overflow-y-auto pb-[100px]">
         {messages.length ? (
           <>
-            <ChatList messages={messages} append={append} />
+            <ChatList messages={messages} append={append} endRef={messagesRef} />
           </>
         ) : (
           <EmptyChat />
         )}
+        <div className="h-px w-full" ref={visibilityRef} />
       </div>
       <ChatPanel
         append={append}
@@ -276,6 +305,8 @@ export function Chat({
         messages={messages}
         input={input}
         setInput={setInput}
+        isAtBottom={isAtBottom}
+        scrollToBottom={scrollToBottom}
       />
     </div>
   );

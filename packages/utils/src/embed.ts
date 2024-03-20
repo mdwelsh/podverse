@@ -194,14 +194,12 @@ export async function VectorSearch({
     functionCall = { ...functionCall, podcast_id: podcastId };
     functionName = 'chunk_vector_search_podcast';
   }
-
-  console.log(`Calling RPC ${functionName} with: `, functionCall);
   const { data, error } = await supabase.rpc(functionName, functionCall);
   if (error) {
     console.error(`Error with RPC ${functionName}: `, error);
     throw error;
   }
-  console.log(`Got result: ${data.length} rows`);
+  console.log(`Got RPC result: ${data.length} rows`);
   return data.map((row: { id: number; document: number; similarity: number; content: string; meta: object }) => {
     return {
       chunkId: row.id,

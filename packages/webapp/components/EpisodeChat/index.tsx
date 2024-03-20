@@ -25,8 +25,6 @@ export function EpisodeChat({
       role: 'assistant',
     },
   ];
-  console.log('initialMessages:', initialMessages);
-
   return (
     <div className="mt-8 flex h-[600px] w-2/5 flex-col gap-2">
       <div>
