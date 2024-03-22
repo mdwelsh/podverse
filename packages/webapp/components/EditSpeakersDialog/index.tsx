@@ -7,24 +7,15 @@ import { EpisodeWithPodcast } from 'podverse-utils';
 import { PencilSquareIcon } from '@heroicons/react/24/outline';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { updateSpeaker } from '@/lib/actions';
 
 export function EditSpeakersDialog({ episode, speaker }: { episode: EpisodeWithPodcast; speaker: string }) {
   const curName = episode.speakers?.[speaker] || `Speaker ${speaker}`;
-  const [ name, setName ] = useState(curName);
+  const [name, setName] = useState(curName);
 
   const onConfirm = () => {
-    fetch('/api/speaker', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ episode: episode.id, speaker, name }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(response.statusText);
-        }
-        console.log(`Got response: ${response}`);
+    updateSpeaker(episode.id, speaker, name)
+      .then(() => {
         toast.success('Speaker name updated');
       })
       .catch((e) => {

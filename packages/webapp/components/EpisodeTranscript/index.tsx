@@ -3,7 +3,7 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { EpisodeWithPodcast } from 'podverse-utils';
 import { EditSpeakersDialog } from '../EditSpeakersDialog';
-import { AudioPlayer, AudioPlayerProvider, useAudioPlayer } from '@/components/AudioPlayer';
+import { useAudioPlayer } from '@/components/AudioPlayer';
 import { PlayCircleIcon } from '@heroicons/react/24/outline';
 
 /** Top level transcript component. Includes the AudioPlayer. */
@@ -28,24 +28,18 @@ export function EpisodeTranscript({ episode }: { episode: EpisodeWithPodcast }) 
         <div>
           <h1>Transcript</h1>
         </div>
-        <div className="size-full overflow-y-auto border p-4 text-xs">
-        </div>
+        <div className="size-full overflow-y-auto border p-4 text-xs"></div>
       </div>
     );
   }
 
   return (
-    <>
-      <AudioPlayerProvider>
-        <AudioPlayer episode={episode} />
-        <div className="mt-8 flex h-[600px] w-3/5 flex-col gap-2">
-          <div>
-            <h1>Transcript</h1>
-          </div>
-          <TranscriptView transcript={transcript} episode={episode} />
-        </div>
-      </AudioPlayerProvider>
-    </>
+    <div className="mt-8 flex h-[600px] w-3/5 flex-col gap-2">
+      <div>
+        <h1>Transcript</h1>
+      </div>
+      <TranscriptView transcript={transcript} episode={episode} />
+    </div>
   );
 }
 
@@ -173,14 +167,14 @@ export function ParagraphText({
   };
 
   return (
-    <div className="flex w-4/5 flex-row gap-1">
-      <div className={`font-sans text-base ${speakerColor}`}>
+    <div className="flex w-full flex-row justify-between gap-1">
+      <div className={`w-full font-sans text-base ${speakerColor}`}>
+        <div className="text-primary hidden group-hover:block" onClick={doSeek}>
+          <PlayCircleIcon className="size-8 float-right" />
+        </div>
         {sentences.map((sentence: any, index: number) => (
           <span key={index}>{sentence.text}&nbsp;&nbsp;</span>
         ))}
-      </div>
-      <div className="text-primary hidden group-hover:block" onClick={doSeek}>
-        <PlayCircleIcon className="size-8" />
       </div>
     </div>
   );

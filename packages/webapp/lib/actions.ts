@@ -14,6 +14,7 @@ import {
   ReadPodcastFeed,
   PodcastWithEpisodesMetadata,
   Ingest,
+  UpdateSpeakerMap,
 } from 'podverse-utils';
 import { Usage } from '@/lib/plans';
 import { getSupabaseClient, getSupabaseClientWithToken } from '@/lib/supabase';
@@ -21,6 +22,7 @@ import { auth } from '@clerk/nextjs';
 import { revalidatePath } from 'next/cache';
 import { inngest } from '@/inngest/client';
 import { GetUsage } from '@/lib/plans';
+import { get } from 'http';
 
 /** Update the given episode. */
 export async function updateEpisode(episode: Episode | EpisodeWithPodcast): Promise<Episode> {
@@ -167,4 +169,20 @@ export async function readPodcastFeed(rssUrl: string): Promise<PodcastWithEpisod
     throw new Error('Unauthorized');
   }
   return ReadPodcastFeed(rssUrl);
+}
+
+export async function updateSpeaker(episodeId: number, speaker: string, name: string): Promise<void> {
+  console.log(`Updating speaker map for episode ${episodeId}: speaker=${speaker}, name=${name}`);
+  const { userId, getToken } = auth();
+  if (!userId) {
+    throw new Error('Unauthorized');
+  }
+  const supabase = await getSupabaseClient();
+  const episode = await GetEpisodeWithPodcast(supabase, episodeId);
+  if (episode.podcast.owner !== userId) {
+    throw new Error('Unauthorized');
+  }
+  await UpdateSpeakerMap(supabase, episodeId, speaker, name, true);
+  console.log(`Finished updating speaker map for episode ${episodeId}: speaker=${speaker}, name=${name}`);
+  revalidatePath('/podcast/[podcastSlug]/episode/[episodeSlug]', 'page');
 }

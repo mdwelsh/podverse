@@ -207,7 +207,11 @@ function ChatMessage({ message, append, ...props }: { message: Message; append: 
   return (
     <div className={cn('group relative mb-4 flex items-start font-sans text-base')} {...props}>
       <div className="bg-background flex size-8 shrink-0 select-none items-center justify-center rounded-full">
-        {message.role === 'user' ? <UserIcon className="text-primary bg-secondary rounded-full p-1" /> : <PodverseIcon />}
+        {message.role === 'user' ? (
+          <UserIcon className="text-primary bg-secondary rounded-full p-1" />
+        ) : (
+          <PodverseIcon />
+        )}
       </div>
       <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">
         <MemoizedReactMarkdown

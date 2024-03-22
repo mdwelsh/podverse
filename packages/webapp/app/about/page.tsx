@@ -9,9 +9,9 @@ export default async function Page() {
         <a href="https://www.mdw.la" className="text-primary underline">
           Matt
         </a>
-        , and I'm the creator of Podverse. I built Podverse because I love learning things from podcasts, but often find
+        , and I&apos;m the creator of Podverse. I built Podverse because I love learning things from podcasts, but often find
         it really hard to find good podcasts to listen to, or to remember which podcast episode I heard something in. I
-        wanted to build a tool that leverages all of the amazing new AI tech that's out there to help me and others get
+        wanted to build a tool that leverages all of the amazing new AI tech that&apos;s out there to help me and others get
         the most out of podcasts.
       </div>
       <div>
@@ -20,7 +20,7 @@ export default async function Page() {
         <a href="https://ziggylabs.ai" className="text-primary underline">
           Ziggylabs
         </a>
-        , a new company that I've started to build AI-powered tools that help people learn and grow. Before Ziggylabs, I
+        , a new company that I&apos;ve started to build AI-powered tools that help people learn and grow. Before Ziggylabs, I
         was the co-founder and Chief Architect at{' '}
         <a href="https://fixie.ai" className="text-primary underline">
           Fixie
@@ -44,7 +44,7 @@ export default async function Page() {
         .
       </div>
       <div>
-        I'd love to hear from you if you have feedback, questions, or suggestions on how to make Podverse better! Drop
+        I&apos;d love to hear from you if you have feedback, questions, or suggestions on how to make Podverse better! Drop
         me a line at{' '}
         <a href="mailto:hello@ziggylabs.ai" className="text-primary underline">
           hello@ziggylabs.ai
