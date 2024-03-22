@@ -13,6 +13,7 @@ import {
   EmbedEpisode,
   SuggestEpisode,
   GetPodcastWithEpisodesByID,
+  Ingest,
 } from 'podverse-utils';
 import { isReady } from '@/lib/episode';
 
@@ -191,7 +192,9 @@ export const processPodcast = inngest.createFunction(
     const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
     const podcast = await GetPodcastWithEpisodesByID(supabase, podcastId);
     // XXX MDW - For now, only do 10 episodes.
-    const episodesToProcess = (force ? podcast.Episodes : podcast.Episodes.filter((episode) => !isReady(episode))).slice(0, 10);
+    const episodesToProcess = (
+      force ? podcast.Episodes : podcast.Episodes.filter((episode) => !isReady(episode))
+    ).slice(0, 10);
 
     const results = await Promise.all(
       episodesToProcess.map(async (episode) => {
@@ -212,5 +215,35 @@ export const processPodcast = inngest.createFunction(
     return {
       message: `Finished processing ${results.length} episodes for podcast ${podcastId}`,
     };
+  },
+);
+
+/** Import or refresh a podcast RSS feed. */
+export const ingestPodcast = inngest.createFunction(
+  {
+    id: 'ingest-podcast',
+    retries: 5,
+  },
+  { event: 'ingest/podcast' },
+  async ({ event, step, runId }) => {
+    const { podcastId, rssUrl, supabaseAccessToken } = event.data;
+    console.log(`ingest/podcast - event ${runId}, podcastId ${podcastId}, rssUrl ${rssUrl}`);
+
+    const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
+    let rssFeed = rssUrl;
+    if (podcastId) {
+      // We are refreshing an existing podcast.
+      const podcast = await GetPodcastWithEpisodesByID(supabase, podcastId);
+      if (!podcast.rssUrl) {
+        throw new Error('Podcast has no RSS feed URL');
+      }
+      rssFeed = podcast.rssUrl;
+    }
+    const newPodcast = await Ingest({ supabase, podcastUrl: rssFeed, refresh: !!podcastId });
+    if (!!podcastId) {
+      return { message: `Refreshed podcast ${podcastId}` };
+    } else {
+      return { message: `Ingested podcast ${newPodcast.id}` };
+    }
   },
 );

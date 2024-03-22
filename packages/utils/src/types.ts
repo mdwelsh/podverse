@@ -57,3 +57,6 @@ export type EpisodeStatus = {
   startedAt?: string;
   completedAt?: string;
 };
+
+/** Type of the Users.plan field. */
+export type UserPlan = {};

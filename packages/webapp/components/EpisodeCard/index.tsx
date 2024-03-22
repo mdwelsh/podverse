@@ -9,7 +9,9 @@ export function EpisodeCard({ episode }: { episode: LatestEpisode }) {
         <div className="flex flex-col w-full h-full">
           <div className="flex flex-col bg-black w-40 h-40 overflow-y-hidden">
             <div className="grow" />
-            <div>{episode.imageUrl && <img src={episode.imageUrl} />}</div>
+            <div>
+              {episode.imageUrl ? <img src={episode.imageUrl} /> : <img src={episode.podcast.imageUrl || ''} />}
+            </div>
             <div className="grow" />
           </div>
           <div className="text-wrap line-clamp-3 truncate">

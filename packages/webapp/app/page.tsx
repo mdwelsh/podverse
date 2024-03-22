@@ -6,6 +6,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { EpisodeList } from '@/components/EpisodeList';
 import { PodcastList } from '@/components/PodcastList';
 import { cn } from '@/lib/utils';
+import { ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
 
 // Use dynamic rendering, since we fetch live data.
 //export const dynamicParams = true;
@@ -36,10 +37,7 @@ export default async function HomePage() {
             <Link href="/signup" target="_blank" rel="noreferrer" className={cn('font-mono', buttonVariants())}>
               Sign up now
             </Link>
-            <Link
-              href="/about"
-              className={cn('font-mono', buttonVariants({ variant: 'outline' }))}
-            >
+            <Link href="/about" className={cn('font-mono', buttonVariants({ variant: 'outline' }))}>
               Learn more
             </Link>
           </>
@@ -50,8 +48,16 @@ export default async function HomePage() {
         <EpisodeList />
       </div>
       <div className="mt-4 flex flex-col gap-4">
-        <div className="font-mono text-xl">Explore podcasts</div>
-        <PodcastList />
+        <div className="flex flex-row gap-8 items-center">
+          <div className="font-mono text-xl">Explore podcasts</div>
+          <div>
+            <Link className={cn('font-mono', buttonVariants({ variant: 'outline' }))} href="/explore">
+              View all
+              <ChevronDoubleRightIcon className="ml-2 inline size-4" />
+            </Link>
+          </div>
+        </div>
+        <PodcastList limit={8} />
       </div>
     </section>
   );

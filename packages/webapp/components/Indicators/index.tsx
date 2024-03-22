@@ -6,10 +6,11 @@
 import { Episode, EpisodeStatus, EpisodeWithPodcast } from 'podverse-utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Icons } from '@/components/icons';
-import { BoltSlashIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { isPending, isProcessing, isError, isReady } from '@/lib/episode';
+import { BoltIcon, BoltSlashIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { isPending, isProcessing, isError, isReady, isPublished } from '@/lib/episode';
 
 export function EpisodeIndicator({ episode }: { episode: Episode | EpisodeWithPodcast }) {
+  // The default is the "ready" state.
   let icon = <CheckCircleIcon className="text-primary inline size-6" />;
 
   if (isPending(episode as Episode)) {
@@ -24,14 +25,15 @@ export function EpisodeIndicator({ episode }: { episode: Episode | EpisodeWithPo
 
 export function EpisodeTooltip({ episode }: { episode: Episode | EpisodeWithPodcast }) {
   const status = episode.status as EpisodeStatus;
-  let message = (status && status.message) ?? 'Processing completed';
-
-  if (isPending(episode as Episode)) {
+  let message = 'Ready';
+  if (isPublished(episode as Episode)) {
+    message = 'Published';
+  } else if (isPending(episode as Episode)) {
     message = 'Processing not started';
   } else if (isProcessing(episode as Episode)) {
-    message = 'Processing';
+    message = (status && status.message) ?? 'Processing';
   } else if (isError(episode as Episode)) {
-    message = 'Error processing episode';
+    message = 'Error processing';
   }
 
   return (
@@ -39,7 +41,9 @@ export function EpisodeTooltip({ episode }: { episode: Episode | EpisodeWithPodc
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger>
-            <EpisodeIndicator episode={episode} />
+            <div className="flex flex-row gap-1 items-center text-muted-foreground">
+              <EpisodeIndicator episode={episode} /> {message}
+            </div>
           </TooltipTrigger>
           <TooltipContent className="text-primary text-xs">
             <p>{message}</p>

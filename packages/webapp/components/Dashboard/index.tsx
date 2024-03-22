@@ -12,13 +12,14 @@ export async function Dashboard() {
   const { data: podcasts, error } = await supabase
     .from('Podcasts')
     .select('*, Episodes(*)')
-    .filter('owner', 'eq', userId);
+    .filter('owner', 'eq', userId)
+    .order('created_at', { ascending: false });
   if (error) {
     console.log('error', error);
     throw error;
   }
   return (
-    <div className="mx-auto mt-8 w-2/5 flex flex-col gap-4">
+    <div className="mx-auto mt-8 w-3/5 flex flex-col gap-4">
       <div className="w-full flex flex-row justify-between">
         <div className="font-mono text-primary text-lg">Your podcasts</div>
         <NewPodcastDialog />

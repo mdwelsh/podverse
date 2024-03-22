@@ -29,7 +29,6 @@ export function EpisodeTranscript({ episode }: { episode: EpisodeWithPodcast }) 
           <h1>Transcript</h1>
         </div>
         <div className="size-full overflow-y-auto border p-4 text-xs">
-          <div className="text-muted-foreground text-sm">Transcript not available</div>
         </div>
       </div>
     );

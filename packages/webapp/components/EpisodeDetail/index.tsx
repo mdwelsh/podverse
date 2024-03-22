@@ -1,15 +1,16 @@
 import Link from 'next/link';
 import { getSupabaseClient } from '@/lib/supabase';
-import { EpisodeWithPodcast, GetEpisodeWithPodcastBySlug, GetEpisodeSuggestions } from 'podverse-utils';
+import { Episode, EpisodeWithPodcast, GetEpisodeWithPodcastBySlug, GetEpisodeSuggestions } from 'podverse-utils';
 import moment from 'moment';
 import { EpisodeIndicator } from '../Indicators';
-import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { ArrowTopRightOnSquareIcon, RssIcon, GlobeAmericasIcon } from '@heroicons/react/24/outline';
 import { CollapseWithToggle } from '@/components/Collapse';
 import { Owner } from '@/components/Owner';
 import { ManageEpisodeDialog } from '../ManageEpisodeDialog';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { EpisodeClient } from '@/components/EpisodeClient';
+import { isReady } from '@/lib/episode';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: 0 };
@@ -42,9 +43,15 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
           <CollapseWithToggle
             extra={
               <div className="flex flex-col gap-2">
-                <div className="text-muted-foreground font-mono text-sm">
-                  Published {moment(episode.pubDate).format('MMMM Do YYYY')}
+                <div className="flex flex-row gap-2">
+                  <div className="text-muted-foreground font-mono text-sm">
+                    Published <span className="text-primary">{moment(episode.pubDate).format('MMMM Do YYYY')}</span>
+                  </div>
+                  <EpisodeLinks episode={episode} />
                 </div>
+                {episode.podcast.copyright && (
+                  <div className="text-muted-foreground font-mono text-sm">{episode.podcast.copyright}</div>
+                )}
                 <div className="w-fit">
                   <Owner owner={episode.podcast.owner}>
                     <ManageEpisodeDialog episode={episodeWithoutPodcast}>
@@ -64,6 +71,29 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
           </CollapseWithToggle>
         </div>
       </div>
+    </div>
+  );
+}
+
+function EpisodeLinks({ episode }: { episode: EpisodeWithPodcast }) {
+  return (
+    <div className="flex flex-row gap-2">
+      {episode.url && (
+        <div className="text-primary text-sm underline">
+          <a href={episode.url} target="_blank" rel="noreferrer">
+            <GlobeAmericasIcon className="text-foreground mx-1 inline size-4" />
+            Website
+          </a>
+        </div>
+      )}
+      {episode.podcast.rssUrl && (
+        <div className="text-primary text-sm underline">
+          <a href={episode.podcast.rssUrl} target="_blank" rel="noreferrer">
+            <RssIcon className="text-foreground mx-1 inline size-4" />
+            RSS feed
+          </a>
+        </div>
+      )}
     </div>
   );
 }
@@ -110,8 +140,14 @@ export async function EpisodeDetail({ podcastSlug, episodeSlug }: { podcastSlug:
   return (
     <div className="mx-auto mt-8 w-4/5 font-mono">
       <EpisodeHeader episode={episode} />
-      <EpisodeSummary episode={episode} />
-      <EpisodeClient episode={episode} suggestedQueries={randomSuggestions} chatAvailable={chatAvailable} />
+      {isReady(episode) ? (
+        <>
+          <EpisodeSummary episode={episode} />
+          <EpisodeClient episode={episode} suggestedQueries={randomSuggestions} chatAvailable={chatAvailable} />
+        </>
+      ) : (
+        <div className="mt-8">This episode has not yet been processed.</div>
+      )}
     </div>
   );
 }

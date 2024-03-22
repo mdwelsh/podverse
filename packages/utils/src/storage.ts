@@ -25,8 +25,12 @@ export async function GetUser(supabase: SupabaseClient, userId: string): Promise
 }
 
 /** Return list of Podcasts. */
-export async function GetPodcasts(supabase: SupabaseClient): Promise<Podcast[]> {
-  const { data, error } = await supabase.from('Podcasts').select('*');
+export async function GetPodcasts(supabase: SupabaseClient, limit?: number): Promise<Podcast[]> {
+  let query = supabase.from('Podcasts').select('*').order('created_at', { ascending: false });
+  if (limit) {
+    query = query.limit(limit);
+  }
+  const { data, error } = await query;
   if (error) {
     console.error('error', error);
     throw error;
@@ -80,15 +84,31 @@ export async function GetPodcastWithEpisodesByID(
 }
 
 /** This is the return value of GetLatestEpisodes. */
-export type LatestEpisode = Omit<Episode, 'podcast'> & { podcast: { slug: string; title: string } };
+export type LatestEpisode = Omit<Episode, 'podcast'> & { podcast: { slug: string; title: string; imageUrl?: string } };
 
 /** Return latest episodes. */
-export async function GetLatestEpisodes(supabase: SupabaseClient, limit: number = 8): Promise<LatestEpisode[]> {
-  const { data, error } = await supabase
+export async function GetLatestEpisodes({
+  supabase,
+  limit = 8,
+  ready,
+}: {
+  supabase: SupabaseClient;
+  limit?: number;
+  ready?: boolean;
+}): Promise<LatestEpisode[]> {
+  let query = supabase
     .from('Episodes')
-    .select('*, podcast ( slug, title )')
-    .order('pubDate', { ascending: false })
-    .limit(limit);
+    .select('*, podcast ( slug, title, imageUrl )')
+    .order('pubDate', { ascending: false });
+  if (ready) {
+    query = query
+      .neq('status', null)
+      .neq('status->startedAt', null)
+      .neq('status->completedAt', null)
+      .not('status->>message', 'like', 'Error%');
+  }
+  const { data, error } = await query.limit(limit);
+
   if (error) {
     console.error('error', error);
     throw error;
@@ -98,7 +118,10 @@ export async function GetLatestEpisodes(supabase: SupabaseClient, limit: number 
 
 /** Return list of Episodes with corresponding Podcast info. */
 export async function GetEpisodesWithPodcast(supabase: SupabaseClient): Promise<EpisodeWithPodcast[]> {
-  const { data, error } = await supabase.from('Episodes').select('*, podcast (*)').order('pubDate', { ascending: false });
+  const { data, error } = await supabase
+    .from('Episodes')
+    .select('*, podcast (*)')
+    .order('pubDate', { ascending: false });
   if (error) {
     console.error('error', error);
     throw error;
@@ -327,8 +350,9 @@ export async function SetEpisode(supabase: SupabaseClient, episode: Episode): Pr
 }
 
 /** Update the given Episode. */
-export async function UpdateEpisode(supabase: SupabaseClient, episode: Episode): Promise<Episode> {
-  const { data, error } = await supabase.from('Episodes').update(episode).eq('id', episode.id).select('*');
+export async function UpdateEpisode(supabase: SupabaseClient, episode: Episode | EpisodeWithPodcast): Promise<Episode> {
+  const { podcast, speakers, ...episodeData } = episode as EpisodeWithPodcast;
+  const { data, error } = await supabase.from('Episodes').update(episodeData).eq('id', episode.id).select('*');
   if (error) {
     throw error;
   }
@@ -419,7 +443,7 @@ export async function UploadLargeFile(
       },
       onProgress: function (bytesUploaded, bytesTotal) {
         const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
-        console.log(bytesUploaded, bytesTotal, percentage + '%');
+        console.log(`Uploaded ${bytesUploaded}/${bytesTotal} (${percentage}%)`);
       },
       onSuccess: function () {
         console.log(`Upload complete: ${upload.url}`);
@@ -459,7 +483,6 @@ export async function GetEpisodeSuggestions(supabase: SupabaseClient, episodeId:
     throw error;
   }
   const result = data.map((row) => row.suggestion);
-  console.log(`RESULT: ${JSON.stringify(result)}`);
   return result;
 }
 

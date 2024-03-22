@@ -8,9 +8,10 @@ import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Icons } from '@/components/icons';
-import { PodcastWithEpisodes } from 'podverse-utils';
+import { Episode, PodcastWithEpisodes, PodcastWithEpisodesMetadata } from 'podverse-utils';
 import { PodcastStrip } from '../PodcastStrip';
 import { EpisodeStrip } from '../PodcastEpisodeList';
+import { readPodcastFeed, importPodcast } from '@/lib/actions';
 
 enum importStage {
   ENTER_URL,
@@ -22,7 +23,7 @@ export function NewPodcastDialog() {
   const [rssUrl, setRssUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [stage, setStage] = useState<importStage>(importStage.ENTER_URL);
-  const [podcast, setPodcast] = useState<PodcastWithEpisodes | null>(null);
+  const [podcast, setPodcast] = useState<PodcastWithEpisodesMetadata | null>(null);
 
   const onImportClicked = async () => {
     setError(null);
@@ -38,17 +39,10 @@ export function NewPodcastDialog() {
       }
       setStage(importStage.LOADING);
 
-      fetch('/api/podcast/preview', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url: rssUrl }),
-      })
-        .then((response) => response.json())
+      readPodcastFeed(rssUrl)
         .then((data) => {
           console.log('Fetched: ', data);
-          setPodcast(data.podcast);
+          setPodcast(data);
           setStage(importStage.VALIDATING);
         })
         .catch((e) => {
@@ -62,19 +56,13 @@ export function NewPodcastDialog() {
   };
 
   const onConfirmClicked = async () => {
-    fetch('/api/podcast/import', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ url: rssUrl }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Fetched: ', data);
+    if (!rssUrl || !podcast) {
+      return;
+    }
+    importPodcast(rssUrl).then((result) => {
         setPodcast(null);
         setStage(importStage.ENTER_URL);
-        toast.success('Podcast imported successfully');
+        toast.success(`Podcast imported successfully`);
       })
       .catch((e) => {
         setStage(importStage.ENTER_URL);
@@ -134,17 +122,17 @@ function PodcastPreview({
   onConfirm,
   onCancel,
 }: {
-  podcast: PodcastWithEpisodes;
+  podcast: PodcastWithEpisodesMetadata;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
   return (
     <div className="w-full flex flex-col gap-2">
       <div className="text-primary text-sm">Here&apos;s a preview of your podcast:</div>
-      <PodcastStrip podcast={podcast} />
+      <PodcastStrip podcast={podcast as PodcastWithEpisodes} />
       <div className="text-primary text-sm">Newest episodes</div>
       {podcast.Episodes.slice(0, 3).map((episode) => (
-        <EpisodeStrip key={episode.id} podcast={podcast} episode={episode} />
+        <EpisodeStrip key={episode.id} podcast={podcast as PodcastWithEpisodes} episode={episode as Episode} />
       ))}
       <div className="flex flex-row gap-2 justify-end">
         <DialogClose asChild>

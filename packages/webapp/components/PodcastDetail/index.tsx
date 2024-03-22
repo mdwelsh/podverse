@@ -8,6 +8,7 @@ import { ManagePodcastDialog } from '@/components/ManagePodcastDialog';
 import { Chat } from '@/components/Chat';
 import { getSupabaseClient } from '@/lib/supabase';
 import { CreateMessage } from 'ai';
+import { isReady } from '@/lib/episode';
 
 async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
   const user = podcast.owner ? await GetUser(supabase, podcast.owner) : null;
@@ -24,6 +25,9 @@ async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
             </Link>
           </div>
           <div className="font-sans text-sm">{podcast.description}</div>
+          {podcast.copyright && (
+            <div className="text-muted-foreground font-mono text-sm">{podcast.copyright}</div>
+          )}
           <div className="flex flex-col gap-2">
             <div className="flex flex-row gap-2">
               <div className="text-muted-foreground flex flex-row gap-4 font-mono text-sm">
@@ -87,12 +91,11 @@ async function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
       role: 'assistant',
     },
     {
-      content: 'Here are some suggestions to get you started:\n' + randomSuggestions.map((s) => `[${s}](/?suggest)`).join(' '),
+      content:
+        'Here are some suggestions to get you started:\n' + randomSuggestions.map((s) => `[${s}](/?suggest)`).join(' '),
       role: 'assistant',
     },
   ];
-  console.log('initialMessages:', initialMessages);
-
   return (
     <div className="mt-8 flex h-[800px] w-2/5 flex-col gap-2">
       <div>
@@ -114,7 +117,7 @@ export async function PodcastDetail({ podcastSlug }: { podcastSlug: string }) {
         <PodcastHeader podcast={podcast} />
         <div className="flex flex-row gap-4">
           <PodcastEpisodeList podcast={podcast} episodes={podcast.Episodes} />
-          <PodcastChat podcast={podcast} />
+          { podcast.Episodes.filter(isReady).length > 0 && <PodcastChat podcast={podcast} /> }
         </div>
       </div>
     );

@@ -158,11 +158,11 @@ function ChatSuggestion({ text, onClick }: { text: string; onClick: () => void }
       }
       onClick={onClick}
     >
-      <div className="flex flex-row items-start gap-2">
-        <div className="w-20">
-          <QuestionMarkCircleIcon className="size-14 px-4" />
+      <div className="flex flex-row items-start gap-1 mx-2">
+        <div className="w-20 mt-4">
+          <QuestionMarkCircleIcon className="size-10" />
         </div>
-        <div className="p-4 font-mono text-sm">{text}</div>
+        <div className="p-4 font-mono text-sm break-words">{text}</div>
       </div>
     </div>
   );
@@ -207,7 +207,7 @@ function ChatMessage({ message, append, ...props }: { message: Message; append: 
   return (
     <div className={cn('group relative mb-4 flex items-start font-sans text-base')} {...props}>
       <div className="bg-background flex size-8 shrink-0 select-none items-center justify-center rounded-full">
-        {message.role === 'user' ? <UserIcon className="text-primary" /> : <PodverseIcon />}
+        {message.role === 'user' ? <UserIcon className="text-primary bg-secondary rounded-full p-1" /> : <PodverseIcon />}
       </div>
       <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">
         <MemoizedReactMarkdown
@@ -251,7 +251,7 @@ function ChatMessage({ message, append, ...props }: { message: Message; append: 
 
 function ChatList({ messages, append, endRef }: { messages: any[]; append: (m: CreateMessage) => void; endRef: any }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 p-4">
       {messages.map((m) => (
         <ChatMessage key={m.id} message={m} append={append} />
       ))}

@@ -21,20 +21,18 @@ import { isReady } from '@/lib/episode';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Usage } from '@/lib/plans';
 import Link from 'next/link';
+import { getUsage, deletePodcast, processPodcast, refreshPodcast } from '@/lib/actions';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const router = useRouter();
 
-  const handleDelete = async () => {
-    const res = await fetch(`/api/podcast/${podcast.slug}`, {
-      method: 'DELETE',
-    });
-    if (res.ok) {
-      toast.success(`Deleted podcast ${podcast.title}`);
-    } else {
-      toast.error('Failed to delete podcast: ' + (await res.text()));
-    }
-    router.push('/');
+  const handleDelete = () => {
+    deletePodcast(podcast.slug)
+      .then(() => {
+        toast.success(`Deleted podcast ${podcast.title}`);
+        router.push('/');
+      })
+      .catch((e) => toast.error('Failed to delete podcast: ' + e.message));
   };
 
   return (
@@ -82,8 +80,7 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const processed = podcast.Episodes.filter((episode) => isReady(episode)).length;
 
   useEffect(() => {
-    fetch('/api/usage')
-      .then((res) => res.json())
+    getUsage()
       .then((usageRecord) => {
         setUsage(usageRecord);
         const plan = usageRecord?.plan;
@@ -141,25 +138,22 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const processEnabled = numToProcess > 0;
   const forceEnabled = processEnabled && processed > 0;
 
-  const onProcess = async () => {
+  const onProcess = () => {
     setForce(false);
-    const res = await fetch(`/api/podcast/${podcast.slug}`, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'process', force }),
-    });
-    if (res.ok) {
-      toast.success(`Started processing for ${podcast.title}`);
-    } else {
-      toast.error('Failed to start processing: ' + (await res.text()));
-    }
+    processPodcast(podcast.id.toString(), force)
+      .then(() => {
+        toast.success(`Started processing for ${podcast.title}`);
+      })
+      .catch((e) => {
+        toast.error('Failed to start processing: ' + e.message);
+      });
   };
 
   return (
     <Dialog>
       <DialogTrigger>
-        <Button className="font-mono">
-          <BoltIcon className="size-5 mr-2 inline" />
-          Process
+        <Button variant="outline" className="font-mono">
+          <BoltIcon className="size-5 mr-2 text-muted-foreground" /> Process
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -208,24 +202,18 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
 }
 
 export function ManagePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
-  const [refreshing, setRefreshing] = useState(false);
   const mostRecentlyPublished = podcast.Episodes
     ? podcast.Episodes.reduce((a, b) => ((a.pubDate || 0) > (b.pubDate || 0) ? a : b))
     : null;
 
-  const doRefresh = async () => {
-    setRefreshing(true);
-    const res = await fetch(`/api/podcast/${podcast.slug}`, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'refresh' }),
-    });
-    setRefreshing(false);
-    if (!res.ok) {
-      toast.error('Failed to refresh podcast: ' + (await res.text()));
-      return;
-    }
-    const updated = await res.json();
-    toast.success(`Updated podcast - ${updated.Episodes.length} episodes processed`);
+  const doRefresh = () => {
+    refreshPodcast(podcast.id.toString())
+      .then(() => {
+        toast.success(`Started refreshing podcast ${podcast.title}`);
+      })
+      .catch((e) => {
+        toast.error('Failed to start refreshing: ' + e.message);
+      });
   };
 
   return (
@@ -260,14 +248,12 @@ export function ManagePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes 
           </div>
         </div>
         <DialogFooter>
-          <Button className="font-mono" variant="secondary" onClick={doRefresh} disabled={refreshing}>
-            {refreshing ? (
-              <ArrowPathIcon className="size-5 mr-2 inline animate-spin" />
-            ) : (
+          <DialogClose>
+            <Button className="font-mono" variant="secondary" onClick={doRefresh}>
               <ArrowPathIcon className="size-5 mr-2 inline" />
-            )}
-            Refresh
-          </Button>
+              Fetch new episodes
+            </Button>
+          </DialogClose>
           <ProcessPodcastDialog podcast={podcast} />
           <DeletePodcastDialog podcast={podcast} />
         </DialogFooter>
