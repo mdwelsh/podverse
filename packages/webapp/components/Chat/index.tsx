@@ -159,8 +159,8 @@ function ChatSuggestion({ text, onClick }: { text: string; onClick: () => void }
       onClick={onClick}
     >
       <div className="flex flex-row items-start gap-1 mx-2">
-        <div className="w-20 mt-4">
-          <QuestionMarkCircleIcon className="size-10" />
+        <div className="w-12 mt-4">
+          <QuestionMarkCircleIcon className="size-6" />
         </div>
         <div className="p-4 font-mono text-sm break-words">{text}</div>
       </div>

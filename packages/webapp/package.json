@@ -43,6 +43,7 @@
     "sonner": "^1.4.0",
     "tailwind-merge": "^1.13.2",
     "tailwindcss-animate": "^1.0.6",
+    "vaul": "^0.9.0",
     "wavesurfer-react": "^3.0.2",
     "wavesurfer.js": "^7.7.3"
   },

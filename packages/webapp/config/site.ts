@@ -12,6 +12,10 @@ export const siteConfig = {
       title: 'About',
       href: '/about',
     },
+    {
+      title: 'Pricing',
+      href: '/pricing',
+    }
   ],
   links: {
     twitter: 'https://twitter.com/shadcn',

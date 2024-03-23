@@ -7,6 +7,7 @@ import { EpisodeList } from '@/components/EpisodeList';
 import { PodcastList } from '@/components/PodcastList';
 import { cn } from '@/lib/utils';
 import { ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
+import { ChatDialog } from '@/components/ChatDialog';
 
 // Use dynamic rendering, since we fetch live data.
 //export const dynamicParams = true;
@@ -28,16 +29,27 @@ export default async function HomePage() {
         </p>
       </div>
       <div className="flex gap-4">
+        <ChatDialog />
         {userId ? (
-          <Link href="/dashboard" target="_blank" rel="noreferrer" className={cn('font-mono', buttonVariants())}>
+          <Link
+            href="/dashboard"
+            target="_blank"
+            rel="noreferrer"
+            className={cn('font-mono', buttonVariants({ variant: 'secondary' }))}
+          >
             Go to dashboard
           </Link>
         ) : (
           <>
-            <Link href="/signup" target="_blank" rel="noreferrer" className={cn('font-mono', buttonVariants())}>
+            <Link
+              href="/signup"
+              target="_blank"
+              rel="noreferrer"
+              className={cn('font-mono', buttonVariants({ variant: 'default' }))}
+            >
               Sign up now
             </Link>
-            <Link href="/about" className={cn('font-mono', buttonVariants({ variant: 'outline' }))}>
+            <Link href="/about" className={cn('font-mono', buttonVariants({ variant: 'secondary' }))}>
               Learn more
             </Link>
           </>
