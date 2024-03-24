@@ -1,6 +1,5 @@
 import { siteConfig } from '@/config/site';
 import { MainNav } from '@/components/main-nav';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { SignupOrLogin } from '@/components/SignupOrLogin';
 import { auth } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
@@ -19,7 +18,6 @@ export function SiteHeader() {
                 <Button variant="secondary">Dashboard</Button>
               </Link>
             )}
-            {/* <ThemeToggle /> */}
             <SignupOrLogin />
           </nav>
         </div>

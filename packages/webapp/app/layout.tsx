@@ -43,7 +43,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <head />
           <body className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
             <ThemeProvider attribute="class" forcedTheme="dark" defaultTheme="dark">
-              <div className="relative flex min-h-screen flex-col">
+              <div className="relative flex min-h-screen flex-col w-full">
                 <SiteHeader />
                 <div className="flex-1">{children}</div>
                 <FloatingChatPanel />

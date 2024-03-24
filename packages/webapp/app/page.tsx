@@ -11,10 +11,6 @@ import { ChatPanel } from '@/components/ChatPanel';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 
-// Use dynamic rendering, since we fetch live data.
-//export const dynamicParams = true;
-//export const revalidate = 60;
-
 export default async function HomePage() {
   const { userId } = auth();
 
