@@ -1,7 +1,7 @@
 'use client';
 
 import { CreateMessage } from 'ai';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   Drawer,
   DrawerClose,
@@ -15,6 +15,7 @@ import {
 import Image from 'next/image';
 import { Chat } from '@/components/Chat';
 import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 export function ChatPanel({
   open,
@@ -71,13 +72,17 @@ export function FloatingChatPanel() {
 
   return (
     <ChatPanel>
-      <div className="fixed right-4 bottom-4 z-30">
-        <Button variant="outline" className="bg-muted border-primary rounded-full font-mono h-18">
-          <div className="flex flex-row items-center gap-2 p-1">
+      <div className="fixed right-4 bottom-4">
+        <div className="relative inline-flex group cursor-pointer">
+          <div className="z-5 absolute -inset-1 bg-gradient-to-tr from-primary to-primary rounded-full blur opacity-25 group-hover:opacity-80 transition duration-1000 group-hover:duration-200"></div>
+          <div
+            role="button"
+            className="z-10 bg-muted flex flex-row font-mono items-center gap-2 p-4 rounded-full border border-primary h-18"
+          >
             <Image src="/images/podverse-logo.svg" alt="Podverse" width={40} height={40} />
             AI Chat
           </div>
-        </Button>
+        </div>
       </div>
     </ChatPanel>
   );
