@@ -14,8 +14,17 @@ import {
 } from '@/components/ui/drawer';
 import Image from 'next/image';
 import { Chat } from '@/components/Chat';
+import { usePathname } from 'next/navigation';
 
-export function ChatDialog() {
+export function ChatPanel({
+  open,
+  onOpenChange,
+  children,
+}: {
+  open?: boolean;
+  onOpenChange?: (_: boolean) => void;
+  children: React.ReactNode;
+}) {
   const suggestedQueries: string[] = [
     'What are some good science podcasts?',
     'Are there any episodes about music?',
@@ -34,15 +43,8 @@ export function ChatDialog() {
   ];
 
   return (
-    <Drawer>
-      <DrawerTrigger>
-        <Button variant="outline" className="border-primary font-mono">
-          <div className="flex flex-row items-center gap-2">
-            <Image src="/images/podverse-logo.svg" alt="Podverse" width={30} height={30} />
-            AI Chat
-          </div>
-        </Button>
-      </DrawerTrigger>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerTrigger>{children}</DrawerTrigger>
       <DrawerContent className="h-full w-4/5 mx-auto">
         <DrawerHeader>
           <DrawerTitle className="font-mono text-primary mx-auto">Podverse AI Chat</DrawerTitle>
@@ -57,5 +59,26 @@ export function ChatDialog() {
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
+  );
+}
+
+export function FloatingChatPanel() {
+  const pathname = usePathname();
+
+  if (pathname.startsWith('/podcast')) {
+    return null;
+  }
+
+  return (
+    <ChatPanel>
+      <div className="fixed right-4 bottom-4 z-30">
+        <Button variant="outline" className="bg-muted border-primary rounded-full font-mono h-18">
+          <div className="flex flex-row items-center gap-2 p-1">
+            <Image src="/images/podverse-logo.svg" alt="Podverse" width={40} height={40} />
+            AI Chat
+          </div>
+        </Button>
+      </div>
+    </ChatPanel>
   );
 }
