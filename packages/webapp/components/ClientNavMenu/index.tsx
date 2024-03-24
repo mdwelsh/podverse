@@ -1,6 +1,6 @@
 'use client';
 
-import { NavItem } from '@/types';
+import { NavItem } from '@/types/nav';
 import {
   NavigationMenu,
   NavigationMenuContent,
