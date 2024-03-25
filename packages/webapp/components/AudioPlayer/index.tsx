@@ -74,7 +74,7 @@ export function AudioPlayer({ episode }: { episode: EpisodeWithPodcast }) {
   };
 
   return (
-    <div className="rounded-full lg:rounded-none lg:border-primary mx-auto bg-transparent lg:bg-muted fixed bottom-0 left-0 z-20 w-fit lg:w-4/5 lg:border-t p-4">
+    <div className="rounded-full lg:rounded-none lg:border-primary mx-auto bg-transparent lg:bg-muted fixed bottom-0 left-0 z-20 w-fit lg:w-full lg:border-t p-4">
       <AudioControls audioRef={audioRef} duration={duration} />
       <audio src={audioUrl} ref={audioRef} onLoadedMetadata={onLoadedMetadata} />
     </div>

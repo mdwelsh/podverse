@@ -17,15 +17,7 @@ import { Chat } from '@/components/Chat';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
-export function ChatPanel({
-  open,
-  onOpenChange,
-  children,
-}: {
-  open?: boolean;
-  onOpenChange?: (_: boolean) => void;
-  children: React.ReactNode;
-}) {
+export function ChatPanel({ children }: { children: React.ReactNode }) {
   const suggestedQueries: string[] = [
     'What are some good science podcasts?',
     'Are there any episodes about music?',
@@ -44,7 +36,7 @@ export function ChatPanel({
   ];
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
+    <Drawer>
       <DrawerTrigger>{children}</DrawerTrigger>
       <DrawerContent className="h-full w-full md:w-4/5 mx-auto">
         <DrawerHeader>
@@ -55,7 +47,9 @@ export function ChatPanel({
         </div>
         <DrawerFooter>
           <DrawerClose>
-            <Button variant="outline" className="text-primary">Close chat</Button>
+            <Button variant="outline" className="text-primary">
+              Close chat
+            </Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
@@ -66,9 +60,9 @@ export function ChatPanel({
 export function FloatingChatPanel() {
   const pathname = usePathname();
 
-  let divClass = "fixed right-4 bottom-4";
+  let divClass = 'fixed right-4 bottom-4';
   if (pathname.startsWith('/podcast')) {
-    divClass = "lg:hidden fixed right-4 bottom-4";
+    divClass = 'lg:hidden fixed right-4 bottom-4';
   }
 
   return (

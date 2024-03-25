@@ -1,10 +1,13 @@
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { NewPodcastDialog } from '@/components/NewPodcastDialog';
 import { PodcastStrip } from '@/components/PodcastStrip';
 
 export async function Dashboard() {
-  const { userId } = auth();
+  const { userId, protect } = auth();
+  protect();
+  console.log(`MDW: AUTH ON DASHBOARD IS: ${userId}`);
+
   if (!userId) {
     return null;
   }

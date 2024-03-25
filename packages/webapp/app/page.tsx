@@ -1,14 +1,13 @@
 'use server';
 
 import Link from 'next/link';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { buttonVariants } from '@/components/ui/button';
 import { EpisodeList } from '@/components/EpisodeList';
 import { PodcastList } from '@/components/PodcastList';
 import { cn } from '@/lib/utils';
 import { ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
 import { ChatPanel } from '@/components/ChatPanel';
-import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 
 export default async function HomePage() {
@@ -28,12 +27,12 @@ export default async function HomePage() {
       </div>
       <div className="flex gap-4">
         <ChatPanel>
-          <Button variant="outline" className="border-primary font-mono">
+          <div className={cn(buttonVariants({ variant: 'outline' }), 'border-primary font-mono')}>
             <div className="flex flex-row items-center gap-2">
               <Image src="/images/podverse-logo.svg" alt="Podverse" width={30} height={30} />
               AI Chat
             </div>
-          </Button>
+          </div>
         </ChatPanel>
         {userId ? (
           <Link

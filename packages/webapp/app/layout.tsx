@@ -10,6 +10,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Footer } from '@/components/Footer';
 import { Toaster } from '@/components/ui/sonner';
 import { FloatingChatPanel } from '@/components/ChatPanel';
+import { dark } from '@clerk/themes';
 
 export const metadata: Metadata = {
   title: {
@@ -38,7 +39,19 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <>
-      <ClerkProvider>
+      <ClerkProvider
+        appearance={{
+          baseTheme: dark,
+          variables: {
+            colorPrimary: '#f59e0b',
+            colorText: 'white',
+            colorBackground: 'hsl(12, 6.5%, 15.1%)',
+            colorTextOnPrimaryBackground: 'white',
+            colorTextSecondary: 'white',
+            colorNeutral: 'white',
+          },
+        }}
+      >
         <html lang="en" suppressHydrationWarning>
           <head />
           <body className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>

@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 
 /** TODO(mdw): Replace the following with getSupabaseClient() everywhere. */
 export default createClient(
@@ -21,14 +21,16 @@ export async function getSupabaseClientWithToken(token: string) {
 /** Return a Supabase client that is authenticated using the Clerk JWT. */
 export async function getSupabaseClient() {
   const { getToken } = auth();
-  const supabaseAccessToken = await getToken({ template: 'podverse-supabase' });
-  if (!supabaseAccessToken) {
+  try {
+    const supabaseAccessToken = await getToken({ template: 'podverse-supabase' });
+    if (!supabaseAccessToken) {
+      throw new Error('No Supabase access token');
+    }
+    return getSupabaseClientWithToken(supabaseAccessToken);
+  } catch (error) {
     return createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL as string,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
     );
-  } else {
-    return getSupabaseClientWithToken(supabaseAccessToken);
   }
 }
-

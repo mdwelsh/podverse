@@ -221,7 +221,7 @@ function ChatMessage({ message, append, ...props }: { message: Message; append: 
             p({ children }) {
               return (
                 <div>
-                  <p className="mb-2 last:mb-0">{children}</p>
+                  <div className="mb-2 last:mb-0">{children}</div>
                 </div>
               );
             },

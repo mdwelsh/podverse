@@ -1,5 +1,5 @@
 
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 
 export function Owner({ children, owner }: { children: React.ReactNode; owner: string | null }) {
   const { userId } = auth();

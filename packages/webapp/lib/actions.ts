@@ -18,11 +18,10 @@ import {
 } from 'podverse-utils';
 import { Usage } from '@/lib/plans';
 import { getSupabaseClient, getSupabaseClientWithToken } from '@/lib/supabase';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { inngest } from '@/inngest/client';
 import { GetUsage } from '@/lib/plans';
-import { get } from 'http';
 
 /** Update the given episode. */
 export async function updateEpisode(episode: Episode | EpisodeWithPodcast): Promise<Episode> {
