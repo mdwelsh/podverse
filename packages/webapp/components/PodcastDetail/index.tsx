@@ -29,8 +29,8 @@ async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
             <div className="text-muted-foreground font-mono text-sm">{podcast.copyright}</div>
           )}
           <div className="flex flex-col gap-2">
-            <div className="flex flex-row gap-2">
-              <div className="text-muted-foreground flex flex-row gap-4 font-mono text-sm">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-muted-foreground font-mono text-sm col-span-3 md:col-span-1">
                 <div>{podcast.Episodes.length} episodes</div>
               </div>
               <PodcastLinks podcast={podcast} />
@@ -49,7 +49,7 @@ async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
 
 function PodcastLinks({ podcast }: { podcast: PodcastWithEpisodes }) {
   return (
-    <div className="flex flex-row gap-2">
+    <>
       {podcast.url && (
         <div className="text-primary text-sm underline">
           <a href={podcast.url} target="_blank" rel="noreferrer">
@@ -66,7 +66,7 @@ function PodcastLinks({ podcast }: { podcast: PodcastWithEpisodes }) {
           </a>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -97,7 +97,7 @@ async function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
     },
   ];
   return (
-    <div className="mt-8 flex h-[800px] w-2/5 flex-col gap-2">
+    <div className="hidden mt-8 lg:flex h-[800px] w-2/5 flex-col gap-2">
       <div>
         <h1>Chat</h1>
       </div>
@@ -113,7 +113,7 @@ export async function PodcastDetail({ podcastSlug }: { podcastSlug: string }) {
   try {
     const podcast = await GetPodcastWithEpisodes(supabase, podcastSlug);
     return (
-      <div className="mx-auto mt-8 w-4/5">
+      <div className="mx-auto mt-8 w-11/12 md:w-4/5">
         <PodcastHeader podcast={podcast} />
         <div className="flex flex-row gap-4">
           <PodcastEpisodeList podcast={podcast} episodes={podcast.Episodes} />
@@ -124,7 +124,7 @@ export async function PodcastDetail({ podcastSlug }: { podcastSlug: string }) {
   } catch (error) {
     console.error('Error looking up podcast:', error);
     return (
-      <div className="mx-auto mt-8 w-4/5 font-mono flex flex-col gap-4">
+      <div className="mx-auto mt-8 w-full md:w-4/5 font-mono flex flex-col gap-4">
         <div>
           Failed to load podcast <span className="text-primary">{podcastSlug}</span>
         </div>

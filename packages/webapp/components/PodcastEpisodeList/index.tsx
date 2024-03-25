@@ -63,7 +63,7 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
   const episodesToShow = showEpisodes.slice((page - 1) * ENTRIES_PER_PAGE, page * ENTRIES_PER_PAGE);
 
   return (
-    <div className="mt-8 flex h-[800px] w-3/5 flex-col gap-2">
+    <div className="mt-8 flex h-[800px] w-full lg:w-3/5 flex-col gap-2">
       <div className="flex w-full flex-row items-center gap-2">
         <div className="mr-4">Episodes</div>
         <ShowAllSwitch checked={showAll} onCheckedChange={setShowAll} />
