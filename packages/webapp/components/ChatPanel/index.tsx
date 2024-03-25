@@ -46,16 +46,16 @@ export function ChatPanel({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerTrigger>{children}</DrawerTrigger>
-      <DrawerContent className="h-full w-4/5 mx-auto">
+      <DrawerContent className="h-full w-full md:w-4/5 mx-auto">
         <DrawerHeader>
           <DrawerTitle className="font-mono text-primary mx-auto">Podverse AI Chat</DrawerTitle>
         </DrawerHeader>
-        <div className="mx-auto w-3/5 overflow-scroll">
+        <div className="mx-auto w-full md:w-3/5 overflow-scroll">
           <Chat initialMessages={initialMessages.map((m, i) => ({ ...m, id: i.toString() }))} />
         </div>
         <DrawerFooter>
           <DrawerClose>
-            <Button variant="outline">Close chat</Button>
+            <Button variant="outline" className="text-primary">Close chat</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
@@ -66,13 +66,14 @@ export function ChatPanel({
 export function FloatingChatPanel() {
   const pathname = usePathname();
 
+  let divClass = "fixed right-4 bottom-4";
   if (pathname.startsWith('/podcast')) {
-    return null;
+    divClass = "lg:hidden fixed right-4 bottom-4";
   }
 
   return (
     <ChatPanel>
-      <div className="fixed right-4 bottom-4">
+      <div className={divClass}>
         <div className="relative inline-flex group cursor-pointer">
           <div className="z-5 absolute -inset-1 bg-gradient-to-tr from-primary to-primary rounded-full blur opacity-25 group-hover:opacity-80 transition duration-1000 group-hover:duration-200"></div>
           <div

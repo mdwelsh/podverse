@@ -74,7 +74,7 @@ export function AudioPlayer({ episode }: { episode: EpisodeWithPodcast }) {
   };
 
   return (
-    <div className="border-primary bg-muted fixed bottom-0 z-20 w-4/5 border-t p-4">
+    <div className="rounded-full lg:rounded-none lg:border-primary mx-auto bg-transparent lg:bg-muted fixed bottom-0 left-0 z-20 w-fit lg:w-4/5 lg:border-t p-4">
       <AudioControls audioRef={audioRef} duration={duration} />
       <audio src={audioUrl} ref={audioRef} onLoadedMetadata={onLoadedMetadata} />
     </div>
@@ -125,18 +125,26 @@ function AudioControls({ audioRef, duration }: { audioRef: MutableRefObject<HTML
 
   return (
     <div className="flex w-full flex-row items-center gap-2">
-      <div>{secondsToTime(curTime)}</div>
+      <div className="hidden lg:block">{secondsToTime(curTime)}</div>
       <PausePlayButton isPlaying={isPlaying} onClick={onPlayPauseClick} />
       <AudioSeeker audioRef={audioRef} curTime={curTime} duration={duration} onValueChange={onSeek} />
-      <div>{secondsToTime(duration)}</div>
+      <div className="hidden lg:block">{secondsToTime(duration)}</div>
     </div>
   );
 }
 
 function PausePlayButton({ isPlaying, onClick }: { isPlaying: boolean; onClick: () => void }) {
   return (
-    <Button onClick={onClick} variant="secondary">
-      {isPlaying ? <PauseIcon className="size-6" /> : <PlayIcon className="size-6" />}
+    <Button onClick={onClick} variant="secondary" className="border-primary border lg:border-none">
+      {isPlaying ? (
+        <>
+          <PauseIcon className="size-6" /> <span className="ml-2 lg:hidden">Pause</span>{' '}
+        </>
+      ) : (
+        <>
+          <PlayIcon className="size-6" /> <span className="ml-2 lg:hidden">Play</span>{' '}
+        </>
+      )}
     </Button>
   );
 }
@@ -152,5 +160,14 @@ function AudioSeeker({
   duration: number;
   onValueChange: (value: number) => void;
 }) {
-  return <Slider onValueChange={(val) => onValueChange(val[0])} value={[curTime]} min={0} max={duration} step={1} />;
+  return (
+    <Slider
+      className="hidden lg:flex"
+      onValueChange={(val) => onValueChange(val[0])}
+      value={[curTime]}
+      min={0}
+      max={duration}
+      step={1}
+    />
+  );
 }

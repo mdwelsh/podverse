@@ -16,60 +16,58 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: 0 };
 
   return (
-    <div className="flex w-full flex-col gap-4 font-mono mb-4">
-      <div className="text-muted-foreground">
+    <div className="w-full grid grid-cols-4 gap-4 font-mono mb-4">
+      <div className="text-muted-foreground col-span-4">
         From{' '}
         <Link href={`/podcast/${episode.podcast.slug}`}>
           <span className="text-primary">{episode.podcast.title}</span>
         </Link>
       </div>
-      <div className="flex w-full flex-row gap-4">
-        <div className="w-[250px]">
-          {episode.imageUrl ? (
-            <img src={episode.imageUrl} />
-          ) : (
-            episode.podcast.imageUrl && <img src={episode.podcast.imageUrl} />
-          )}
+      <div className="block md:block">
+        {episode.imageUrl ? (
+          <img src={episode.imageUrl} />
+        ) : (
+          episode.podcast.imageUrl && <img src={episode.podcast.imageUrl} />
+        )}
+      </div>
+      <div className="col-span-3">
+        <div className="text-primary text-xl font-bold">
+          <Link href={episode.url || `/podcast/${episode.podcast.slug}/episode/${episode.slug}`}>
+            <span className="text-primary">
+              {episode.title}
+              {episode.url && <ArrowTopRightOnSquareIcon className="text-primary ml-1 inline size-4 align-super" />}
+            </span>
+          </Link>
         </div>
-        <div className="flex w-full flex-col gap-4">
-          <div className="text-primary text-xl font-bold">
-            <Link href={episode.url || `/podcast/${episode.podcast.slug}/episode/${episode.slug}`}>
-              <span className="text-primary">
-                {episode.title}
-                {episode.url && <ArrowTopRightOnSquareIcon className="text-primary ml-1 inline size-4 align-super" />}
-              </span>
-            </Link>
-          </div>
-          <CollapseWithToggle
-            extra={
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-row gap-2">
-                  <div className="text-muted-foreground font-mono text-sm">
-                    Published <span className="text-primary">{moment(episode.pubDate).format('MMMM Do YYYY')}</span>
-                  </div>
-                  <EpisodeLinks episode={episode} />
+        <CollapseWithToggle
+          extra={
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-col lg:flex-row gap-2">
+                <div className="text-muted-foreground font-mono text-sm">
+                  Published <span className="text-primary">{moment(episode.pubDate).format('MMMM Do YYYY')}</span>
                 </div>
-                {episode.podcast.copyright && (
-                  <div className="text-muted-foreground font-mono text-sm">{episode.podcast.copyright}</div>
-                )}
-                <div className="w-fit">
-                  <Owner owner={episode.podcast.owner}>
-                    <ManageEpisodeDialog episode={episodeWithoutPodcast}>
-                      <div className={cn(buttonVariants({ variant: 'outline' }))}>
-                        <div className="flex flex-row gap-2 items-center">
-                          <EpisodeIndicator episode={episodeWithoutPodcast} />
-                          Manage episode
-                        </div>
-                      </div>
-                    </ManageEpisodeDialog>
-                  </Owner>
-                </div>
+                <EpisodeLinks episode={episode} />
               </div>
-            }
-          >
-            <div className="font-sans text-sm">{episode.description}</div>
-          </CollapseWithToggle>
-        </div>
+              {episode.podcast.copyright && (
+                <div className="text-muted-foreground font-mono text-sm">{episode.podcast.copyright}</div>
+              )}
+              <div className="w-fit">
+                <Owner owner={episode.podcast.owner}>
+                  <ManageEpisodeDialog episode={episodeWithoutPodcast}>
+                    <div className={cn(buttonVariants({ variant: 'outline' }))}>
+                      <div className="flex flex-row gap-2 items-center">
+                        <EpisodeIndicator episode={episodeWithoutPodcast} />
+                        Manage episode
+                      </div>
+                    </div>
+                  </ManageEpisodeDialog>
+                </Owner>
+              </div>
+            </div>
+          }
+        >
+          <div className="font-sans text-sm">{episode.description}</div>
+        </CollapseWithToggle>
       </div>
     </div>
   );
@@ -138,7 +136,7 @@ export async function EpisodeDetail({ podcastSlug, episodeSlug }: { podcastSlug:
   const chatAvailable = (documents && documents.length > 0) || false;
 
   return (
-    <div className="mx-auto mt-8 w-4/5 font-mono">
+    <div className="mt-8 mx-auto w-11/12 md:w-4/5 font-mono">
       <EpisodeHeader episode={episode} />
       {isReady(episode) ? (
         <>

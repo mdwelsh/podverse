@@ -26,7 +26,7 @@ export function EpisodeChat({
     },
   ];
   return (
-    <div className="mt-8 flex h-[600px] w-2/5 flex-col gap-2">
+    <div className="hidden lg:flex mt-8 h-[600px] w-2/5 flex-col gap-2">
       <div>
         <h1>Chat</h1>
       </div>

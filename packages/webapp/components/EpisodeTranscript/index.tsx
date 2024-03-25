@@ -24,7 +24,7 @@ export function EpisodeTranscript({ episode }: { episode: EpisodeWithPodcast }) 
 
   if (episode.rawTranscriptUrl === null || transcript === null) {
     return (
-      <div className="mt-8 flex h-[600px] w-3/5 flex-col gap-2">
+      <div className="mt-8 flex h-[600px] w-full lg:w-3/5 flex-col gap-2">
         <div>
           <h1>Transcript</h1>
         </div>
@@ -34,7 +34,7 @@ export function EpisodeTranscript({ episode }: { episode: EpisodeWithPodcast }) 
   }
 
   return (
-    <div className="mt-8 flex h-[600px] w-3/5 flex-col gap-2">
+    <div className="mt-8 flex h-[600px] w-full lg:w-3/5 flex-col gap-2">
       <div>
         <h1>Transcript</h1>
       </div>
