@@ -14,6 +14,8 @@ CREATE SCHEMA IF NOT EXISTS "public";
 
 ALTER SCHEMA "public" OWNER TO "pg_database_owner";
 
+create extension IF NOT EXISTS vector with schema "public";
+
 CREATE OR REPLACE FUNCTION "public"."chunk_vector_search"("embedding" "public"."vector", "match_threshold" double precision, "match_count" integer, "min_content_length" integer) RETURNS TABLE("id" bigint, "document" bigint, "meta" "jsonb", "content" "text", "similarity" double precision)
     LANGUAGE "plpgsql"
     AS $$
