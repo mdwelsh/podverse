@@ -40,14 +40,14 @@ interface RootLayoutProps {
 
 export default async function RootLayout({ children }: RootLayoutProps) {
   // For now, restrict usage on production.
-
-  // if (process.env.VERCEL_ENV === 'production') {
-  //   const user = await currentUser();
-  //   // This is the mdwelsh Github user.
-  //   if (user?.id !== 'user_2cQ3Uw3DLjz7B8AhRs0winNCAad') {
-  //     return 'Coming soon';
-  //   }
-  // }
+  let comingSoon = false;
+  if (process.env.VERCEL_ENV === 'production') {
+    const user = await currentUser();
+    // This is the mdwelsh Github user.
+    if (user?.id !== 'user_2cQ3Uw3DLjz7B8AhRs0winNCAad') {
+      comingSoon = true;
+    }
+  }
 
   return (
     <>
@@ -69,11 +69,17 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           <body className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
             <ThemeProvider attribute="class" forcedTheme="dark" defaultTheme="dark">
               <div className="relative flex min-h-screen flex-col w-full">
-                <SiteHeader />
-                <div className="flex-1">{children}</div>
-                <FloatingChatPanel />
-                <Footer />
-                <Toaster richColors />
+                {comingSoon ? (
+                  'Coming soon'
+                ) : (
+                  <>
+                    <SiteHeader />
+                    <div className="flex-1">{children}</div>
+                    <FloatingChatPanel />
+                    <Footer />
+                    <Toaster richColors />
+                  </>
+                )}
               </div>
               <TailwindIndicator />
             </ThemeProvider>
