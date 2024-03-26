@@ -12,6 +12,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { FloatingChatPanel } from '@/components/ChatPanel';
 import { dark } from '@clerk/themes';
 import { Analytics } from '@vercel/analytics/react';
+import { currentUser } from '@clerk/nextjs/server';
 
 export const metadata: Metadata = {
   title: {
@@ -37,7 +38,17 @@ interface RootLayoutProps {
   children: React.ReactNode;
 }
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default async function RootLayout({ children }: RootLayoutProps) {
+  // For now, restrict usage on production.
+
+  // if (process.env.VERCEL_ENV === 'production') {
+  //   const user = await currentUser();
+  //   // This is the mdwelsh Github user.
+  //   if (user?.id !== 'user_2cQ3Uw3DLjz7B8AhRs0winNCAad') {
+  //     return 'Coming soon';
+  //   }
+  // }
+
   return (
     <>
       <ClerkProvider

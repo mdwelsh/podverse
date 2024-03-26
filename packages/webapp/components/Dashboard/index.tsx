@@ -6,7 +6,6 @@ import { PodcastStrip } from '@/components/PodcastStrip';
 export async function Dashboard() {
   const { userId, protect } = auth();
   protect();
-  console.log(`MDW: AUTH ON DASHBOARD IS: ${userId}`);
 
   if (!userId) {
     return null;

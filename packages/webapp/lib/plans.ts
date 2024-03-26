@@ -4,6 +4,7 @@ import { isReady } from '@/lib/episode';
 export type Plan = {
   id: string;
   displayName: string;
+  description: string;
   price: number;
   hidden?: boolean;
   features?: string[];
@@ -16,6 +17,7 @@ export const PLANS: Record<string, Plan> = {
   free: {
     id: 'free',
     displayName: 'Free',
+    description: 'Get started for free',
     price: 0,
     maxPodcasts: 1,
     maxEpisodesPerPodcast: 10,
@@ -24,6 +26,7 @@ export const PLANS: Record<string, Plan> = {
   creator: {
     id: 'creator',
     displayName: 'Creator',
+    description: 'Perfect for serious podcasters',
     price: 15.0,
     maxPodcasts: 5,
     maxEpisodesPerPodcast: 50,
@@ -32,12 +35,14 @@ export const PLANS: Record<string, Plan> = {
   professional: {
     id: 'professional',
     displayName: 'Professional',
+    description: 'Unlimited podcasts and episodes',
     price: 50.0,
     maxChatSessions: 250,
   },
   unlimited: {
     id: 'unlimited',
     displayName: 'Unlimited',
+    description: 'Unlimited everything',
     price: 300.0,
     hidden: true,
   },

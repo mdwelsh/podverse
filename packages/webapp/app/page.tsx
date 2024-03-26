@@ -11,7 +11,12 @@ import { ChatPanel } from '@/components/ChatPanel';
 import Image from 'next/image';
 
 export default async function HomePage() {
-  const { userId } = auth();
+  const { userId, protect } = auth();
+
+  // For now, require login for production envs.
+  if (process.env.VERCEL_ENV === 'production') {
+    protect();
+  }
 
   return (
     <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
