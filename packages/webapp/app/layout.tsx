@@ -11,6 +11,7 @@ import { Footer } from '@/components/Footer';
 import { Toaster } from '@/components/ui/sonner';
 import { FloatingChatPanel } from '@/components/ChatPanel';
 import { dark } from '@clerk/themes';
+import { Analytics } from '@vercel/analytics/react';
 
 export const metadata: Metadata = {
   title: {
@@ -65,6 +66,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
               </div>
               <TailwindIndicator />
             </ThemeProvider>
+            <Analytics />
           </body>
         </html>
       </ClerkProvider>

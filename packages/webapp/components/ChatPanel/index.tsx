@@ -6,7 +6,6 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -15,7 +14,6 @@ import {
 import Image from 'next/image';
 import { Chat } from '@/components/Chat';
 import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
 
 export function ChatPanel({ children }: { children: React.ReactNode }) {
   const suggestedQueries: string[] = [

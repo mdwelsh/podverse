@@ -1,7 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { isReady } from '@/lib/episode';
 
-
 export type Plan = {
   id: string;
   displayName: string;
