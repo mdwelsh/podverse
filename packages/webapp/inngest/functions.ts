@@ -47,12 +47,13 @@ export const processEpisode = inngest.createFunction(
     episode.error = null;
     await UpdateEpisode(supabase, episode);
 
+    const currentUrl = process.env.VERCEL_URL ?? 'https://deepdocks.tailf7e81.ts.net';
+
     try {
       // Start transcription.
       const transcribeResult = await step.run('transcribe', async () => {
         console.log(`process/episode [${episodeId}] - Transcribing`);
-        // TODO (mdw): Fill in URL for callback with correct hostname.
-        const callbackUrl = `https://deepdocks.tailf7e81.ts.net/api/episode/${episode.id}/transcript`;
+        const callbackUrl = `${currentUrl}/api/episode/${episode.id}/transcript`;
         const result = await TranscribeEpisode({
           supabase,
           supabaseToken: supabaseAccessToken,

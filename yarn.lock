@@ -1876,6 +1876,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@stripe/stripe-js@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@stripe/stripe-js@npm:3.1.0"
+  checksum: a32e5d3d6cd7bd7130e0d2f15312bdae83f568125407e461c033d726c44503bd00aabe8d6d593a6329d4a10b8a325440ce947cec21b685f260ee3f01f4597ec8
+  languageName: node
+  linkType: hard
+
 "@supabase/functions-js@npm:2.1.5":
   version: 2.1.5
   resolution: "@supabase/functions-js@npm:2.1.5"
@@ -2178,7 +2185,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^20.4.1":
+"@types/node@npm:*, @types/node@npm:>=8.1.0, @types/node@npm:^20.4.1":
   version: 20.11.30
   resolution: "@types/node@npm:20.11.30"
   dependencies:
@@ -8756,6 +8763,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"qs@npm:^6.11.0":
+  version: 6.12.0
+  resolution: "qs@npm:6.12.0"
+  dependencies:
+    side-channel: ^1.0.6
+  checksum: ba007fb2488880b9c6c3df356fe6888b9c1f4c5127552edac214486cfe83a332de09a5c40d490d79bb27bef977ba1085a8497512ff52eaac72e26564f77ce908
+  languageName: node
+  linkType: hard
+
 "querystringify@npm:^2.1.1":
   version: 2.2.0
   resolution: "querystringify@npm:2.2.0"
@@ -9747,6 +9763,16 @@ __metadata:
   version: 2.0.1
   resolution: "strip-json-comments@npm:2.0.1"
   checksum: 1074ccb63270d32ca28edfb0a281c96b94dc679077828135141f27d52a5a398ef5e78bcf22809d23cadc2b81dfbe345eb5fd8699b385c8b1128907dec4a7d1e1
+  languageName: node
+  linkType: hard
+
+"stripe@npm:^14.22.0":
+  version: 14.22.0
+  resolution: "stripe@npm:14.22.0"
+  dependencies:
+    "@types/node": ">=8.1.0"
+    qs: ^6.11.0
+  checksum: 4dff9744c34f18061c05d2055f3e1df59c70900db92e7eacc01855c090a423d0501f310cb971dc6a9cef2de43ed3c6500ad3a0e97f08bf01187cc60595f78032
   languageName: node
   linkType: hard
 
@@ -10870,6 +10896,7 @@ __metadata:
     "@radix-ui/react-slot": ^1.0.2
     "@radix-ui/react-switch": ^1.0.3
     "@radix-ui/react-tooltip": ^1.0.7
+    "@stripe/stripe-js": ^3.1.0
     "@types/node": ^18
     "@types/prettier": ^3
     "@types/react": ^18.2.14
@@ -10905,6 +10932,7 @@ __metadata:
     react-textarea-autosize: ^8.5.3
     sharp: ^0.31.3
     sonner: ^1.4.0
+    stripe: ^14.22.0
     tailwind-merge: ^1.13.2
     tailwindcss: ^3.3.2
     tailwindcss-animate: ^1.0.6

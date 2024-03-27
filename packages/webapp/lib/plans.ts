@@ -11,6 +11,7 @@ export type Plan = {
   maxPodcasts?: number;
   maxEpisodesPerPodcast?: number;
   maxChatSessions?: number;
+  priceId?: string;
 };
 
 export const PLANS: Record<string, Plan> = {
@@ -21,23 +22,22 @@ export const PLANS: Record<string, Plan> = {
     price: 0,
     maxPodcasts: 1,
     maxEpisodesPerPodcast: 10,
-    maxChatSessions: 25,
   },
   creator: {
     id: 'creator',
     displayName: 'Creator',
     description: 'Perfect for serious podcasters',
     price: 15.0,
-    maxPodcasts: 5,
+    maxPodcasts: 3,
     maxEpisodesPerPodcast: 50,
-    maxChatSessions: 100,
+    priceId: 'price_1OyzZQ1vQbZgOhBPFifGWxmL',
   },
   professional: {
     id: 'professional',
     displayName: 'Professional',
-    description: 'Unlimited podcasts and episodes',
+    description: 'Unlimited power',
     price: 50.0,
-    maxChatSessions: 250,
+    priceId: 'price_1OyzZw1vQbZgOhBPeqVlY4a0',
   },
   unlimited: {
     id: 'unlimited',
@@ -87,11 +87,11 @@ export async function GetUsage(supabase: SupabaseClient, userId: string): Promis
   if (!(planName[0].plan in PLANS)) {
     throw new Error('Invalid plan name: ' + JSON.stringify(planName));
   }
-  const plan = PLANS[planName[0].plan]
+  const plan = PLANS[planName[0].plan];
 
   return {
     plan,
     episodesProcessed,
-    chatSessionCount: 0,  // TODO: Count these.
+    chatSessionCount: 0, // TODO: Count these.
   };
 }
