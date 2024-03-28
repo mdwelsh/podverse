@@ -25,13 +25,14 @@ export async function POST(req: NextRequest) {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'subscription',
+      client_reference_id: userId,
       success_url: redirectUrl + '?success=true',
       cancel_url: redirectUrl + '?canceled=true',
     });
     if (!session || !session.url) {
       throw new Error('Error creating checkout session');
     }
-    return NextResponse.json({sessionId: session.id});
+    return NextResponse.json({ sessionId: session.id });
   } catch (err) {
     console.log(err);
     return NextResponse.json({ error: `Error creating checkout session: ${JSON.stringify(err)}` }, { status: 500 });

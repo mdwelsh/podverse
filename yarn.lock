@@ -2161,6 +2161,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/micro-cors@npm:^0.1.5":
+  version: 0.1.5
+  resolution: "@types/micro-cors@npm:0.1.5"
+  dependencies:
+    "@types/micro": ^7.3.7
+  checksum: 19a7d68e759196fd2dba89da186feaa59b44ca1c2ea4e557be67158578fae6f3e78921003741cf1dd7c9d94cd5e842f0ea679e66b8c5496ddfe6e662f7b02bd1
+  languageName: node
+  linkType: hard
+
+"@types/micro@npm:^7.3.7":
+  version: 7.3.7
+  resolution: "@types/micro@npm:7.3.7"
+  dependencies:
+    "@types/node": "*"
+  checksum: 37766f7637d4499362932499d72dda499b6afcdc2a1e2864fd7e65de4591767ef318a48b32626b472a1c16249d8666697816ae309ebd07a097d981bb8ee9502f
+  languageName: node
+  linkType: hard
+
 "@types/ms@npm:*":
   version: 0.7.34
   resolution: "@types/ms@npm:0.7.34"
@@ -7310,6 +7328,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"micro-cors@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "micro-cors@npm:0.1.1"
+  checksum: adf8a2b613ee963ca02bf12bd1a89d31602420094f88d23d2dc467fdc7131f44cf693704860685cf1b3a8058cf9349089ef795d03470c139a997b5c3dac39641
+  languageName: node
+  linkType: hard
+
 "micromark-core-commonmark@npm:^2.0.0":
   version: 2.0.0
   resolution: "micromark-core-commonmark@npm:2.0.0"
@@ -10897,6 +10922,7 @@ __metadata:
     "@radix-ui/react-switch": ^1.0.3
     "@radix-ui/react-tooltip": ^1.0.7
     "@stripe/stripe-js": ^3.1.0
+    "@types/micro-cors": ^0.1.5
     "@types/node": ^18
     "@types/prettier": ^3
     "@types/react": ^18.2.14
@@ -10918,6 +10944,7 @@ __metadata:
     eslint-plugin-tailwindcss: ^3.13.0
     inngest: ^3.13.0
     lucide-react: ^0.331.0
+    micro-cors: ^0.1.1
     moment: ^2.30.1
     next: ^14.1.0
     next-themes: ^0.2.1
