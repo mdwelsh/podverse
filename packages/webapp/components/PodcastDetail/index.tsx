@@ -1,4 +1,4 @@
-import supabase from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 import { PodcastWithEpisodes, GetPodcastWithEpisodes, GetUser, GetPodcastSuggestions } from 'podverse-utils';
 import { PodcastEpisodeList } from '@/components/PodcastEpisodeList';
 import Link from 'next/link';
@@ -6,13 +6,10 @@ import { ArrowTopRightOnSquareIcon, RssIcon, GlobeAmericasIcon } from '@heroicon
 import { Owner } from '@/components/Owner';
 import { ManagePodcastDialog } from '@/components/ManagePodcastDialog';
 import { Chat } from '@/components/Chat';
-import { getSupabaseClient } from '@/lib/supabase';
 import { CreateMessage } from 'ai';
 import { isReady } from '@/lib/episode';
 
 async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
-  const user = podcast.owner ? await GetUser(supabase, podcast.owner) : null;
-
   return (
     <div className="flex w-full flex-col gap-4 font-mono">
       <div className="flex w-full flex-row gap-4">
@@ -25,9 +22,7 @@ async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
             </Link>
           </div>
           <div className="font-sans text-sm">{podcast.description}</div>
-          {podcast.copyright && (
-            <div className="text-muted-foreground font-mono text-sm">{podcast.copyright}</div>
-          )}
+          {podcast.copyright && <div className="text-muted-foreground font-mono text-sm">{podcast.copyright}</div>}
           <div className="flex flex-col gap-2">
             <div className="grid grid-cols-3 gap-2">
               <div className="text-muted-foreground font-mono text-sm col-span-3 md:col-span-1">
@@ -111,13 +106,14 @@ async function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
 
 export async function PodcastDetail({ podcastSlug }: { podcastSlug: string }) {
   try {
+    const supabase = await getSupabaseClient();
     const podcast = await GetPodcastWithEpisodes(supabase, podcastSlug);
     return (
       <div className="mx-auto mt-8 w-11/12 md:w-4/5">
         <PodcastHeader podcast={podcast} />
         <div className="flex flex-row gap-4">
           <PodcastEpisodeList podcast={podcast} episodes={podcast.Episodes} />
-          { podcast.Episodes.filter(isReady).length > 0 && <PodcastChat podcast={podcast} /> }
+          {podcast.Episodes.filter(isReady).length > 0 && <PodcastChat podcast={podcast} />}
         </div>
       </div>
     );

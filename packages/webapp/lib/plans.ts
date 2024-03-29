@@ -1,6 +1,14 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { isReady } from '@/lib/episode';
 
+/** Represents the state field of the Subscriptions table. */
+export enum SubscriptionState {
+  Active = 'active',
+  Canceled = 'canceled',
+  CancelPending = 'cancel_pending',
+}
+
+/** Represents a single plan. */
 export type Plan = {
   id: string;
   displayName: string;

@@ -1,8 +1,9 @@
 import { EpisodeCard } from '../EpisodeCard';
 import { GetLatestEpisodes } from 'podverse-utils';
-import supabase from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 
 export async function EpisodeList() {
+  const supabase = await getSupabaseClient();
   const episodes = await await GetLatestEpisodes({ supabase, ready: true, limit: 12 });
 
   return (

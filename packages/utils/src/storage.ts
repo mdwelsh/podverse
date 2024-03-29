@@ -9,6 +9,7 @@ import {
   PodcastWithEpisodes,
   Speakers,
   PodcastMetadata,
+  Subscription
 } from './types.js';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Upload as TusUpload } from 'tus-js-client';
@@ -337,6 +338,7 @@ export async function DeletePodcast(supabase: SupabaseClient, slug: string) {
 
 /** Set metadata for the given episode. */
 export async function SetEpisode(supabase: SupabaseClient, episode: Episode): Promise<Episode> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id, created_at, ...episodeData } = episode;
   const { data, error } = await supabase.from('Episodes').insert(episodeData).select('*');
   if (error) {
@@ -351,6 +353,7 @@ export async function SetEpisode(supabase: SupabaseClient, episode: Episode): Pr
 
 /** Update the given Episode. */
 export async function UpdateEpisode(supabase: SupabaseClient, episode: Episode | EpisodeWithPodcast): Promise<Episode> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { podcast, speakers, ...episodeData } = episode as EpisodeWithPodcast;
   const { data, error } = await supabase.from('Episodes').update(episodeData).eq('id', episode.id).select('*');
   if (error) {
@@ -515,4 +518,14 @@ export async function AddSuggestion(supabase: SupabaseClient, episodeId: number,
     throw error;
   }
   return;
+}
+
+/** Get subscriptions for the given user. */
+export async function GetSubscriptions(supabase: SupabaseClient, userId: string): Promise<Subscription[]> {
+  const { data, error } = await supabase.from('Subscriptions').select('*').eq('user', userId);
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  return data;
 }

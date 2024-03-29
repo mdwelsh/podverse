@@ -238,6 +238,53 @@ export type Database = {
           },
         ]
       }
+      Subscriptions: {
+        Row: {
+          billingProviderId: string | null
+          created_at: string
+          description: string | null
+          end_time: string | null
+          id: number
+          modified_at: string | null
+          plan: string
+          start_time: string | null
+          state: string
+          user: string
+        }
+        Insert: {
+          billingProviderId?: string | null
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          id?: number
+          modified_at?: string | null
+          plan: string
+          start_time?: string | null
+          state: string
+          user: string
+        }
+        Update: {
+          billingProviderId?: string | null
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          id?: number
+          modified_at?: string | null
+          plan?: string
+          start_time?: string | null
+          state?: string
+          user?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_Subscriptions_user_fkey"
+            columns: ["user"]
+            isOneToOne: false
+            referencedRelation: "Users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       Suggestions: {
         Row: {
           episode: number
