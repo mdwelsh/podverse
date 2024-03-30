@@ -24,6 +24,7 @@ import {
   EmbedText,
   TextSplitter,
   SuggestQueries,
+  Search,
 } from 'podverse-utils';
 import { dump, load } from 'js-yaml';
 import fs from 'fs';
@@ -341,6 +342,18 @@ program
 
 program
   .command('search')
+  .description('Perform a full-text search for the given query.')
+  .argument('<query>', 'Search query.')
+  .action(async (query: string) => {
+    term('Performing search for: ').yellow(query)('\n');
+    const results = await Search({ supabase, input: query });
+    for (const result of results) {
+      term.green(JSON.stringify(result, null, 2) + '\n\n');
+    }
+  });
+
+program
+  .command('vector-search')
   .description('Perform a vector search for the given query.')
   .argument('<query>', 'Search query.')
   .option('--episode <episodeId>', 'Episode ID to query.')
