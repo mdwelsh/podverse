@@ -2,7 +2,6 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { NavItem } from '@/types/nav';
-import { siteConfig } from '@/config/site';
 import { cn } from '@/lib/utils';
 import { ClientNavMenu } from '@/components/ClientNavMenu';
 

@@ -10,11 +10,14 @@ import {
   DeletePodcast,
   GetPodcast,
   GetPodcastByID,
+  Podcast,
   PodcastWithEpisodes,
   ReadPodcastFeed,
   PodcastWithEpisodesMetadata,
   Ingest,
   UpdateSpeakerMap,
+  Search,
+  SearchResult,
 } from 'podverse-utils';
 import { Usage } from '@/lib/plans';
 import { getSupabaseClient, getSupabaseClientWithToken } from '@/lib/supabase';
@@ -22,6 +25,12 @@ import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { inngest } from '@/inngest/client';
 import { GetUsage } from '@/lib/plans';
+
+/** Get the given podcast. */
+export async function getPodcast(podcastId: string): Promise<Podcast> {
+  const supabase = await getSupabaseClient();
+  return GetPodcastByID(supabase, podcastId);
+}
 
 /** Update the given episode. */
 export async function updateEpisode(episode: Episode | EpisodeWithPodcast): Promise<Episode> {
@@ -170,9 +179,10 @@ export async function readPodcastFeed(rssUrl: string): Promise<PodcastWithEpisod
   return ReadPodcastFeed(rssUrl);
 }
 
+/** Update the speaker map for the given episode. */
 export async function updateSpeaker(episodeId: number, speaker: string, name: string): Promise<void> {
   console.log(`Updating speaker map for episode ${episodeId}: speaker=${speaker}, name=${name}`);
-  const { userId, getToken } = auth();
+  const { userId } = auth();
   if (!userId) {
     throw new Error('Unauthorized');
   }
@@ -184,4 +194,10 @@ export async function updateSpeaker(episodeId: number, speaker: string, name: st
   await UpdateSpeakerMap(supabase, episodeId, speaker, name, true);
   console.log(`Finished updating speaker map for episode ${episodeId}: speaker=${speaker}, name=${name}`);
   revalidatePath('/podcast/[podcastSlug]/episode/[episodeSlug]', 'page');
+}
+
+/** Perform a full-text search. */
+export async function search(query: string): Promise<SearchResult[]> {
+  const supabase = await getSupabaseClient();
+  return Search({ supabase, input: query, includeVector: false });
 }
