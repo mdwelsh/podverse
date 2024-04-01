@@ -40,14 +40,14 @@ interface RootLayoutProps {
 
 export default async function RootLayout({ children }: RootLayoutProps) {
   // For now, restrict usage on production.
-  let comingSoon = false;
-  if (process.env.VERCEL_ENV === 'production') {
-    const user = await currentUser();
-    // This is the mdwelsh Github user.
-    if (user?.id !== 'user_2cQ3Uw3DLjz7B8AhRs0winNCAad') {
-      comingSoon = true;
-    }
-  }
+  // let comingSoon = false;
+  // if (process.env.VERCEL_ENV === 'production') {
+  //   const user = await currentUser();
+  //   // This is the mdwelsh Github user.
+  //   if (user?.id !== 'user_2cQ3Uw3DLjz7B8AhRs0winNCAad') {
+  //     comingSoon = true;
+  //   }
+  // }
 
   return (
     <>
