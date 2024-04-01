@@ -17,7 +17,8 @@ export function PurchaseButton({
   existingSubscription?: Subscription;
   className?: string;
 }) {
-  const redirectUrl = (process.env.VERCEL_URL || 'http://localhost:3000') + '/pricing';
+  const redirectUrl =
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000') + '/pricing';
   const isPurchase = !existingSubscription;
   const isExisting = plan.id === existingPlan.id;
   const isFree = isExisting && plan.id === 'free';
