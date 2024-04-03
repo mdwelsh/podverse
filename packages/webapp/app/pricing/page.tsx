@@ -45,10 +45,10 @@ export default async function Page() {
   }
 
   return (
-    <div className="mx-auto mt-8 w-2/5 md:w-4/5 xl:w-3/5 flex flex-col gap-4">
+    <div className="mx-auto mt-8 flex w-2/5 flex-col gap-4 md:w-4/5 xl:w-3/5">
       <PurchaseConfirmation />
-      <div className="font-mono text-primary text-lg">Pricing and Plans</div>
-      <div className="grid md:grid-cols-3 grid-cols-1 gap-12 md:gap-4">
+      <div className="text-primary font-mono text-lg">Pricing and Plans</div>
+      <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-4">
         {Object.entries(PLANS)
           .filter(([key, plan]) => !plan.hidden)
           .map(([key, plan], index) => (
@@ -65,8 +65,8 @@ function PlanCard({
   existingSubscription,
 }: {
   plan: Plan;
-  existingPlan: Plan;
-  existingSubscription?: Subscription;
+  existingPlan?: Plan;
+  existingSubscription?: Subscription | null;
 }) {
   const isCurrent = existingPlan && existingPlan.id === plan.id;
   const endDate =
@@ -75,7 +75,7 @@ function PlanCard({
 
   return (
     <div className={`flex flex-col gap-1 ${isCurrent ? 'text-muted-foreground' : 'text-white'}`}>
-      <div className="text-primary text-xs mt-2 h-4">
+      <div className="text-primary mt-2 h-4 text-xs">
         {isCurrent ? (
           <>
             Current plan
@@ -89,10 +89,10 @@ function PlanCard({
         <div className="bg-secondary flex flex-col gap-0 p-4">
           <div className="font-mono text-2xl">{plan.displayName}</div>
           <div>
-            <span className="text-muted-foreground italic text-xs lg:text-base">{plan.description}</span>
+            <span className="text-muted-foreground text-xs italic lg:text-base">{plan.description}</span>
           </div>
         </div>
-        <div className="bg-muted flex flex-col gap-2 p-4 h-[400px] lg:h-[300px]">
+        <div className="bg-muted flex h-[400px] flex-col gap-2 p-4 lg:h-[300px]">
           <div>
             {plan.maxPodcasts && 'Up to '}
             <span className="text-primary font-bold">{plan.maxPodcasts ?? 'Unlimited'}</span> podcast
@@ -108,18 +108,18 @@ function PlanCard({
             <span className="text-primary font-bold">{plan.maxChatSessions ?? 'Unlimited'}</span> AI chat sessions per
             month
           </div>
-          <div className="flex-grow"></div>
-          <div className="flex flex-col gap-2 lg:gap-0 lg:flex-row items-center justify-between mt-4 pt-4 border-t border-primary">
+          <div className="grow"></div>
+          <div className="border-primary mt-4 flex flex-col items-center justify-between gap-2 border-t pt-4 lg:flex-row lg:gap-0">
             <div className="font-mono text-lg">
               <span className="text-primary font-bold">${plan.price}</span> / month
             </div>
             {existingPlan ? (
-              <PurchaseButton plan={plan} existingPlan={existingPlan} existingSubscription={existingSubscription} />
+              <PurchaseButton plan={plan} existingPlan={existingPlan} existingSubscription={existingSubscription || undefined} />
             ) : (
               <SignupOrLogin />
             )}
           </div>
-          <div className="py-2 mx-auto lg:mx-0 text-xs h-3 text-muted-foreground">
+          <div className="text-muted-foreground mx-auto h-3 py-2 text-xs lg:mx-0">
             {plan.price > 0 && 'Cancel any time'}
           </div>
         </div>
