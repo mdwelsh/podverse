@@ -24,7 +24,7 @@ async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
           <div className="font-sans text-sm">{podcast.description}</div>
           {podcast.copyright && <div className="text-muted-foreground font-mono text-sm">{podcast.copyright}</div>}
           <div className="flex flex-col gap-2">
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <div className="text-muted-foreground col-span-3 font-mono text-sm md:col-span-1">
                 <div>{podcast.Episodes.length} episodes</div>
               </div>

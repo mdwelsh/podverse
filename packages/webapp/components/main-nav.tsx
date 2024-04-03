@@ -11,9 +11,9 @@ interface MainNavProps {
 
 export function MainNav({ items }: MainNavProps) {
   return (
-    <div className="flex flex-row gap-10 items-center">
+    <div className="flex flex-row gap-0 md:gap-10 items-center">
       <Link href="/" className="flex items-center">
-        <div className="relative group cursor-pointer">
+        <div className="hidden sm:inline relative group cursor-pointer">
           <div className="z-5 absolute -inset-1 bg-gradient-to-tr from-primary to-primary rounded-full blur opacity-35 group-hover:opacity-80 transition duration-1000 group-hover:duration-200"></div>
           <Image src="/images/podverse-logo.svg" alt="Podverse" width={50} height={50} className="relative z-10" />
         </div>

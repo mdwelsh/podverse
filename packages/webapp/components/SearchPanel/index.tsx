@@ -42,7 +42,7 @@ export function SearchPanel() {
       <SheetTrigger>
         <div className="flex flex-row gap-2 text-primary font-mono text-sm">
           <MagnifyingGlassIcon className="h-6 w-6 text-primary" />
-          Search
+          <span className="hidden md:inline">Search</span>
         </div>
       </SheetTrigger>
       <SheetContent side="top">

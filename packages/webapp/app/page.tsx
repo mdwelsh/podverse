@@ -14,20 +14,20 @@ export default async function HomePage() {
   const { userId } = auth();
 
   return (
-    <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
-      <div className="flex max-w-[980px] flex-col items-start gap-2">
+    <section className="container grid w-full items-center gap-6 p-2 pb-8 pt-6 md:p-4 md:py-10">
+      <div className="flex w-full flex-col items-start gap-2">
         <h1 className="font-mono text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
           AI superpowers for your podcast.
         </h1>
-        <p className="text-muted-foreground max-w-[700px] font-mono text-lg">
+        <p className="text-muted-foreground max-w-[700px] font-mono text-base md:text-lg">
           Automatic episode transcripts, summaries, AI chat, and more.
           <br />
           Take your podcast to the next level.
         </p>
       </div>
-      <div className="flex gap-4">
+      <div className="flex flex-col gap-4 px-20 md:flex-row md:px-0">
         <ChatPanel>
-          <div className={cn(buttonVariants({ variant: 'outline' }), 'border-primary font-mono')}>
+          <div className={cn(buttonVariants({ variant: 'outline' }), 'border-primary w-full font-mono')}>
             <div className="flex flex-row items-center gap-2">
               <Image src="/images/podverse-logo.svg" alt="Podverse" width={30} height={30} />
               AI Chat
@@ -60,14 +60,14 @@ export default async function HomePage() {
         )}
       </div>
       <div className="mt-4 flex flex-col gap-4">
-        <div className="font-mono text-xl">Latest episodes</div>
+        <div className="font-mono text-base sm:text-xl">Latest episodes</div>
         <EpisodeList />
       </div>
       <div className="mt-4 flex flex-col gap-4">
-        <div className="flex flex-row gap-8 items-center">
-          <div className="font-mono text-xl">Explore podcasts</div>
-          <div>
-            <Link className={cn('font-mono', buttonVariants({ variant: 'outline' }))} href="/explore">
+        <div className="flex flex-row items-center gap-8">
+          <div className="font-mono text-base sm:text-xl">Explore podcasts</div>
+          <div className="text-xs">
+            <Link className={cn(buttonVariants({ variant: 'outline' }), 'font-mono text-xs sm:text-sm')} href="/explore">
               View all
               <ChevronDoubleRightIcon className="ml-2 inline size-4" />
             </Link>

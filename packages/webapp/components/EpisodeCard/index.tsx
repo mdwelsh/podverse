@@ -5,22 +5,22 @@ import { LatestEpisode } from 'podverse-utils';
 export function EpisodeCard({ episode }: { episode: LatestEpisode }) {
   return (
     <Link href={`/podcast/${episode.podcast.slug}/episode/${episode.slug}`}>
-      <div className="mx-auto hover:ring-4 hover:ring-primary flex flex-col w-48 sm:w-40 md:w-48 gap-4 h-full p-2 md:p-4 rounded-lg border bg-gray-700 dark:bg-gray-700 text-white dark:text-white overflow-hidden">
-        <div className="flex flex-col w-full h-full">
-          <div className="mx-auto flex flex-col bg-black size-32 md:size-40 overflow-y-hidden">
+      <div className="hover:ring-primary mx-auto flex h-full w-40 flex-col gap-4 overflow-hidden rounded-lg border bg-gray-700 p-2 text-white hover:ring-4 sm:w-40 md:w-48 md:p-4 dark:bg-gray-700 dark:text-white">
+        <div className="flex size-full flex-col">
+          <div className="mx-auto flex size-32 flex-col overflow-y-hidden bg-black md:size-40">
             <div className="grow" />
             <div className="w-full">
               {episode.imageUrl ? <img src={episode.imageUrl} /> : <img src={episode.podcast.imageUrl || ''} />}
             </div>
             <div className="grow" />
           </div>
-          <div className="text-wrap line-clamp-2 md:line-clamp-3 truncate">
-            <p className="font-[Inter] mb-2 mt-2 text-sm md:text-sm">{episode.title}</p>
+          <div className="line-clamp-2 truncate text-wrap md:line-clamp-3">
+            <p className="my-2 font-[Inter] text-sm md:text-sm">{episode.title}</p>
           </div>
           <div className="grow" />
           <div className="h-4">
             {episode.podcast.title && (
-              <p className="text-xs truncate mt-0 md:mt-2">
+              <p className="mt-0 truncate text-xs md:mt-2">
                 from <span className="text-primary">{episode.podcast.title}</span>
               </p>
             )}
