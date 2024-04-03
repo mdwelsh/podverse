@@ -29,13 +29,12 @@ export async function GetUser(supabase: SupabaseClient, userId: string): Promise
 
 /** Podcasts ********************************************************************************/
 
+/** Return type of GetPodcasts. */
+export type PodcastListEntry = Podcast & { newestEpisode: string };
+
 /** Return list of Podcasts. */
-export async function GetPodcasts(supabase: SupabaseClient, limit?: number): Promise<Podcast[]> {
-  let query = supabase.from('Podcasts').select('*').order('created_at', { ascending: false });
-  if (limit) {
-    query = query.limit(limit);
-  }
-  const { data, error } = await query;
+export async function GetPodcasts(supabase: SupabaseClient, limit?: number): Promise<PodcastListEntry[]> {
+  const { data, error } = await supabase.rpc('all_podcasts', { limit: limit || 100 });
   if (error) {
     console.error('error', error);
     throw error;
@@ -203,31 +202,27 @@ export type LatestEpisode = Omit<Episode, 'podcast'> & { podcast: { slug: string
 /** Return latest episodes. */
 export async function GetLatestEpisodes({
   supabase,
-  limit = 8,
-  ready,
+  limit = 10,
 }: {
   supabase: SupabaseClient;
   limit?: number;
-  ready?: boolean;
 }): Promise<LatestEpisode[]> {
-  let query = supabase
-    .from('Episodes')
-    .select('*, podcast ( slug, title, imageUrl )')
-    .order('pubDate', { ascending: false });
-  if (ready) {
-    query = query
-      .neq('status', null)
-      .neq('status->startedAt', null)
-      .neq('status->completedAt', null)
-      .not('status->>message', 'like', 'Error%');
-  }
-  const { data, error } = await query.limit(limit);
-
+  const { data, error } = await supabase.rpc('latest_episodes', { limit });
   if (error) {
     console.error('error', error);
     throw error;
   }
-  return data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return data.map((e: any) => {
+    return {
+      ...e,
+      podcast: {
+        slug: e.podcastSlug,
+        title: e.podcastTitle,
+        imageUrl: e.podcastImageUrl,
+      },
+    };
+  });
 }
 
 /** Return metadata for the given episode. */
