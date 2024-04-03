@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json({ portalSession });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return NextResponse.json({ error: `Error creating portal session: ${JSON.stringify(err)}` }, { status: 500 });
   }
 }

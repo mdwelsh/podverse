@@ -18,6 +18,9 @@ import {
   UpdateSpeakerMap,
   Search,
   SearchResult,
+  GetPodcastSuggestions,
+  GetPodcastWithEpisodes,
+  GetEpisodeWithPodcastBySlug,
 } from 'podverse-utils';
 import { Usage } from '@/lib/plans';
 import { getSupabaseClient, getSupabaseClientWithToken } from '@/lib/supabase';
@@ -25,11 +28,31 @@ import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { inngest } from '@/inngest/client';
 import { GetUsage } from '@/lib/plans';
+import { ReportIssueTemplate } from '@/components/EmailTemplates';
+import { Resend } from 'resend';
 
 /** Get the given podcast. */
 export async function getPodcast(podcastId: string): Promise<Podcast> {
   const supabase = await getSupabaseClient();
   return GetPodcastByID(supabase, podcastId);
+}
+
+/** Get the given podcast and episodes. */
+export async function getPodcastWithEpisodes(slug: string): Promise<PodcastWithEpisodes> {
+  const supabase = await getSupabaseClient();
+  return GetPodcastWithEpisodes(supabase, slug);
+}
+
+/** Get the given episode and podcast metadata. */
+export async function getEpisodeWithPodcast(podcastSlug: string, episodeSlug: string): Promise<EpisodeWithPodcast> {
+  const supabase = await getSupabaseClient();
+  return GetEpisodeWithPodcastBySlug(supabase, podcastSlug, episodeSlug);
+}
+
+/** Get suggested queries for the given podcast. */
+export async function getPodcastSuggestions(podcastId: number): Promise<string[]> {
+  const supabase = await getSupabaseClient();
+  return await GetPodcastSuggestions(supabase, podcastId);
 }
 
 /** Update the given episode. */
@@ -200,4 +223,20 @@ export async function updateSpeaker(episodeId: number, speaker: string, name: st
 export async function search(query: string): Promise<SearchResult[]> {
   const supabase = await getSupabaseClient();
   return Search({ supabase, input: query, includeVector: false });
+}
+
+/** Send a report issue email. */
+export async function reportIssue(email: string, issue: string): Promise<string> {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const { data, error } = await resend.emails.send({
+    from: 'Ziggy Labs Help <help@ziggylabs.ai>',
+    to: ['matt@ziggylabs.ai'],
+    subject: 'Issue reported by Podverse user',
+    react: ReportIssueTemplate({ email, issue }),
+  });
+  if (error) {
+    console.error('Error sending email', error);
+    throw error;
+  }
+  return JSON.stringify(data);
 }

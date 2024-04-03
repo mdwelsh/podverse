@@ -41,7 +41,6 @@ export function NewPodcastDialog() {
 
       readPodcastFeed(rssUrl)
         .then((data) => {
-          console.log('Fetched: ', data);
           setPodcast(data);
           setStage(importStage.VALIDATING);
         })

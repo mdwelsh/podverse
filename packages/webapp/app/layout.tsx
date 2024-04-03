@@ -12,7 +12,8 @@ import { Toaster } from '@/components/ui/sonner';
 import { FloatingChatPanel } from '@/components/ChatPanel';
 import { dark } from '@clerk/themes';
 import { Analytics } from '@vercel/analytics/react';
-import { currentUser } from '@clerk/nextjs/server';
+import { ChatContextProvider } from '@/components/ChatContext';
+import { Chat } from '@/components/Chat';
 
 export const metadata: Metadata = {
   title: {
@@ -40,7 +41,7 @@ interface RootLayoutProps {
 
 export default async function RootLayout({ children }: RootLayoutProps) {
   // For now, restrict usage on production.
-  // let comingSoon = false;
+  let comingSoon = false;
   // if (process.env.VERCEL_ENV === 'production') {
   //   const user = await currentUser();
   //   // This is the mdwelsh Github user.
@@ -68,20 +69,22 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           <head />
           <body className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
             <ThemeProvider attribute="class" forcedTheme="dark" defaultTheme="dark">
-              <div className="relative flex min-h-screen flex-col w-full">
-                {comingSoon ? (
-                  'Coming soon'
-                ) : (
-                  <>
-                    <SiteHeader />
-                    <div className="flex-1">{children}</div>
-                    <FloatingChatPanel />
-                    <Footer />
-                    <Toaster richColors />
-                  </>
-                )}
-              </div>
-              <TailwindIndicator />
+                <div className="relative flex min-h-screen flex-col w-full">
+                  {comingSoon ? (
+                    'Coming soon'
+                  ) : (
+                    <>
+                      <SiteHeader />
+                      <div className="flex-1">{children}</div>
+                      <ChatContextProvider>
+                        <FloatingChatPanel />
+                      </ChatContextProvider>
+                      <Footer />
+                      <Toaster richColors />
+                    </>
+                  )}
+                </div>
+                <TailwindIndicator />
             </ThemeProvider>
             <Analytics />
           </body>

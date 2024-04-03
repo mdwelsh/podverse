@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { CreateMessage, Message } from 'ai';
 import { useChat } from 'ai/react';
 import { cn } from '@/lib/utils';
-import { useEffect, useRef, type RefObject } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import Textarea from 'react-textarea-autosize';
 import {
   ArrowDownIcon,
@@ -20,6 +20,8 @@ import { Button } from '@/components/ui/button';
 import { timeString } from '@/lib/time';
 import { useScrollAnchor } from '@/lib/use-scroll-anchor';
 import { Icons } from '@/components/icons';
+import { EpisodeWithPodcast, PodcastWithEpisodes } from 'podverse-utils';
+import { useChatContext } from '../ChatContext';
 
 export const MemoizedReactMarkdown: FC<Options> = memo(
   ReactMarkdown,
@@ -73,7 +75,7 @@ export function PromptForm({
       }}
       ref={formRef}
     >
-      <div className="relative flex max-h-60 w-full grow flex-row justify-between items-center">
+      <div className="relative flex max-h-60 w-full grow flex-row items-center justify-between">
         {isLoading && <div className="bg-background absolute inset-0 z-10 opacity-50" />}
         <Textarea
           ref={inputRef}
@@ -88,7 +90,7 @@ export function PromptForm({
         />
         <div className="w-12">
           {isLoading ? (
-            <Icons.spinner className="mx-auto text-primary size-6 animate-spin" />
+            <Icons.spinner className="text-primary mx-auto size-6 animate-spin" />
           ) : (
             <Button variant="ghost" type="submit" size="icon" disabled={input === ''}>
               <PaperAirplaneIcon className="text-primary size-6" />
@@ -123,8 +125,8 @@ function ChatPanel({
   isAtBottom: boolean;
 }) {
   return (
-    <div className="bg-background absolute bottom-0 w-full flex flex-col gap-2">
-      <div className="ml-auto text-muted-foreground">
+    <div className="bg-background absolute bottom-0 flex w-full flex-col gap-2">
+      <div className="text-muted-foreground ml-auto">
         <Button variant="ghost" onClick={scrollToBottom}>
           <ArrowDownIcon className="mr-2 size-4" /> Scroll to bottom
         </Button>
@@ -158,11 +160,11 @@ function ChatSuggestion({ text, onClick }: { text: string; onClick: () => void }
       }
       onClick={onClick}
     >
-      <div className="flex flex-row items-start gap-1 mx-2">
-        <div className="w-12 mt-4">
+      <div className="mx-2 flex flex-row items-start gap-1">
+        <div className="mt-4 w-12">
           <QuestionMarkCircleIcon className="size-6" />
         </div>
-        <div className="p-4 font-mono text-sm break-words">{text}</div>
+        <div className="break-words p-4 font-mono text-sm">{text}</div>
       </div>
     </div>
   );
@@ -275,16 +277,41 @@ function EmptyChat() {
 }
 
 export function Chat({
-  initialMessages,
+  greeting,
+  suggestions,
   episodeId,
   podcastId,
 }: {
-  initialMessages?: Message[];
+  greeting?: string;
+  suggestions?: string[];
   episodeId?: number;
   podcastId?: number;
 }) {
+  // We keep the randomized suggestions in state so it does not change on every render.
+  const [randomSuggestions, setRandomSuggestions] = useState<string[]>([]);
+  useEffect(() => {
+    setRandomSuggestions(suggestions ? suggestions.sort(() => 0.5 - Math.random()).slice(0, 3) : []);
+  }, [suggestions]);
+
+  const initialMessages: CreateMessage[] = [
+    {
+      content:
+        greeting ||
+        "Hi there! I'm the Podverse AI Bot. You can ask me questions about any of the podcasts on this site.",
+      role: 'assistant',
+    },
+  ];
+
+  if (randomSuggestions.length) {
+    initialMessages.push({
+      content:
+        'Here are some suggestions to get you started:\n' + randomSuggestions.map((s) => `[${s}](/?suggest)`).join(' '),
+      role: 'assistant',
+    });
+  }
+
   const { messages, append, reload, stop, isLoading, input, setInput } = useChat({
-    initialMessages,
+    initialMessages: initialMessages.map((m, i) => ({ ...m, id: i.toString() })),
     body: { episodeId, podcastId },
   });
   const { messagesRef, scrollRef, visibilityRef, isAtBottom, scrollToBottom } = useScrollAnchor();
@@ -314,4 +341,29 @@ export function Chat({
       />
     </div>
   );
+}
+
+export function ContextAwareChat() {
+  const { podcast, episode } = useChatContext();
+  const greeting =
+    "Hi there! I'm the Podverse AI Bot. You can ask me questions about any of the podcasts on this site.";
+  const suggestions = ['What are some good science podcasts?', 'Are there any episodes about music?', 'Report a bug'];
+
+  if (episode) {
+    return <EpisodeContextChat episode={episode} />;
+  } else if (podcast) {
+    return <PodcastContextChat podcast={podcast} />;
+  } else {
+    return <Chat greeting={greeting} suggestions={suggestions} />;
+  }
+}
+
+export function PodcastContextChat({ podcast }: { podcast: PodcastWithEpisodes }) {
+  const greeting = `Hi there! I\'m the Podverse AI Bot. You can ask me questions about the **${podcast.title}** podcast.`;
+  return <Chat podcastId={podcast.id} greeting={greeting} suggestions={podcast.suggestions} />;
+}
+
+export function EpisodeContextChat({ episode }: { episode: EpisodeWithPodcast }) {
+  const greeting = `Hi there! I\'m the Podverse AI Bot. You can ask me questions about **${episode.title}** or the **${episode.podcast.title}** podcast.`;
+  return <Chat episodeId={episode.id} greeting={greeting} suggestions={episode.suggestions} />;
 }

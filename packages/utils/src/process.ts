@@ -9,7 +9,7 @@ import {
   GetSpeakerMap,
   UpdateSpeakerMap,
   GetPodcastByID,
-  GetEpisodeSuggestions,
+  GetSuggestions,
   AddSuggestion,
   DeleteSuggestions
 } from './storage.js';
@@ -291,7 +291,7 @@ export async function SuggestEpisode({
   }
 
   // Check for existing suggestions.
-  let suggestions = await GetEpisodeSuggestions(supabase, episode.id);
+  let suggestions = await GetSuggestions(supabase, episode.id);
   if (Object.keys(suggestions).length > 0) {
     if (!force) {
       return `Episode ${episode.id} already has suggestions.`;

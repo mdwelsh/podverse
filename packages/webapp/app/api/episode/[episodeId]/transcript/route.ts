@@ -6,7 +6,6 @@ import { inngest } from '@/inngest/client';
 export async function POST(req: Request, { params }: { params: { episodeId: string } }) {
   console.log(`Got transcript callback for episode: ${params.episodeId}`);
   const data = await req.json();
-  console.log('Deepgram callback data:', data);
 
   // @ts-expect-error
   const supabaseAccessToken = req.nextUrl.searchParams.get('supabaseAccessToken');

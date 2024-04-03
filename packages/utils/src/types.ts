@@ -7,10 +7,18 @@ export type Episode = Tables<'Episodes'>;
 export type User = Tables<'Users'>;
 export type Subscription = Tables<'Subscriptions'>;
 
+/** Mapping from speaker ID to name. */
 export type Speakers = Record<string, string>;
 
+/** Query suggestions for a given podcast or episode. */
+export type Suggestions = string[];
+
 /** An Episode where the podcast field is replaced with the Podcast object itself. */
-export type EpisodeWithPodcast = Omit<Episode, 'podcast'> & { podcast: Podcast; speakers?: Speakers };
+export type EpisodeWithPodcast = Omit<Episode, 'podcast'> & {
+  podcast: Podcast;
+  speakers?: Speakers;
+  suggestions?: Suggestions;
+};
 
 /** Podcast metadata (that is, RSS feed data) only. */
 export type PodcastMetadata = Omit<Podcast, 'id' | 'created_at' | 'modified_at' | 'owner'> & {
@@ -44,13 +52,14 @@ export type EpisodeMetadata = Omit<
 export type EpisodeWithPodcastMetadata = Omit<EpisodeMetadata, 'podcast'> & {
   podcast: PodcastMetadata;
   speakers?: Speakers;
+  suggestions?: Suggestions;
 };
 
 /** A Podcast with a list of episodes. */
-export type PodcastWithEpisodes = Podcast & { Episodes: Episode[] };
+export type PodcastWithEpisodes = Podcast & { Episodes: Episode[]; suggestions?: Suggestions };
 
 /** Podcast metadata with a list of Episode metadata. */
-export type PodcastWithEpisodesMetadata = PodcastMetadata & { Episodes: EpisodeMetadata[] };
+export type PodcastWithEpisodesMetadata = PodcastMetadata & { Episodes: EpisodeMetadata[]; suggestions?: Suggestions };
 
 /** Type of the Episodes.status field. */
 export type EpisodeStatus = {
@@ -59,5 +68,3 @@ export type EpisodeStatus = {
   completedAt?: string;
 };
 
-/** Type of the Users.plan field. */
-export type UserPlan = {};

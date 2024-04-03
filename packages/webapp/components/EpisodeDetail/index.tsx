@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getSupabaseClient } from '@/lib/supabase';
-import { Episode, EpisodeWithPodcast, GetEpisodeWithPodcastBySlug, GetEpisodeSuggestions } from 'podverse-utils';
+import { EpisodeWithPodcast, GetEpisodeWithPodcastBySlug } from 'podverse-utils';
 import moment from 'moment';
 import { EpisodeIndicator } from '../Indicators';
 import { ArrowTopRightOnSquareIcon, RssIcon, GlobeAmericasIcon } from '@heroicons/react/24/outline';
@@ -16,7 +16,7 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: 0 };
 
   return (
-    <div className="w-full grid grid-cols-4 gap-4 font-mono mb-4">
+    <div className="mb-4 grid w-full grid-cols-4 gap-4 font-mono">
       <div className="text-muted-foreground col-span-4">
         From{' '}
         <Link href={`/podcast/${episode.podcast.slug}`}>
@@ -42,7 +42,7 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
         <CollapseWithToggle
           extra={
             <div className="flex flex-col gap-2">
-              <div className="flex flex-col lg:flex-row gap-2">
+              <div className="flex flex-col gap-2 lg:flex-row">
                 <div className="text-muted-foreground font-mono text-sm">
                   Published <span className="text-primary">{moment(episode.pubDate).format('MMMM Do YYYY')}</span>
                 </div>
@@ -55,7 +55,7 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
                 <Owner owner={episode.podcast.owner}>
                   <ManageEpisodeDialog episode={episodeWithoutPodcast}>
                     <div className={cn(buttonVariants({ variant: 'outline' }))}>
-                      <div className="flex flex-row gap-2 items-center">
+                      <div className="flex flex-row items-center gap-2">
                         <EpisodeIndicator episode={episodeWithoutPodcast} />
                         Manage episode
                       </div>
@@ -103,7 +103,7 @@ async function EpisodeSummary({ episode }: { episode: EpisodeWithPodcast }) {
         <div>
           <h1>Summary</h1>
         </div>
-        <div className="size-full overflow-y-auto border p-4 text-xs flex flex-col gap-2">
+        <div className="flex size-full flex-col gap-2 overflow-y-auto border p-4 text-xs">
           <div className="text-muted-foreground text-sm">Summary not available</div>
         </div>
       </div>
@@ -125,8 +125,6 @@ async function EpisodeSummary({ episode }: { episode: EpisodeWithPodcast }) {
 export async function EpisodeDetail({ podcastSlug, episodeSlug }: { podcastSlug: string; episodeSlug: string }) {
   const supabase = await getSupabaseClient();
   const episode = await GetEpisodeWithPodcastBySlug(supabase, podcastSlug, episodeSlug);
-  const suggestedQueries = await GetEpisodeSuggestions(supabase, episode.id);
-  const randomSuggestions = suggestedQueries.sort(() => 0.5 - Math.random()).slice(0, 3);
 
   // Check if there are any Documents for this episode.
   const { data: documents, error } = await supabase.from('Documents').select('id').eq('episode', episode.id);
@@ -136,12 +134,12 @@ export async function EpisodeDetail({ podcastSlug, episodeSlug }: { podcastSlug:
   const chatAvailable = (documents && documents.length > 0) || false;
 
   return (
-    <div className="mt-8 mx-auto w-11/12 md:w-4/5 font-mono">
+    <div className="mx-auto mt-8 w-11/12 font-mono md:w-4/5">
       <EpisodeHeader episode={episode} />
       {isReady(episode) ? (
         <>
           <EpisodeSummary episode={episode} />
-          <EpisodeClient episode={episode} suggestedQueries={randomSuggestions} chatAvailable={chatAvailable} />
+          <EpisodeClient episode={episode} chatAvailable={chatAvailable} />
         </>
       ) : (
         <div className="mt-8">This episode has not yet been processed.</div>

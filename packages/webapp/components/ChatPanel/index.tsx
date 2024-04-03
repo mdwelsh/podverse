@@ -1,7 +1,6 @@
 'use client';
 
-import { CreateMessage } from 'ai';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import {
   Drawer,
   DrawerClose,
@@ -12,42 +11,31 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import Image from 'next/image';
-import { Chat } from '@/components/Chat';
+import { ContextAwareChat } from '@/components/Chat';
 import { usePathname } from 'next/navigation';
 
-export function ChatPanel({ children }: { children: React.ReactNode }) {
-  const suggestedQueries: string[] = [
-    'What are some good science podcasts?',
-    'Are there any episodes about music?',
-    'What does this website do, anyway?',
-  ];
-  const initialMessages: CreateMessage[] = [
-    {
-      content: `Hi there! I\'m the Podverse AI Bot. You can ask me questions about any of the podcasts on this site.`,
-      role: 'assistant',
-    },
-    {
-      content:
-        'Here are some suggestions to get you started:\n' + suggestedQueries.map((s) => `[${s}](/?suggest)`).join(' '),
-      role: 'assistant',
-    },
-  ];
+const DEFAULT_SUGGESTED_QUERIES = [
+  'What are some good science podcasts?',
+  'Are there any episodes about music?',
+  'Report a bug',
+];
+
+export function ChatPanel({ children, suggestedQueries }: { children: React.ReactNode; suggestedQueries?: string[] }) {
+  const queries = suggestedQueries || DEFAULT_SUGGESTED_QUERIES;
 
   return (
     <Drawer>
       <DrawerTrigger>{children}</DrawerTrigger>
-      <DrawerContent className="h-full w-full md:w-4/5 mx-auto">
+      <DrawerContent className="mx-auto size-full md:w-4/5">
         <DrawerHeader>
-          <DrawerTitle className="font-mono text-primary mx-auto">Podverse AI Chat</DrawerTitle>
+          <DrawerTitle className="text-primary mx-auto font-mono">Podverse AI Chat</DrawerTitle>
         </DrawerHeader>
-        <div className="mx-auto w-full md:w-3/5 overflow-scroll">
-          <Chat initialMessages={initialMessages.map((m, i) => ({ ...m, id: i.toString() }))} />
+        <div className="mx-auto w-full overflow-scroll md:w-3/5">
+          <ContextAwareChat />
         </div>
         <DrawerFooter>
           <DrawerClose>
-            <Button variant="outline" className="text-primary">
-              Close chat
-            </Button>
+            <div className={buttonVariants({ variant: 'outline' })}>Close chat</div>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
@@ -66,11 +54,11 @@ export function FloatingChatPanel() {
   return (
     <ChatPanel>
       <div className={divClass}>
-        <div className="relative inline-flex group cursor-pointer">
-          <div className="z-5 absolute -inset-1 bg-gradient-to-tr from-primary to-primary rounded-full blur opacity-25 group-hover:opacity-80 transition duration-1000 group-hover:duration-200"></div>
+        <div className="group relative inline-flex cursor-pointer">
+          <div className="z-5 from-primary to-primary absolute -inset-1 rounded-full bg-gradient-to-tr opacity-25 blur transition duration-1000 group-hover:opacity-80 group-hover:duration-200"></div>
           <div
             role="button"
-            className="z-10 bg-muted flex flex-row font-mono items-center gap-2 p-4 rounded-full border border-primary h-18"
+            className="bg-muted border-primary h-18 z-10 flex flex-row items-center gap-2 rounded-full border p-4 font-mono"
           >
             <Image src="/images/podverse-logo.svg" alt="Podverse" width={40} height={40} />
             AI Chat

@@ -69,7 +69,7 @@ export type Usage = {
 export async function GetUsage(supabase: SupabaseClient, userId: string): Promise<Usage> {
   const { data, error } = await supabase.from('Podcasts').select('*, Episodes(*)').filter('owner', 'eq', userId);
   if (error) {
-    console.log('error', error);
+    console.error('Error fetching podcasts for user:', error);
     throw error;
   }
   const episodesProcessed: Record<string, number> = {};
@@ -79,7 +79,7 @@ export async function GetUsage(supabase: SupabaseClient, userId: string): Promis
   }
   const { data: planName, error: error2 } = await supabase.from('Users').select('plan').eq('id', userId);
   if (error2) {
-    console.log('error', error2);
+    console.error('Error fetching plan for user:', error2);
     throw error2;
   }
   if (!planName || planName.length === 0) {

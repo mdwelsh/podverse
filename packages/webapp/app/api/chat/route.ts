@@ -6,6 +6,7 @@ import { Tool, ToolCallPayload } from 'ai';
 import { VectorSearch, EpisodeWithPodcast, GetEpisode, GetEpisodeWithPodcast } from 'podverse-utils';
 import { getSupabaseClient } from '@/lib/supabase';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { reportIssue } from '@/lib/actions';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -122,9 +123,34 @@ export async function POST(req: Request) {
           properties: {
             query: {
               type: 'string',
+              description: 'The query to search for in the knowledge base.',
             },
           },
           required: ['query'],
+        },
+      },
+    },
+    {
+      type: 'function',
+      function: {
+        name: 'reportIssue',
+        description:
+          'Report an issue regarding the content or functionality of the site. Before calling this function, please ask for details on the issue from the user, and ask for their email address if they would like a follow up reply from us.',
+        parameters: {
+          type: 'object',
+          properties: {
+            issue: {
+              type: 'string',
+              description:
+                'A detailed description of the issue reported by the user. If the user has not specified details, do not call this function, and request additional details instead.',
+            },
+            email: {
+              type: 'string',
+              description:
+                'The email address of the user reporting the issue. This is optional, but you should encourage the user to provide this information so we can follow up with them if necessary.',
+            },
+          },
+          required: ['issue'],
         },
       },
     },
@@ -171,6 +197,28 @@ export async function POST(req: Request) {
               stream: true,
               tools,
               tool_choice: 'auto',
+            });
+          } else if (toolCall.func.name === 'reportIssue') {
+            const args = JSON.parse(toolCall.func.arguments as unknown as string);
+            console.log(`reportIssue: Reporting issue from ${args.email}: ${args.issue}`);
+            await reportIssue(args.email, args.issue);
+            const newMessages = appendToolCallMessage({
+              tool_call_id: toolCall.id,
+              function_name: 'reportIssue',
+              tool_call_result: {
+                role: 'system',
+                content: 'Your issue has been reported. Thank you for your feedback!',
+              },
+            });
+            return openai.chat.completions.create({
+              messages: [
+                ...messages,
+                ...newMessages,
+              ],
+              model: 'gpt-4-turbo-preview',
+              stream: true,
+              tools,
+              tool_choice: 'none',
             });
           }
         }

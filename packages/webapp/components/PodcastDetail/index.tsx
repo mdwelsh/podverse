@@ -1,12 +1,12 @@
 import { getSupabaseClient } from '@/lib/supabase';
-import { PodcastWithEpisodes, GetPodcastWithEpisodes, GetUser, GetPodcastSuggestions } from 'podverse-utils';
+import { PodcastWithEpisodes, GetPodcastWithEpisodes } from 'podverse-utils';
 import { PodcastEpisodeList } from '@/components/PodcastEpisodeList';
 import Link from 'next/link';
 import { ArrowTopRightOnSquareIcon, RssIcon, GlobeAmericasIcon } from '@heroicons/react/24/outline';
 import { Owner } from '@/components/Owner';
 import { ManagePodcastDialog } from '@/components/ManagePodcastDialog';
-import { Chat } from '@/components/Chat';
-import { CreateMessage } from 'ai';
+import { ContextAwareChat } from '@/components/Chat';
+import { ChatContextProvider } from '@/components/ChatContext';
 import { isReady } from '@/lib/episode';
 
 async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
@@ -25,7 +25,7 @@ async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
           {podcast.copyright && <div className="text-muted-foreground font-mono text-sm">{podcast.copyright}</div>}
           <div className="flex flex-col gap-2">
             <div className="grid grid-cols-3 gap-2">
-              <div className="text-muted-foreground font-mono text-sm col-span-3 md:col-span-1">
+              <div className="text-muted-foreground col-span-3 font-mono text-sm md:col-span-1">
                 <div>{podcast.Episodes.length} episodes</div>
               </div>
               <PodcastLinks podcast={podcast} />
@@ -65,10 +65,8 @@ function PodcastLinks({ podcast }: { podcast: PodcastWithEpisodes }) {
   );
 }
 
-async function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
-  const supabase = await getSupabaseClient();
-  const suggestedQueries = await GetPodcastSuggestions(supabase, podcast.id);
-  if (!suggestedQueries || suggestedQueries.length === 0) {
+export function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
+  if (!podcast.suggestions || podcast.suggestions.length === 0) {
     return (
       <div className="mt-8 flex h-[800px] w-2/5 flex-col gap-2">
         <div>
@@ -79,26 +77,13 @@ async function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
     );
   }
 
-  const randomSuggestions = suggestedQueries.sort(() => 0.5 - Math.random()).slice(0, 3);
-  const initialMessages: CreateMessage[] = [
-    {
-      content: `Hi there! I\'m the Podverse AI Bot. You can ask me questions about the **${podcast.title}** podcast.`,
-      role: 'assistant',
-    },
-    {
-      content:
-        'Here are some suggestions to get you started:\n' + randomSuggestions.map((s) => `[${s}](/?suggest)`).join(' '),
-      role: 'assistant',
-    },
-  ];
   return (
-    <div className="hidden mt-8 lg:flex h-[800px] w-2/5 flex-col gap-2">
+    <div className="mt-8 hidden h-[800px] w-2/5 flex-col gap-2 lg:flex">
       <div>
         <h1>Chat</h1>
       </div>
       <div className="size-full overflow-y-auto border p-4 text-xs">
-        {/* Assign an ID to each of the initialMessages. */}
-        <Chat podcastId={podcast.id} initialMessages={initialMessages.map((m, i) => ({ ...m, id: i.toString() }))} />
+        <ContextAwareChat />
       </div>
     </div>
   );
@@ -109,23 +94,25 @@ export async function PodcastDetail({ podcastSlug }: { podcastSlug: string }) {
     const supabase = await getSupabaseClient();
     const podcast = await GetPodcastWithEpisodes(supabase, podcastSlug);
     return (
-      <div className="mx-auto mt-8 w-11/12 md:w-4/5">
-        <PodcastHeader podcast={podcast} />
-        <div className="flex flex-row gap-4">
-          <PodcastEpisodeList podcast={podcast} episodes={podcast.Episodes} />
-          {podcast.Episodes.filter(isReady).length > 0 && <PodcastChat podcast={podcast} />}
+      <ChatContextProvider podcast={podcast}>
+        <div className="mx-auto mt-8 w-11/12 md:w-4/5">
+          <PodcastHeader podcast={podcast} />
+          <div className="flex flex-row gap-4">
+            <PodcastEpisodeList podcast={podcast} episodes={podcast.Episodes} />
+            {podcast.Episodes.filter(isReady).length > 0 && <PodcastChat podcast={podcast} />}
+          </div>
         </div>
-      </div>
+      </ChatContextProvider>
     );
   } catch (error) {
     console.error('Error looking up podcast:', error);
     return (
-      <div className="mx-auto mt-8 w-full md:w-4/5 font-mono flex flex-col gap-4">
+      <div className="mx-auto mt-8 flex w-full flex-col gap-4 font-mono md:w-4/5">
         <div>
           Failed to load podcast <span className="text-primary">{podcastSlug}</span>
         </div>
         <div>
-          <Link className="font-mono text-primary underline" href="/">
+          <Link className="text-primary font-mono underline" href="/">
             Go home
           </Link>
         </div>

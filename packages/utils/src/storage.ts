@@ -1,7 +1,6 @@
 /** This module has functions for accessing tables in Supabase. */
 
 import {
-  User,
   Podcast,
   Episode,
   EpisodeMetadata,
@@ -9,13 +8,16 @@ import {
   PodcastWithEpisodes,
   Speakers,
   PodcastMetadata,
-  Subscription
+  Subscription,
+  User,
 } from './types.js';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Upload as TusUpload } from 'tus-js-client';
 import { Readable } from 'stream';
 
-/** Return the User with the given ID. */
+/** User ********************************************************************************/
+
+/** Get the user with the given ID. */
 export async function GetUser(supabase: SupabaseClient, userId: string): Promise<User> {
   const { data, error } = await supabase.from('Users').select('*').eq('id', userId).limit(1);
   if (error) {
@@ -24,6 +26,8 @@ export async function GetUser(supabase: SupabaseClient, userId: string): Promise
   }
   return data[0];
 }
+
+/** Podcasts ********************************************************************************/
 
 /** Return list of Podcasts. */
 export async function GetPodcasts(supabase: SupabaseClient, limit?: number): Promise<Podcast[]> {
@@ -37,198 +41,6 @@ export async function GetPodcasts(supabase: SupabaseClient, limit?: number): Pro
     throw error;
   }
   return data;
-}
-
-/** Return podcasts with episodes. */
-export async function GetPodcastWithEpisodes(supabase: SupabaseClient, slug: string): Promise<PodcastWithEpisodes> {
-  const { data, error } = await supabase
-    .from('Podcasts')
-    .select('*, Episodes (*)')
-    .eq('slug', slug)
-    .order('pubDate', { referencedTable: 'Episodes', ascending: false })
-    .limit(1);
-  if (error) {
-    console.error('error', error);
-    throw error;
-  }
-  if (!data || data.length === 0) {
-    throw new Error(`Podcast with slug ${slug} not found.`);
-  }
-  const podcast = data[0];
-  // Sort the podcast.Episodes list by pubDate.
-  //podcast.Episodes?.sort((a: Episode, b: Episode) => ((a.pubDate || 0) > (b.pubDate || 0) ? -1 : 1));
-  return podcast;
-}
-
-/** Return podcasts with episodes by podcast ID. */
-export async function GetPodcastWithEpisodesByID(
-  supabase: SupabaseClient,
-  podcastId: string,
-): Promise<PodcastWithEpisodes> {
-  const { data, error } = await supabase
-    .from('Podcasts')
-    .select('*, Episodes (*)')
-    .eq('id', podcastId)
-    .order('pubDate', { referencedTable: 'Episodes', ascending: false })
-    .limit(1);
-  if (error) {
-    console.error('error', error);
-    throw error;
-  }
-  if (!data || data.length === 0) {
-    throw new Error(`Podcast with ID ${podcastId} not found.`);
-  }
-  const podcast = data[0];
-  // Sort the podcast.Episodes list by pubDate.
-  //podcast.Episodes?.sort((a: Episode, b: Episode) => ((a.pubDate || 0) > (b.pubDate || 0) ? -1 : 1));
-  return podcast;
-}
-
-/** This is the return value of GetLatestEpisodes. */
-export type LatestEpisode = Omit<Episode, 'podcast'> & { podcast: { slug: string; title: string; imageUrl?: string } };
-
-/** Return latest episodes. */
-export async function GetLatestEpisodes({
-  supabase,
-  limit = 8,
-  ready,
-}: {
-  supabase: SupabaseClient;
-  limit?: number;
-  ready?: boolean;
-}): Promise<LatestEpisode[]> {
-  let query = supabase
-    .from('Episodes')
-    .select('*, podcast ( slug, title, imageUrl )')
-    .order('pubDate', { ascending: false });
-  if (ready) {
-    query = query
-      .neq('status', null)
-      .neq('status->startedAt', null)
-      .neq('status->completedAt', null)
-      .not('status->>message', 'like', 'Error%');
-  }
-  const { data, error } = await query.limit(limit);
-
-  if (error) {
-    console.error('error', error);
-    throw error;
-  }
-  return data;
-}
-
-/** Return list of Episodes with corresponding Podcast info. */
-export async function GetEpisodesWithPodcast(supabase: SupabaseClient): Promise<EpisodeWithPodcast[]> {
-  const { data, error } = await supabase
-    .from('Episodes')
-    .select('*, podcast (*)')
-    .order('pubDate', { ascending: false });
-  if (error) {
-    console.error('error', error);
-    throw error;
-  }
-  return data;
-}
-
-/** Return metadata for the given episode. */
-export async function GetEpisode(supabase: SupabaseClient, episodeId: number): Promise<Episode> {
-  const { data, error } = await supabase.from('Episodes').select('*').eq('id', episodeId).limit(1);
-  if (error) {
-    console.error('error', error);
-    throw error;
-  }
-  if (!data || data.length === 0) {
-    throw new Error(`Episode with ID ${episodeId} not found.`);
-  }
-  return data[0];
-}
-
-/** Return the speaker map for the given episode. */
-export async function GetSpeakerMap(supabase: SupabaseClient, episodeId: number): Promise<Speakers> {
-  const { data, error } = await supabase.from('SpeakerMap').select('*').eq('episode', episodeId);
-  if (error) {
-    console.error('error', error);
-    throw error;
-  }
-  const speakers: Speakers = {};
-  for (const row of data) {
-    speakers[row.speakerId] = row.name;
-  }
-  return speakers;
-}
-
-/** Create or update the given speaker map entry. */
-export async function UpdateSpeakerMap(
-  supabase: SupabaseClient,
-  episodeId: number,
-  speakerId: string,
-  speakerName: string,
-  force: boolean = false,
-) {
-  const entry = { episode: episodeId, speakerId, name: speakerName };
-  if (!force) {
-    const { data: existing, error } = await supabase
-      .from('SpeakerMap')
-      .select('*')
-      .eq('episode', episodeId)
-      .eq('speakerId', speakerId);
-    if (error) {
-      console.error('error', error);
-      throw error;
-    }
-    if (existing && existing.length > 0) {
-      return;
-    }
-  }
-  const { error } = await supabase
-    .from('SpeakerMap')
-    .upsert(entry, { onConflict: 'episode,speakerId', ignoreDuplicates: false })
-    .eq('episode', episodeId);
-  if (error) {
-    throw error;
-  }
-  return;
-}
-
-/** Return metadata for the given episode. */
-export async function GetEpisodeWithPodcast(supabase: SupabaseClient, episodeId: number): Promise<EpisodeWithPodcast> {
-  const { data, error } = await supabase.from('Episodes').select('*, podcast (*)').eq('id', episodeId).limit(1);
-  if (error) {
-    console.error('error', error);
-    throw error;
-  }
-  if (!data || data.length === 0) {
-    throw new Error(`Episode with ID ${episodeId} not found.`);
-  }
-  return {
-    ...data[0],
-    speakers: await GetSpeakerMap(supabase, episodeId),
-  };
-}
-
-/** Return metadata for the given episode. */
-export async function GetEpisodeWithPodcastBySlug(
-  supabase: SupabaseClient,
-  podcastSlug: string,
-  episodeSlug: string,
-): Promise<EpisodeWithPodcast> {
-  const { data, error } = await supabase
-    .from('Episodes')
-    .select('*, podcast (*)')
-    .eq('podcast.slug', podcastSlug)
-    .eq('slug', episodeSlug)
-    .limit(1);
-  if (error) {
-    console.error('error', error);
-    throw error;
-  }
-  if (!data || data.length === 0) {
-    throw new Error(`Episode with slug ${podcastSlug}/${episodeSlug} not found.`);
-  }
-  return {
-    ...data[0],
-    speakers: await GetSpeakerMap(supabase, data[0].id),
-  };
 }
 
 /** Return metadata for the given podcast. */
@@ -336,6 +148,144 @@ export async function DeletePodcast(supabase: SupabaseClient, slug: string) {
   console.log(`Finished deleting podcast: ${slug}`);
 }
 
+/** Return the given podcast with episodes. */
+export async function GetPodcastWithEpisodes(supabase: SupabaseClient, slug: string): Promise<PodcastWithEpisodes> {
+  const { data, error } = await supabase
+    .from('Podcasts')
+    .select('*, Episodes (*)')
+    .eq('slug', slug)
+    .order('pubDate', { referencedTable: 'Episodes', ascending: false })
+    .limit(1);
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  if (!data || data.length === 0) {
+    throw new Error(`Podcast with slug ${slug} not found.`);
+  }
+  const podcast = data[0];
+  return {
+    ...podcast,
+    suggestions: await GetPodcastSuggestions(supabase, podcast.id),
+  };
+}
+
+/** Return podcasts with episodes by podcast ID. */
+export async function GetPodcastWithEpisodesByID(
+  supabase: SupabaseClient,
+  podcastId: string,
+): Promise<PodcastWithEpisodes> {
+  const { data, error } = await supabase
+    .from('Podcasts')
+    .select('*, Episodes (*)')
+    .eq('id', podcastId)
+    .order('pubDate', { referencedTable: 'Episodes', ascending: false })
+    .limit(1);
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  if (!data || data.length === 0) {
+    throw new Error(`Podcast with ID ${podcastId} not found.`);
+  }
+  const podcast = data[0];
+  return {
+    ...podcast,
+    suggestions: await GetPodcastSuggestions(supabase, podcast.id),
+  };
+}
+
+/** Episodes **************************************************************************/
+
+/** This is the return value of GetLatestEpisodes. */
+export type LatestEpisode = Omit<Episode, 'podcast'> & { podcast: { slug: string; title: string; imageUrl?: string } };
+
+/** Return latest episodes. */
+export async function GetLatestEpisodes({
+  supabase,
+  limit = 8,
+  ready,
+}: {
+  supabase: SupabaseClient;
+  limit?: number;
+  ready?: boolean;
+}): Promise<LatestEpisode[]> {
+  let query = supabase
+    .from('Episodes')
+    .select('*, podcast ( slug, title, imageUrl )')
+    .order('pubDate', { ascending: false });
+  if (ready) {
+    query = query
+      .neq('status', null)
+      .neq('status->startedAt', null)
+      .neq('status->completedAt', null)
+      .not('status->>message', 'like', 'Error%');
+  }
+  const { data, error } = await query.limit(limit);
+
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  return data;
+}
+
+/** Return metadata for the given episode. */
+export async function GetEpisode(supabase: SupabaseClient, episodeId: number): Promise<Episode> {
+  const { data, error } = await supabase.from('Episodes').select('*').eq('id', episodeId).limit(1);
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  if (!data || data.length === 0) {
+    throw new Error(`Episode with ID ${episodeId} not found.`);
+  }
+  return data[0];
+}
+
+/** Return metadata for the given episode. */
+export async function GetEpisodeWithPodcast(supabase: SupabaseClient, episodeId: number): Promise<EpisodeWithPodcast> {
+  const { data, error } = await supabase.from('Episodes').select('*, podcast (*)').eq('id', episodeId).limit(1);
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  if (!data || data.length === 0) {
+    throw new Error(`Episode with ID ${episodeId} not found.`);
+  }
+  return {
+    ...data[0],
+    speakers: await GetSpeakerMap(supabase, episodeId),
+    suggestions: await GetSuggestions(supabase, episodeId),
+  };
+}
+
+/** Return metadata for the given episode. */
+export async function GetEpisodeWithPodcastBySlug(
+  supabase: SupabaseClient,
+  podcastSlug: string,
+  episodeSlug: string,
+): Promise<EpisodeWithPodcast> {
+  const { data, error } = await supabase
+    .from('Episodes')
+    .select('*, podcast (*)')
+    .eq('podcast.slug', podcastSlug)
+    .eq('slug', episodeSlug)
+    .limit(1);
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  if (!data || data.length === 0) {
+    throw new Error(`Episode with slug ${podcastSlug}/${episodeSlug} not found.`);
+  }
+  return {
+    ...data[0],
+    speakers: await GetSpeakerMap(supabase, data[0].id),
+    suggestions: await GetSuggestions(supabase, data[0].id),
+  };
+}
+
 /** Set metadata for the given episode. */
 export async function SetEpisode(supabase: SupabaseClient, episode: Episode): Promise<Episode> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -380,17 +330,101 @@ export async function SetEpisodes(supabase: SupabaseClient, episodes: Episode[] 
   }
 }
 
-// export async function DeleteEpisode(episode: Episode) {
-//   const podcast = await GetPodcast(episode.podcastSlug);
-//   podcast.episodes = podcast.episodes?.filter((ep: Episode) => ep.slug !== episode.slug);
-//   await SetPodcast(podcast);
-// }
+/** Suggestions ***************************************************************************/
 
-// /** Return a list of all episodes in this Podcast. */
-// export async function ListEpisodes(podcastSlug: string): Promise<string[]> {
-//   const podcast = await GetPodcast(podcastSlug);
-//   return podcast.episodes?.map((e: Episode) => e.slug) ?? [];
-// }
+/** Return suggested queries for the given episode. */
+export async function GetSuggestions(supabase: SupabaseClient, episodeId: number): Promise<string[]> {
+  const { data, error } = await supabase.from('Suggestions').select('suggestion').eq('episode', episodeId);
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  const result = data.map((row) => row.suggestion);
+  return result;
+}
+
+/** Return suggested queries for the given podcast. */
+export async function GetPodcastSuggestions(supabase: SupabaseClient, podcastId: number): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('Suggestions')
+    .select('suggestion, Episodes!inner(podcast)')
+    .eq('Episodes.podcast', podcastId);
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  const result = data.map((row) => row.suggestion);
+  return result;
+}
+
+/** Delete all suggestions for the given episode. */
+export async function DeleteSuggestions(supabase: SupabaseClient, episodeId: number) {
+  const { error } = await supabase.from('Suggestions').delete().eq('episode', episodeId);
+  if (error) {
+    throw error;
+  }
+}
+
+/** Add a suggestion. */
+export async function AddSuggestion(supabase: SupabaseClient, episodeId: number, suggestion: string) {
+  const entry = { episode: episodeId, suggestion };
+  const { error } = await supabase.from('Suggestions').insert(entry).eq('episode', episodeId);
+  if (error) {
+    throw error;
+  }
+  return;
+}
+
+/** Speaker map **********************************************************************/
+
+/** Return the speaker map for the given episode. */
+export async function GetSpeakerMap(supabase: SupabaseClient, episodeId: number): Promise<Speakers> {
+  const { data, error } = await supabase.from('SpeakerMap').select('*').eq('episode', episodeId);
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  const speakers: Speakers = {};
+  for (const row of data) {
+    speakers[row.speakerId] = row.name;
+  }
+  return speakers;
+}
+
+/** Create or update the given speaker map entry. */
+export async function UpdateSpeakerMap(
+  supabase: SupabaseClient,
+  episodeId: number,
+  speakerId: string,
+  speakerName: string,
+  force: boolean = false,
+) {
+  const entry = { episode: episodeId, speakerId, name: speakerName };
+  if (!force) {
+    const { data: existing, error } = await supabase
+      .from('SpeakerMap')
+      .select('*')
+      .eq('episode', episodeId)
+      .eq('speakerId', speakerId);
+    if (error) {
+      console.error('error', error);
+      throw error;
+    }
+    if (existing && existing.length > 0) {
+      return;
+    }
+  }
+  const { error } = await supabase
+    .from('SpeakerMap')
+    .upsert(entry, { onConflict: 'episode,speakerId', ignoreDuplicates: false })
+    .eq('episode', episodeId);
+  if (error) {
+    throw error;
+  }
+  return;
+}
+
+/** File storage ***************************************************************************/
 
 /** Use to upload a small file. */
 export async function Upload(
@@ -468,57 +502,7 @@ export async function UploadLargeFile(
   });
 }
 
-/** Return suggested queries for all podcasts. */
-export async function GetSuggestions(supabase: SupabaseClient): Promise<string[]> {
-  const { data, error } = await supabase.from('Suggestions').select('suggestion');
-  if (error) {
-    console.error('error', error);
-    throw error;
-  }
-  return data.map((row) => row.suggestion);
-}
-
-/** Return suggested queries for the given episode. */
-export async function GetEpisodeSuggestions(supabase: SupabaseClient, episodeId: number): Promise<string[]> {
-  const { data, error } = await supabase.from('Suggestions').select('suggestion').eq('episode', episodeId);
-  if (error) {
-    console.error('error', error);
-    throw error;
-  }
-  const result = data.map((row) => row.suggestion);
-  return result;
-}
-
-/** Return suggested queries for the given podcast . */
-export async function GetPodcastSuggestions(supabase: SupabaseClient, podcastId: number): Promise<string[]> {
-  const { data, error } = await supabase
-    .from('Suggestions')
-    .select('suggestion, Episodes!inner(podcast)')
-    .eq('Episodes.podcast', podcastId);
-  if (error) {
-    console.error('error', error);
-    throw error;
-  }
-  return data.map((row) => row.suggestion);
-}
-
-/** Delete all suggestions for the given episode. */
-export async function DeleteSuggestions(supabase: SupabaseClient, episodeId: number) {
-  const { error } = await supabase.from('Suggestions').delete().eq('episode', episodeId);
-  if (error) {
-    throw error;
-  }
-}
-
-/** Add a suggestion. */
-export async function AddSuggestion(supabase: SupabaseClient, episodeId: number, suggestion: string) {
-  const entry = { episode: episodeId, suggestion };
-  const { error } = await supabase.from('Suggestions').insert(entry).eq('episode', episodeId);
-  if (error) {
-    throw error;
-  }
-  return;
-}
+/** Subscriptions ***************************************************************************/
 
 /** Get subscriptions for the given user. */
 export async function GetSubscriptions(supabase: SupabaseClient, userId: string): Promise<Subscription[]> {

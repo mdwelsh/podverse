@@ -25,7 +25,6 @@ export function SearchPanel() {
 
   const onSubmit = () => {
     setBusy(true);
-    console.log('Search query:', query);
     search(query.trim())
       .then((results) => {
         setResults(results);
