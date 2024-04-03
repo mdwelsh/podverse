@@ -22,7 +22,6 @@ export async function POST(req: Request, { params }: { params: { episodeId: stri
     return Response.json({ message: 'Thank you for uploading your transcript.' });
   }
   const deepgramToken = req.headers.get('dg-token');
-  console.error('Got dg-token header on callback:', deepgramToken);
   if (!deepgramToken || deepgramToken !== process.env.DEEPGRAM_API_KEY_IDENTIFIER) {
     console.error('dg-token header mismatch');
     return Response.json({ message: 'Thank you for uploading your transcript.' });
