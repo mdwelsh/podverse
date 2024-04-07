@@ -2,34 +2,30 @@ import { auth } from '@clerk/nextjs/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { NewPodcastDialog } from '@/components/NewPodcastDialog';
 import { PodcastStrip } from '@/components/PodcastStrip';
+import { getPodcastStats, PodcastStat } from '@/lib/actions';
 
 export async function Dashboard() {
   const { userId, protect } = auth();
   protect();
-
   if (!userId) {
     return null;
   }
-  const supabase = await getSupabaseClient();
-  const { data: podcasts, error } = await supabase
-    .from('Podcasts')
-    .select('*, Episodes(*)')
-    .filter('owner', 'eq', userId)
-    .order('created_at', { ascending: false });
-  if (error) {
-    console.log('error', error);
-    throw error;
-  }
+  const podcasts: PodcastStat[] = await getPodcastStats();
+
   return (
-    <div className="mx-auto mt-8 w-3/5 flex flex-col gap-4">
-      <div className="w-full flex flex-row justify-between">
-        <div className="font-mono text-primary text-lg">Your podcasts</div>
+    <div className="mx-auto mt-8 flex w-3/5 flex-col gap-4">
+      <div className="flex w-full flex-row justify-between">
+        <div className="text-primary font-mono text-lg">Your podcasts</div>
         <NewPodcastDialog />
       </div>
-      <div className="w-full flex flex-col p-2 gap-2 text-xs overflow-y-auto h-full">
-        {podcasts.map((podcast, index) => (
-          <PodcastStrip key={index} podcast={podcast} manageable />
-        ))}
+      <div className="flex size-full flex-col gap-2 overflow-y-auto p-2 text-xs">
+        {podcasts.length > 0 ? (
+          podcasts.map((podcast, index) => <PodcastStrip key={index} podcast={podcast} manageable />)
+        ) : (
+          <div className="text-muted-foreground mt-6 font-mono text-base">
+            You have not imported any podcasts yet. Click the <span className="text-primary">New podcast</span> button above to get started.
+          </div>
+        )}
       </div>
     </div>
   );

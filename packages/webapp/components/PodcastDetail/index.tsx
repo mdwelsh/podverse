@@ -32,7 +32,7 @@ async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
             </div>
             <Owner owner={podcast.owner}>
               <div className="mt-2 w-fit">
-                <ManagePodcastDialog podcast={podcast} />
+                <ManagePodcastDialog podcastSlug={podcast.slug} />
               </div>
             </Owner>
           </div>

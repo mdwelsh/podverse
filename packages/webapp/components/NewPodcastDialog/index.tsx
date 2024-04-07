@@ -8,8 +8,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Icons } from '@/components/icons';
-import { Episode, PodcastWithEpisodes, PodcastWithEpisodesMetadata } from 'podverse-utils';
-import { PodcastStrip } from '../PodcastStrip';
+import { Episode, Podcast, PodcastWithEpisodes, PodcastWithEpisodesMetadata } from 'podverse-utils';
 import { EpisodeStrip } from '../PodcastEpisodeList';
 import { readPodcastFeed, importPodcast } from '@/lib/actions';
 
@@ -58,7 +57,8 @@ export function NewPodcastDialog() {
     if (!rssUrl || !podcast) {
       return;
     }
-    importPodcast(rssUrl).then((result) => {
+    importPodcast(rssUrl)
+      .then((result) => {
         setPodcast(null);
         setStage(importStage.ENTER_URL);
         toast.success(`Podcast imported successfully`);
@@ -116,6 +116,20 @@ export function NewPodcastDialog() {
   );
 }
 
+function PodcastPreviewHeader({ podcast }: { podcast: PodcastWithEpisodesMetadata }) {
+  return (
+    <div className="flex w-full flex-row gap-4 overflow-hidden rounded-lg border bg-gray-700 p-4 font-mono text-white dark:bg-gray-700 dark:text-white">
+      <div className="flex size-full flex-row gap-4">
+        <div className="w-1/5">{podcast.imageUrl && <img src={podcast.imageUrl} />}</div>
+        <div className="line-clamp-3 flex w-4/5 flex-col gap-4 truncate text-wrap">
+          <div className="text-primary text-lg">{podcast.title}</div>
+          {podcast.copyright && <div className="text-muted-foreground text-xs">{podcast.copyright}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PodcastPreview({
   podcast,
   onConfirm,
@@ -128,7 +142,7 @@ function PodcastPreview({
   return (
     <div className="w-full flex flex-col gap-2">
       <div className="text-primary text-sm">Here&apos;s a preview of your podcast:</div>
-      <PodcastStrip podcast={podcast as PodcastWithEpisodes} />
+      <PodcastPreviewHeader podcast={podcast} />
       <div className="text-primary text-sm">Newest episodes</div>
       {podcast.Episodes.slice(0, 3).map((episode) => (
         <EpisodeStrip key={episode.id} podcast={podcast as PodcastWithEpisodes} episode={episode as Episode} />

@@ -1,6 +1,6 @@
 'use client';
 
-import { PodcastWithEpisodes } from 'podverse-utils';
+import { GetPodcastWithEpisodesByID, PodcastWithEpisodes } from 'podverse-utils';
 import {
   Dialog,
   DialogClose,
@@ -21,7 +21,7 @@ import { isReady } from '@/lib/episode';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Usage } from '@/lib/plans';
 import Link from 'next/link';
-import { getUsage, deletePodcast, processPodcast, refreshPodcast } from '@/lib/actions';
+import { getUsage, deletePodcast, processPodcast, refreshPodcast, getPodcastWithEpisodes } from '@/lib/actions';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const router = useRouter();
@@ -201,20 +201,33 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   );
 }
 
-export function ManagePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
+export function ManagePodcastDialog({ podcastSlug }: { podcastSlug: string }) {
+  const [podcast, setPodcast] = useState<PodcastWithEpisodes | null>(null);
+
+  useEffect(() => {
+    getPodcastWithEpisodes(podcastSlug)
+      .then((podcast) => setPodcast(podcast))
+      .catch((e) => console.error(e));
+  }, [podcastSlug]);
+
+  const doRefresh = () => {
+    if (podcast) {
+      refreshPodcast(podcast.id.toString())
+        .then(() => {
+          toast.success(`Started refreshing podcast ${podcast.title}`);
+        })
+        .catch((e) => {
+          toast.error('Failed to start refreshing: ' + e.message);
+        });
+    }
+  };
+
+  if (!podcast) {
+    return null;
+  }
   const mostRecentlyPublished = podcast.Episodes
     ? podcast.Episodes.reduce((a, b) => ((a.pubDate || 0) > (b.pubDate || 0) ? a : b))
     : null;
-
-  const doRefresh = () => {
-    refreshPodcast(podcast.id.toString())
-      .then(() => {
-        toast.success(`Started refreshing podcast ${podcast.title}`);
-      })
-      .catch((e) => {
-        toast.error('Failed to start refreshing: ' + e.message);
-      });
-  };
 
   return (
     <Dialog>

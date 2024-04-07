@@ -240,3 +240,27 @@ export async function reportIssue(email: string, issue: string): Promise<string>
   }
   return JSON.stringify(data);
 }
+
+export type PodcastStat = {
+  id: number;
+  title: string;
+  description: string;
+  slug: string;
+  owner: string;
+  imageUrl: string;
+  newest: string;
+  newestprocessed: string;
+  allepisodes: number;
+  processed: number;
+  inprogress: number;
+  errors: number;
+};
+
+export async function getPodcastStats(): Promise<PodcastStat[]> {
+  const supabase = await getSupabaseClient();
+  const { data, error } = await supabase.rpc("podcast_stats");
+  if (error) {
+    throw error;
+  }
+  return data;
+}
