@@ -20,14 +20,16 @@ import {
   SearchResult,
   GetPodcastSuggestions,
   GetPodcastWithEpisodes,
+  GetSubscriptions,
   GetEpisodeWithPodcastBySlug,
+  Subscription,
 } from 'podverse-utils';
-import { Usage } from '@/lib/plans';
+import { SubscriptionState } from './plans';
+import { PodcastStat } from '@/lib/plans';
 import { getSupabaseClient, getSupabaseClientWithToken } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { inngest } from '@/inngest/client';
-import { GetUsage } from '@/lib/plans';
 import { ReportIssueTemplate } from '@/components/EmailTemplates';
 import { Resend } from 'resend';
 
@@ -162,14 +164,26 @@ export async function importPodcast(rssUrl: string): Promise<PodcastWithEpisodes
   return podcast;
 }
 
-/** Return usage for the current user. */
-export async function getUsage(): Promise<Usage> {
+/** Return the active subscription for the current user, or null if they have no subscription. */
+export async function getCurrentSubscription(): Promise<Subscription | null> {
   const { userId } = auth();
   if (!userId) {
     throw new Error('Unauthorized');
   }
   const supabase = await getSupabaseClient();
-  return GetUsage(supabase, userId);
+  const allsubs = await GetSubscriptions(supabase, userId);
+  // First check for an active sub.
+  const activeSubs = allsubs.filter((s) => s.state === SubscriptionState.Active);
+  if (activeSubs.length > 0) {
+    return activeSubs[0];
+  }
+  // Next check for a cancel pending sub.
+  const canceledSubs = allsubs.filter((s) => s.state === SubscriptionState.CancelPending);
+  if (canceledSubs.length > 0) {
+    return canceledSubs[0];
+  }
+  // Otherwise the user is on the free plan.
+  return null;
 }
 
 /** Delete the given podcast. */
@@ -241,26 +255,12 @@ export async function reportIssue(email: string, issue: string): Promise<string>
   return JSON.stringify(data);
 }
 
-export type PodcastStat = {
-  id: number;
-  title: string;
-  description: string;
-  slug: string;
-  owner: string;
-  imageUrl: string;
-  newest: string;
-  newestprocessed: string;
-  allepisodes: number;
-  processed: number;
-  inprogress: number;
-  errors: number;
-};
-
+/** Return podcast stats. */
 export async function getPodcastStats(): Promise<PodcastStat[]> {
   const supabase = await getSupabaseClient();
-  const { data, error } = await supabase.rpc("podcast_stats");
+  const { data, error } = await supabase.rpc('podcast_stats');
   if (error) {
     throw error;
   }
   return data;
-}
+};

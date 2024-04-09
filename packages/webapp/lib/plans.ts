@@ -1,6 +1,3 @@
-import { SupabaseClient } from '@supabase/supabase-js';
-import { isReady } from '@/lib/episode';
-
 /** Represents the state field of the Subscriptions table. */
 export enum SubscriptionState {
   Active = 'active',
@@ -56,50 +53,17 @@ export const PLANS: Record<string, Plan> = {
   },
 };
 
-export type Usage = {
-  /** User's current plan. */
-  plan: Plan;
-  /** Mapping from podcast ID to number of processed episodes. */
-  episodesProcessed: Record<string, number>;
-  /** User's current chat session usage. */
-  chatSessionCount: number;
+export type PodcastStat = {
+  id: number;
+  title: string;
+  description: string;
+  slug: string;
+  owner: string;
+  imageUrl: string;
+  newest: string;
+  newestprocessed: string;
+  allepisodes: number;
+  processed: number;
+  inprogress: number;
+  errors: number;
 };
-
-/** Return the current usage record for the given user. */
-export async function GetUsage(supabase: SupabaseClient, userId: string): Promise<Usage> {
-  const { data, error } = await supabase.from('Podcasts').select('*, Episodes(*)').filter('owner', 'eq', userId);
-  if (error) {
-    console.error('Error fetching podcasts for user:', error);
-    throw error;
-  }
-  const episodesProcessed: Record<string, number> = {};
-  for (const podcast of data || []) {
-    const episodes = podcast.Episodes || [];
-    episodesProcessed[podcast.id] = episodes.filter(isReady).length;
-  }
-  const { data: planName, error: error2 } = await supabase.from('Users').select('plan').eq('id', userId);
-  if (error2) {
-    console.error('Error fetching plan for user:', error2);
-    throw error2;
-  }
-  if (!planName || planName.length === 0) {
-    throw new Error('No plan found for user: ' + userId);
-  }
-
-  // No plan means free plan.
-  if (!planName[0].plan) {
-    planName[0].plan = 'free';
-  }
-
-  // Test if planName is a key of PLANS.
-  if (!(planName[0].plan in PLANS)) {
-    throw new Error('Invalid plan name: ' + JSON.stringify(planName));
-  }
-  const plan = PLANS[planName[0].plan];
-
-  return {
-    plan,
-    episodesProcessed,
-    chatSessionCount: 0, // TODO: Count these.
-  };
-}

@@ -5,38 +5,11 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { GetSubscriptions, Subscription } from 'podverse-utils';
 import { auth } from '@clerk/nextjs/server';
 import { SignupOrLogin } from '@/components/SignupOrLogin';
+import { getCurrentSubscription } from '@/lib/actions';
 
-/** Returns the user's existing subscription, null if user is logged in but has no sub, and
- * undefined if the user is not logged in.
- */
-async function currentSubscription(): Promise<Subscription | null | undefined> {
-  const { userId } = auth();
-  const supabase = await getSupabaseClient();
-  if (!userId) {
-    return undefined;
-  }
-  try {
-    let existingSubscriptions = (await GetSubscriptions(supabase, userId)).filter(
-      (s) => s.state === SubscriptionState.Active || s.state === SubscriptionState.CancelPending,
-    );
-    if (existingSubscriptions.length > 1) {
-      // Not clear what to do if we have multiple subs. Seems like we could have a state where
-      // the user bought a plan, canceled it, bought another plan, canceled it, etc. For now we
-      // just return the first one.
-      existingSubscriptions = existingSubscriptions.filter((s) => s.state === SubscriptionState.Active);
-    }
-    if (existingSubscriptions.length >= 1) {
-      return existingSubscriptions[0];
-    } else {
-      return null;
-    }
-  } catch (error) {
-    console.error('Error determining existing sub:', error);
-  }
-}
 
 export default async function Page() {
-  const existingSubscription = await currentSubscription();
+  const existingSubscription = await getCurrentSubscription();
   let existingPlan: Plan | undefined = undefined;
   if (existingSubscription) {
     existingPlan = Object.values(PLANS).find((p) => p.id === existingSubscription?.plan) ?? PLANS.free;

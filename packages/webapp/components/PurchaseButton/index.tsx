@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { Plan } from '@/lib/plans';
 import { Button } from '@/components/ui/button';
 import { loadStripe } from '@stripe/stripe-js';

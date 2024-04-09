@@ -5,7 +5,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { isError, isProcessing, isReady } from '@/lib/episode';
 import { Icons } from '@/components/icons';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { PodcastStat } from '@/lib/actions';
+import { PodcastStat } from '@/lib/plans';
 
 export function PodcastStrip({
   podcast,

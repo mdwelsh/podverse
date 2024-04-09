@@ -2,7 +2,8 @@ import { auth } from '@clerk/nextjs/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { NewPodcastDialog } from '@/components/NewPodcastDialog';
 import { PodcastStrip } from '@/components/PodcastStrip';
-import { getPodcastStats, PodcastStat } from '@/lib/actions';
+import { getPodcastStats } from '@/lib/actions';
+import { PodcastStat } from '@/lib/plans';
 
 export async function Dashboard() {
   const { userId, protect } = auth();

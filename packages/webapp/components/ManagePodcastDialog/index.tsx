@@ -1,6 +1,6 @@
 'use client';
 
-import { GetPodcastWithEpisodesByID, PodcastWithEpisodes } from 'podverse-utils';
+import { GetPodcastWithEpisodesByID, PodcastWithEpisodes, Subscription } from 'podverse-utils';
 import {
   Dialog,
   DialogClose,
@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button, buttonVariants } from '@/components/ui/button';
-import moment, { max } from 'moment';
+import moment from 'moment';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -19,9 +19,16 @@ import { ArrowPathIcon, TrashIcon, BoltIcon, ExclamationTriangleIcon } from '@he
 import { useEffect, useState } from 'react';
 import { isReady } from '@/lib/episode';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Usage } from '@/lib/plans';
 import Link from 'next/link';
-import { getUsage, deletePodcast, processPodcast, refreshPodcast, getPodcastWithEpisodes } from '@/lib/actions';
+import {
+  getCurrentSubscription,
+  getPodcastStats,
+  deletePodcast,
+  processPodcast,
+  refreshPodcast,
+  getPodcastWithEpisodes,
+} from '@/lib/actions';
+import { PodcastStat, Plan, PLANS } from '@/lib/plans';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const router = useRouter();
@@ -72,69 +79,79 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
 }
 
 function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
-  const [usage, setUsage] = useState<Usage | null>(null);
+  const [stats, setStats] = useState<PodcastStat[] | null>(null);
+  const [plan, setPlan] = useState<Plan | null>(null);
   const [force, setForce] = useState(false);
-  const [numToProcess, setNumToProcess] = useState(0);
-
-  const total = podcast.Episodes.length;
-  const processed = podcast.Episodes.filter((episode) => isReady(episode)).length;
 
   useEffect(() => {
-    getUsage()
-      .then((usageRecord) => {
-        setUsage(usageRecord);
-        const plan = usageRecord?.plan;
-        const limit = Math.min(total, plan.maxEpisodesPerPodcast || total);
-        const available = force ? limit : Math.max(0, limit - processed);
-        setNumToProcess(available);
-      })
-      .catch((e) => console.error(e));
-  }, [force, podcast.Episodes, processed, total]);
+    if (!stats) {
+      getPodcastStats()
+        .then((newStats) => {
+          setStats(newStats);
+        })
+        .catch((e) => console.error(e));
+    }
+    if (!plan) {
+      getCurrentSubscription()
+        .then((newSub) => {
+          if (!newSub) {
+            setPlan(PLANS.free);
+          } else {
+            setPlan(PLANS[newSub.plan]);
+          }
+        })
+        .catch((e) => console.error(e));
+    }
+  }, [stats, plan]);
 
-  let message = (
-    <div>
-      This will start processing <span className="text-primary">{numToProcess}</span> episodes for this podcast.
-    </div>
-  );
-  if (usage && usage.plan.maxEpisodesPerPodcast !== null) {
-    message = (
-      <div>
-        <div>
-          This will start processing <span className="text-primary">{numToProcess}</span> episodes for this podcast.
-        </div>
-        <div>
-          Your current plan has a limit of{' '}
-          <span className="text-primary">{usage.plan.maxEpisodesPerPodcast} episodes</span> per podcast. You can{' '}
-          <Link href="/plans" className="underline text-primary">
-            upgrade your plan
-          </Link>{' '}
-          to process more episodes.
-        </div>
-      </div>
-    );
+  if (!stats || !plan) {
+    return null;
   }
 
-  if (numToProcess === 0) {
-    if (processed === total) {
-      message = <div>No episodes to process.</div>;
-    } else if (usage && usage.plan.maxEpisodesPerPodcast !== null) {
-      message = (
+  const stat = stats.find((p) => p.id === podcast.id);
+  if (!stat) {
+    console.error('No stats found for podcast', podcast.id);
+    return null;
+  }
+  const total = stat?.allepisodes || 0;
+  const processed = stat?.processed || 0;
+  const unprocessed = total - processed;
+  const leftOnPlan = plan.maxEpisodesPerPodcast ? Math.max(0, plan.maxEpisodesPerPodcast - processed) : Infinity;
+  const numToProcess = Math.min(unprocessed, leftOnPlan);
+
+  let upgradeMessage = (
         <div className="flex flex-row items-center gap-4">
           <ExclamationTriangleIcon className="size-20 text-primary" />
           <div>
             Your current plan has a limit of{' '}
-            <span className="text-primary">{usage.plan.maxEpisodesPerPodcast} episodes</span> per podcast. You can{' '}
+            <span className="text-primary">{plan.maxEpisodesPerPodcast} episodes</span> per podcast. You can{' '}
             <Link href="/plans" className="underline text-primary">
               upgrade your plan
             </Link>{' '}
             to process more episodes.
           </div>
         </div>
-      );
-    } else {
-      message = <div>Calculating...</div>;
-    }
+  );
+
+  // Three cases to consider here:
+  // 1. Number to process is zero, but not over user's plan limit. Simply means there's nothing to process.
+  // 2. Number to process is nonzero, but is restricted by the user's plan limit.
+  // 3. Number to process is nonzero, but is not restricted by the user's plan limit.
+
+  let message = <></>;
+  if (unprocessed === 0) {
+    message = <div>No episodes to process.</div>;
+  } else {
+    message = (
+      <div>
+        <div>
+          This will start processing <span className="text-primary">{numToProcess}</span> episodes.
+        </div>
+        {unprocessed > leftOnPlan && upgradeMessage}
+      </div>
+    );
   }
+
   const processEnabled = numToProcess > 0;
   const forceEnabled = processEnabled && processed > 0;
 
