@@ -11,6 +11,7 @@ import {
   Subscription,
   User,
 } from './types.js';
+import { PodcastStat, SubscriptionState } from './plans.js';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Upload as TusUpload } from 'tus-js-client';
 import { Readable } from 'stream';
@@ -508,3 +509,29 @@ export async function GetSubscriptions(supabase: SupabaseClient, userId: string)
   }
   return data;
 }
+
+/** Return the active subscription for the given user, or null if they have no subscription. */
+export async function GetCurrentSubscription(supabase: SupabaseClient, userId: string): Promise<Subscription | null> {
+  const allsubs = await GetSubscriptions(supabase, userId);
+  // First check for an active sub.
+  const activeSubs = allsubs.filter((s) => s.state === SubscriptionState.Active);
+  if (activeSubs.length > 0) {
+    return activeSubs[0];
+  }
+  // Next check for a cancel pending sub.
+  const canceledSubs = allsubs.filter((s) => s.state === SubscriptionState.CancelPending);
+  if (canceledSubs.length > 0) {
+    return canceledSubs[0];
+  }
+  // Otherwise the user is on the free plan.
+  return null;
+}
+
+/** Return podcast stats. */
+export async function GetPodcastStats(supabase: SupabaseClient): Promise<PodcastStat[]> {
+  const { data, error } = await supabase.rpc('podcast_stats');
+  if (error) {
+    throw error;
+  }
+  return data;
+};

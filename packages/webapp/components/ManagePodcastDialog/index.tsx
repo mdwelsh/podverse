@@ -1,6 +1,6 @@
 'use client';
 
-import { GetPodcastWithEpisodesByID, PodcastWithEpisodes, Subscription } from 'podverse-utils';
+import { PodcastWithEpisodes, PodcastStat, Plan, PLANS } from 'podverse-utils';
 import {
   Dialog,
   DialogClose,
@@ -28,7 +28,6 @@ import {
   refreshPodcast,
   getPodcastWithEpisodes,
 } from '@/lib/actions';
-import { PodcastStat, Plan, PLANS } from '@/lib/plans';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const router = useRouter();
@@ -120,17 +119,17 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const numToProcess = Math.min(unprocessed, leftOnPlan);
 
   let upgradeMessage = (
-        <div className="flex flex-row items-center gap-4">
-          <ExclamationTriangleIcon className="size-20 text-primary" />
-          <div>
-            Your current plan has a limit of{' '}
-            <span className="text-primary">{plan.maxEpisodesPerPodcast} episodes</span> per podcast. You can{' '}
-            <Link href="/plans" className="underline text-primary">
-              upgrade your plan
-            </Link>{' '}
-            to process more episodes.
-          </div>
-        </div>
+    <div className="flex flex-row items-center gap-4">
+      <ExclamationTriangleIcon className="size-20 text-primary" />
+      <div>
+        Your current plan has a limit of <span className="text-primary">{plan.maxEpisodesPerPodcast} episodes</span> per
+        podcast. You can{' '}
+        <Link href="/plans" className="underline text-primary">
+          upgrade your plan
+        </Link>{' '}
+        to process more episodes.
+      </div>
+    </div>
   );
 
   // Three cases to consider here:

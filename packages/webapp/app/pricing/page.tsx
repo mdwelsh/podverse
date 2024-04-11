@@ -1,9 +1,6 @@
-import { Plan, PLANS, SubscriptionState } from '@/lib/plans';
 import { PurchaseButton } from '@/components/PurchaseButton';
 import { PurchaseConfirmation } from '@/components/PurchaseConfirmation';
-import { getSupabaseClient } from '@/lib/supabase';
-import { GetSubscriptions, Subscription } from 'podverse-utils';
-import { auth } from '@clerk/nextjs/server';
+import { Subscription, Plan, PLANS, SubscriptionState } from 'podverse-utils';
 import { SignupOrLogin } from '@/components/SignupOrLogin';
 import { getCurrentSubscription } from '@/lib/actions';
 

@@ -1,21 +1,27 @@
 /** This module contains Inngest Functions that are invoked in response to Inngest events. */
 
 import { getSupabaseClientWithToken } from '../lib/supabase';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { inngest } from './client';
 import {
   EpisodeStatus,
   Json,
   GetEpisode,
   UpdateEpisode,
-  TranscribeEpisode,
-  SummarizeEpisode,
-  SpeakerIDEpisode,
-  EmbedEpisode,
-  SuggestEpisode,
   GetPodcastWithEpisodesByID,
   Ingest,
+  GetCurrentSubscription,
+  GetPodcastStats,
 } from 'podverse-utils';
+import { TranscribeEpisode, SummarizeEpisode, SpeakerIDEpisode, EmbedEpisode, SuggestEpisode } from '@/lib/process';
 import { isReady } from '@/lib/episode';
+
+/** Return false if the user's plan does not permit processing of this Episode. */
+async function checkUserPlanLimit(supabase: SupabaseClient): Promise<boolean> {
+//  const podcastStats = await GetPodcastStats(supabase);
+//  const subscription = await GetCurrentSubscription(supabase);
+  return true;
+}
 
 /** Process a single episode. */
 export const processEpisode = inngest.createFunction(
@@ -54,6 +60,7 @@ export const processEpisode = inngest.createFunction(
       const transcribeResult = await step.run('transcribe', async () => {
         console.log(`process/episode [${episodeId}] - Transcribing`);
         const callbackUrl = `https://${currentHostname}/api/episode/${episode.id}/transcript`;
+        console.log(`process/episode [${episodeId}] - Callback URL: ${callbackUrl}`);
         const result = await TranscribeEpisode({
           supabase,
           supabaseToken: supabaseAccessToken,
@@ -142,38 +149,6 @@ export const processEpisode = inngest.createFunction(
     }
   },
 );
-
-// OLD VERSION BELOW
-// export const processEpisode = inngest.createFunction(
-//   {
-//     id: 'process-episode',
-//     retries: 0,
-//     concurrency: {
-//       // Limit number of concurrent calls to Deepgram to avoid hitting API limit.
-//       limit: 10,
-//     },
-//   },
-//   { event: 'process/episode' },
-//   async ({ event, step }) => {
-//     const { episodeId, force, supabaseAccessToken } = event.data;
-//     if (!episodeId) {
-//       throw new Error('process/episode - Missing episodeId in event data');
-//     }
-//     console.log(`process/episode event received for episodeId ${episodeId}`, event);
-//     const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
-//     try {
-//       const result = await ProcessEpisode({ supabase, episodeId, force });
-//       console.log(`process/episode done processing episodeId ${episodeId}`, event);
-//       return {
-//         event,
-//         body: result,
-//       };
-//     } catch (error) {
-//       console.error(`process/episode - Error processing episode ${episodeId}`, error);
-//       throw error;
-//     }
-//   },
-// );
 
 /** Scan for unprocessed episodes and fire off events to process them. */
 export const processPodcast = inngest.createFunction(

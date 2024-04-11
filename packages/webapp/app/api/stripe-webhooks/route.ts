@@ -3,8 +3,7 @@ import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import stripe from '@/lib/stripe';
 import { getSupabaseClientWithToken } from '@/lib/supabase';
-import { GetUser, GetSubscriptions } from 'podverse-utils';
-import { SubscriptionState, PLANS } from '@/lib/plans';
+import { GetUser, GetSubscriptions, PLANS, SubscriptionState } from 'podverse-utils';
 import moment from 'moment';
 import { createClient } from '@supabase/supabase-js';
 

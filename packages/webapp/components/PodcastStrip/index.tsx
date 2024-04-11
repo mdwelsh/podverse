@@ -1,11 +1,10 @@
-import { Podcast, PodcastWithEpisodes, PodcastWithEpisodesMetadata } from 'podverse-utils';
+import { Podcast, PodcastWithEpisodes, PodcastStat } from 'podverse-utils';
 import Link from 'next/link';
 import { ManagePodcastDialog } from '@/components/ManagePodcastDialog';
 import { buttonVariants } from '@/components/ui/button';
 import { isError, isProcessing, isReady } from '@/lib/episode';
 import { Icons } from '@/components/icons';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { PodcastStat } from '@/lib/plans';
 
 export function PodcastStrip({
   podcast,

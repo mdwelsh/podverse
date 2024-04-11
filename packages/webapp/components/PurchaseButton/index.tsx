@@ -1,9 +1,8 @@
 'use client';
 
-import { Plan } from '@/lib/plans';
 import { Button } from '@/components/ui/button';
 import { loadStripe } from '@stripe/stripe-js';
-import { Subscription } from 'podverse-utils';
+import { Plan, Subscription } from 'podverse-utils';
 
 export function PurchaseButton({
   plan,

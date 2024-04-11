@@ -1,5 +1,5 @@
 import { getSupabaseClientWithToken } from '@/lib/supabase';
-import { TranscribeEpisodeCallback } from 'podverse-utils';
+import { TranscribeEpisodeCallback } from '@/lib/process';
 import { inngest } from '@/inngest/client';
 
 /** Callback from Deepgram when transcript is ready. */

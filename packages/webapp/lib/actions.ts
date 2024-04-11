@@ -23,9 +23,10 @@ import {
   GetSubscriptions,
   GetEpisodeWithPodcastBySlug,
   Subscription,
+  PodcastStat,
+  GetPodcastStats
 } from 'podverse-utils';
-import { SubscriptionState } from './plans';
-import { PodcastStat } from '@/lib/plans';
+import { SubscriptionState } from 'podverse-utils/src/plans';
 import { getSupabaseClient, getSupabaseClientWithToken } from '@/lib/supabase';
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
@@ -258,9 +259,5 @@ export async function reportIssue(email: string, issue: string): Promise<string>
 /** Return podcast stats. */
 export async function getPodcastStats(): Promise<PodcastStat[]> {
   const supabase = await getSupabaseClient();
-  const { data, error } = await supabase.rpc('podcast_stats');
-  if (error) {
-    throw error;
-  }
-  return data;
+  return await GetPodcastStats(supabase);
 };
