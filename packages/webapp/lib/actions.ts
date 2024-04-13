@@ -24,7 +24,7 @@ import {
   GetEpisodeWithPodcastBySlug,
   Subscription,
   PodcastStat,
-  GetPodcastStats
+  GetPodcastStats,
 } from 'podverse-utils';
 import { SubscriptionState } from 'podverse-utils/src/plans';
 import { getSupabaseClient, getSupabaseClientWithToken } from '@/lib/supabase';
@@ -165,6 +165,17 @@ export async function importPodcast(rssUrl: string): Promise<PodcastWithEpisodes
   return podcast;
 }
 
+/** Return the list of subscriptions for the current user. */
+export async function getSubscriptions(): Promise<Subscription[] | null> {
+  const { userId } = auth();
+  if (!userId) {
+    throw new Error('Unauthorized');
+  }
+  const supabase = await getSupabaseClient();
+  const allsubs = await GetSubscriptions(supabase);
+  return allsubs;
+}
+
 /** Return the active subscription for the current user, or null if they have no subscription. */
 export async function getCurrentSubscription(): Promise<Subscription | null> {
   const { userId } = auth();
@@ -172,7 +183,7 @@ export async function getCurrentSubscription(): Promise<Subscription | null> {
     throw new Error('Unauthorized');
   }
   const supabase = await getSupabaseClient();
-  const allsubs = await GetSubscriptions(supabase, userId);
+  const allsubs = await GetSubscriptions(supabase);
   // First check for an active sub.
   const activeSubs = allsubs.filter((s) => s.state === SubscriptionState.Active);
   if (activeSubs.length > 0) {
@@ -260,4 +271,4 @@ export async function reportIssue(email: string, issue: string): Promise<string>
 export async function getPodcastStats(): Promise<PodcastStat[]> {
   const supabase = await getSupabaseClient();
   return await GetPodcastStats(supabase);
-};
+}

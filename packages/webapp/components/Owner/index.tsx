@@ -6,5 +6,5 @@ export function Owner({ children, owner }: { children: React.ReactNode; owner: s
   if (!userId) {
     return null;
   }
-  return (userId && userId === owner) ? children : null;
+  return (userId && userId === owner) ? children : <div/>;
 }

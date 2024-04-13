@@ -18,7 +18,6 @@ import { useRouter } from 'next/navigation';
 import { ArrowPathIcon, TrashIcon, BoltIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
 import { isReady } from '@/lib/episode';
-import { Checkbox } from '@/components/ui/checkbox';
 import Link from 'next/link';
 import {
   getCurrentSubscription,
@@ -28,6 +27,7 @@ import {
   refreshPodcast,
   getPodcastWithEpisodes,
 } from '@/lib/actions';
+import { usePlanLimit } from '@/lib/limits';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const router = useRouter();
@@ -45,7 +45,7 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
     <Dialog>
       <DialogTrigger>
         <Button className="font-mono" variant="destructive">
-          <TrashIcon className="size-5 mr-2 inline" />
+          <TrashIcon className="mr-2 inline size-5" />
           Delete
         </Button>
       </DialogTrigger>
@@ -54,7 +54,7 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
           <DialogTitle className="font-mono">Delete Podcast</DialogTitle>
         </DialogHeader>
         <div>
-          <div className="text-sm text-muted-foreground flex flex-col gap-1 font-mono">
+          <div className="text-muted-foreground flex flex-col gap-1 font-mono text-sm">
             <div>Are you sure you want to delete this podcast?</div>
             <div>This action cannot be undone.</div>
           </div>
@@ -67,7 +67,7 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
           </DialogClose>
           <DialogClose asChild>
             <Button variant="destructive" className="font-mono" onClick={handleDelete}>
-              <TrashIcon className="size-5 mr-2 inline" />
+              <TrashIcon className="mr-2 inline size-5" />
               Delete
             </Button>
           </DialogClose>
@@ -78,53 +78,20 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
 }
 
 function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
-  const [stats, setStats] = useState<PodcastStat[] | null>(null);
-  const [plan, setPlan] = useState<Plan | null>(null);
-  const [force, setForce] = useState(false);
-
-  useEffect(() => {
-    if (!stats) {
-      getPodcastStats()
-        .then((newStats) => {
-          setStats(newStats);
-        })
-        .catch((e) => console.error(e));
-    }
-    if (!plan) {
-      getCurrentSubscription()
-        .then((newSub) => {
-          if (!newSub) {
-            setPlan(PLANS.free);
-          } else {
-            setPlan(PLANS[newSub.plan]);
-          }
-        })
-        .catch((e) => console.error(e));
-    }
-  }, [stats, plan]);
-
-  if (!stats || !plan) {
+  const planLimit = usePlanLimit(podcast.id);
+  if (!planLimit) {
     return null;
   }
 
-  const stat = stats.find((p) => p.id === podcast.id);
-  if (!stat) {
-    console.error('No stats found for podcast', podcast.id);
-    return null;
-  }
-  const total = stat?.allepisodes || 0;
-  const processed = stat?.processed || 0;
-  const unprocessed = total - processed;
-  const leftOnPlan = plan.maxEpisodesPerPodcast ? Math.max(0, plan.maxEpisodesPerPodcast - processed) : Infinity;
-  const numToProcess = Math.min(unprocessed, leftOnPlan);
+  const showUpgradeMessage = planLimit.unprocessedEpisodes > planLimit.leftOnPlan;
 
   let upgradeMessage = (
     <div className="flex flex-row items-center gap-4">
-      <ExclamationTriangleIcon className="size-20 text-primary" />
+      <ExclamationTriangleIcon className="text-primary size-20" />
       <div>
-        Your current plan has a limit of <span className="text-primary">{plan.maxEpisodesPerPodcast} episodes</span> per
-        podcast. You can{' '}
-        <Link href="/plans" className="underline text-primary">
+        You have processed <span className="text-primary">{planLimit.processedEpisodes}</span> out of{' '}
+        <span className="text-primary">{planLimit.maxEpisodesPerPodcast}</span> episodes allowed for this podcast. You can{' '}
+        <Link href="/plans" className="text-primary underline">
           upgrade your plan
         </Link>{' '}
         to process more episodes.
@@ -132,31 +99,34 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
     </div>
   );
 
-  // Three cases to consider here:
-  // 1. Number to process is zero, but not over user's plan limit. Simply means there's nothing to process.
-  // 2. Number to process is nonzero, but is restricted by the user's plan limit.
-  // 3. Number to process is nonzero, but is not restricted by the user's plan limit.
+  // Four cases to consider here:
+  // 1. Unprocessed episodes is zero. Simply means there's nothing to process.
+  // 2. unprocessed > leftOnPlan, but leftOnPlan is > 0. This means the user is limited by the
+  //    plan limit.
+  // 3. unprocessed > leftOnPlan, but leftOnPlan === 0. This means the user is completely out of credits.
 
   let message = <></>;
-  if (unprocessed === 0) {
+  if (planLimit.unprocessedEpisodes === 0) {
     message = <div>No episodes to process.</div>;
   } else {
     message = (
       <div>
-        <div>
-          This will start processing <span className="text-primary">{numToProcess}</span> episodes.
-        </div>
-        {unprocessed > leftOnPlan && upgradeMessage}
+        {showUpgradeMessage && upgradeMessage}
+        {planLimit.leftOnPlan > 0 && (
+          <div>
+            This will start processing <span className="text-primary">{planLimit.numToProcess}</span> out of{' '}
+            <span className="text-primary">{planLimit.unprocessedEpisodes}</span> un-processed episodes.
+          </div>
+        )}
       </div>
     );
   }
 
-  const processEnabled = numToProcess > 0;
-  const forceEnabled = processEnabled && processed > 0;
+  const processEnabled = planLimit.numToProcess > 0;
+  const forceEnabled = processEnabled && planLimit.processedEpisodes > 0;
 
   const onProcess = () => {
-    setForce(false);
-    processPodcast(podcast.id.toString(), force)
+    processPodcast(podcast.id.toString(), false)
       .then(() => {
         toast.success(`Started processing for ${podcast.title}`);
       })
@@ -169,7 +139,7 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
     <Dialog>
       <DialogTrigger>
         <Button variant="outline" className="font-mono">
-          <BoltIcon className="size-5 mr-2 text-muted-foreground" /> Process
+          <BoltIcon className="text-muted-foreground mr-2 size-5" /> Process
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -177,16 +147,16 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
           <DialogTitle className="font-mono">Process episodes</DialogTitle>
         </DialogHeader>
         <div>
-          <div className="text-sm text-muted-foreground flex flex-col gap-1 font-mono">{message}</div>
-          <div className="items-top mt-4 flex space-x-2">
-            <Checkbox
+          <div className="text-muted-foreground flex flex-col gap-1 font-mono text-sm">{message}</div>
+          {/* <div className="items-top mt-4 flex space-x-2"> */}
+          {/* <Checkbox
               id="force"
               className="mt-1"
               disabled={!forceEnabled}
               checked={force}
               onCheckedChange={(val: boolean) => setForce(val)}
-            />
-            <div className="flex flex-col gap-1">
+            /> */}
+          {/* <div className="flex flex-col gap-1">
               <label htmlFor="force" className="text-muted-foreground font-mono">
                 Re-process existing episodes
               </label>
@@ -196,8 +166,8 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
                   have already been processed.
                 </div>
               )}
-            </div>
-          </div>
+            </div> */}
+          {/* </div> */}
         </div>
         <DialogFooter>
           <DialogClose asChild>
@@ -207,7 +177,7 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
           </DialogClose>
           <DialogClose asChild>
             <Button className="font-mono" onClick={onProcess} disabled={!processEnabled}>
-              <BoltIcon className="size-5 mr-2 inline" />
+              <BoltIcon className="mr-2 inline size-5" />
               Process
             </Button>
           </DialogClose>
@@ -257,7 +227,7 @@ export function ManagePodcastDialog({ podcastSlug }: { podcastSlug: string }) {
           </DialogTitle>
         </DialogHeader>
         <div>
-          <div className="text-sm text-muted-foreground flex flex-col gap-4 font-mono">
+          <div className="text-muted-foreground flex flex-col gap-4 font-mono text-sm">
             {mostRecentlyPublished && (
               <div className="flex flex-col gap-2">
                 <div>
@@ -279,7 +249,7 @@ export function ManagePodcastDialog({ podcastSlug }: { podcastSlug: string }) {
         <DialogFooter>
           <DialogClose>
             <Button className="font-mono" variant="secondary" onClick={doRefresh}>
-              <ArrowPathIcon className="size-5 mr-2 inline" />
+              <ArrowPathIcon className="mr-2 inline size-5" />
               Fetch new episodes
             </Button>
           </DialogClose>

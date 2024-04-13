@@ -500,9 +500,11 @@ export async function UploadLargeFile(
 
 /** Subscriptions ***************************************************************************/
 
-/** Get subscriptions for the given user. */
-export async function GetSubscriptions(supabase: SupabaseClient, userId: string): Promise<Subscription[]> {
-  const { data, error } = await supabase.from('Subscriptions').select('*').eq('user', userId);
+/** Get subscriptions for the current user. */
+export async function GetSubscriptions(supabase: SupabaseClient): Promise<Subscription[]> {
+  // This works because the RLS policy on the Subscriptions table should only return subs
+  // for the requesting user.
+  const { data, error } = await supabase.from('Subscriptions').select('*');
   if (error) {
     console.error('error', error);
     throw error;
@@ -510,9 +512,9 @@ export async function GetSubscriptions(supabase: SupabaseClient, userId: string)
   return data;
 }
 
-/** Return the active subscription for the given user, or null if they have no subscription. */
-export async function GetCurrentSubscription(supabase: SupabaseClient, userId: string): Promise<Subscription | null> {
-  const allsubs = await GetSubscriptions(supabase, userId);
+/** Return the active subscription for the current user, or null if they have no subscription. */
+export async function GetCurrentSubscription(supabase: SupabaseClient): Promise<Subscription | null> {
+  const allsubs = await GetSubscriptions(supabase);
   // First check for an active sub.
   const activeSubs = allsubs.filter((s) => s.state === SubscriptionState.Active);
   if (activeSubs.length > 0) {

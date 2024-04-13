@@ -4,6 +4,7 @@ import { getSupabaseClientWithToken } from '../lib/supabase';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { inngest } from './client';
 import {
+  Episode,
   EpisodeStatus,
   Json,
   GetEpisode,
@@ -12,15 +13,25 @@ import {
   Ingest,
   GetCurrentSubscription,
   GetPodcastStats,
+  PLANS,
 } from 'podverse-utils';
 import { TranscribeEpisode, SummarizeEpisode, SpeakerIDEpisode, EmbedEpisode, SuggestEpisode } from '@/lib/process';
 import { isReady } from '@/lib/episode';
 
 /** Return false if the user's plan does not permit processing of this Episode. */
-async function checkUserPlanLimit(supabase: SupabaseClient): Promise<boolean> {
-//  const podcastStats = await GetPodcastStats(supabase);
-//  const subscription = await GetCurrentSubscription(supabase);
-  return true;
+async function checkUserPlanLimit(supabase: SupabaseClient, episode: Episode): Promise<boolean> {
+  const podcastStats = await GetPodcastStats(supabase);
+  const subscription = await GetCurrentSubscription(supabase);
+  let plan = PLANS.free;
+  if (subscription) {
+    plan = PLANS[subscription.plan as keyof typeof PLANS];
+  }
+  const stat = podcastStats.find((p) => p.id === episode.podcast);
+  if (!stat) {
+    throw new Error(`Podcast ${episode.podcast} not found in podcast stats`);
+  }
+  const processed = stat?.processed || 0;
+  return processed < (plan.maxEpisodesPerPodcast || Infinity);
 }
 
 /** Process a single episode. */
@@ -42,8 +53,25 @@ export const processEpisode = inngest.createFunction(
     console.log(`process/episode event received for episodeId ${episodeId}`, event);
     const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
 
-    // Set episode status.
     let episode = await GetEpisode(supabase, episodeId);
+
+    // Check plan limit and bail out if we've hit it.
+    if (!checkUserPlanLimit(supabase, episode)) {
+      episode.error = { message: 'Plan limit reached' };
+      episode.status = {
+        ...(episode.status as EpisodeStatus),
+        message: `Error: Plan limit reached`,
+        completedAt: new Date().toISOString(),
+      };
+      await UpdateEpisode(supabase, episode);
+      return {
+        event,
+        body: {
+          message: 'Plan limit reached',
+        },
+      };
+    }
+
     episode.status = {
       ...(episode.status as EpisodeStatus),
       startedAt: new Date().toISOString(),

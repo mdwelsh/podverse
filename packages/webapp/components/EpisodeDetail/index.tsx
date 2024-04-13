@@ -13,7 +13,7 @@ import { EpisodeClient } from '@/components/EpisodeClient';
 import { isReady } from '@/lib/episode';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
-  const episodeWithoutPodcast = { ...episode, podcast: 0 };
+  const episodeWithoutPodcast = { ...episode, podcast: episode.podcast.id };
 
   return (
     <div className="mb-4 grid w-full grid-cols-4 gap-4 font-mono">

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { Episode, EpisodeStatus } from 'podverse-utils';
 import {
@@ -13,32 +14,54 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import moment from 'moment';
 import { toast } from 'sonner';
 import { EpisodeIndicator } from '../Indicators';
 import { isPending, isProcessing, isError, isReady } from '@/lib/episode';
-import { PublishEpisodeSwitch } from '../PublishEpisodeSwitch';
-import { BoltIcon } from '@heroicons/react/24/outline';
-import { updateEpisode, processEpisode } from '@/lib/actions';
+import { BoltIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { processEpisode } from '@/lib/actions';
+import { usePlanLimit } from '@/lib/limits';
+import { cn } from '@/lib/utils';
 
 export function ManageEpisodeDialog({ episode, children }: { episode: Episode; children?: React.ReactNode }) {
   const [force, setForce] = useState(false);
+  const planLimit = usePlanLimit(episode.podcast);
+  if (!planLimit) {
+    return null;
+  }
+  console.log(planLimit);
   const status = episode.status as EpisodeStatus;
+  const canProcess = planLimit.leftOnPlan > 0;
 
   const handleProcess = async () => {
     setForce(false);
     try {
-      const result = await processEpisode(episode.id.toString(), force);
       toast.success(`Started processing episode ${episode.title}`);
+      await processEpisode(episode.id.toString(), force);
     } catch (e) {
       toast.error(`Failed to start processing: ${(e as { message: string }).message}`);
     }
   };
 
+  let upgradeMessage = (
+    <div className="flex flex-row items-center gap-4">
+      <ExclamationTriangleIcon className="text-primary size-20" />
+      <div>
+        You have processed <span className="text-primary">{planLimit.processedEpisodes}</span> out of{' '}
+        <span className="text-primary">{planLimit.maxEpisodesPerPodcast}</span> episodes allowed for this podcast. You
+        can{' '}
+        <Link href="/plans" className="text-primary underline">
+          upgrade your plan
+        </Link>{' '}
+        to process more episodes.
+      </div>
+    </div>
+  );
+
   let statusMessage = status && status.message;
   let errorMessage = episode.error ? JSON.stringify(episode.error, null, 2) : null;
-  const processDisabled = isReady(episode) && !force;
+  const processingAllowed = force || canProcess;
 
   return (
     <Dialog>
@@ -73,7 +96,8 @@ export function ManageEpisodeDialog({ episode, children }: { episode: Episode; c
             <div>{status && status.startedAt && `Started processing ${moment(status.startedAt).fromNow()}`}</div>
             <div>{status && status.completedAt && `Finished processing ${moment(status.completedAt).fromNow()}`}</div>
           </div>
-          {!isPending(episode) && (
+          {!processingAllowed && upgradeMessage}
+          {!isPending(episode) && processingAllowed && (
             <div className="items-top mt-4 flex space-x-2">
               <Checkbox id="force" className="mt-1" checked={force} onCheckedChange={(val: boolean) => setForce(val)} />
               <div className="flex flex-col gap-1">
@@ -88,16 +112,18 @@ export function ManageEpisodeDialog({ episode, children }: { episode: Episode; c
           )}
         </div>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline" className="font-mono" onClick={handleProcess} disabled={processDisabled}>
-              <BoltIcon className="size-5 text-muted-foreground" /> Process
-            </Button>
-          </DialogClose>
+          {canProcess && (
+            <DialogClose asChild>
+              <div className={cn(buttonVariants({ variant: 'outline' }), 'font-mono')} onClick={handleProcess}>
+                <BoltIcon className="text-muted-foreground size-5" /> Process
+              </div>
+            </DialogClose>
+          )}
           <DialogClose asChild>
             {/* @ts-ignore */}
-            <Button className="font-mono" variant="secondary" onClick={() => setForce(false)}>
+            <div className={cn(buttonVariants({ variant: 'secondary' }), 'font-mono')} onClick={() => setForce(false)}>
               Close
-            </Button>
+            </div>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

@@ -11,13 +11,13 @@ interface MainNavProps {
 
 export function MainNav({ items }: MainNavProps) {
   return (
-    <div className="flex flex-row gap-0 md:gap-10 items-center">
+    <div className="flex flex-row items-center gap-0 md:gap-10">
       <Link href="/" className="flex items-center">
-        <div className="hidden sm:inline relative group cursor-pointer">
-          <div className="z-5 absolute -inset-1 bg-gradient-to-tr from-primary to-primary rounded-full blur opacity-35 group-hover:opacity-80 transition duration-1000 group-hover:duration-200"></div>
+        <div className="group relative hidden cursor-pointer sm:inline">
+          <div className="z-5 from-primary to-primary absolute -inset-1 rounded-full bg-gradient-to-tr opacity-35 blur transition duration-1000 group-hover:opacity-80 group-hover:duration-200"></div>
           <Image src="/images/podverse-logo.svg" alt="Podverse" width={50} height={50} className="relative z-10" />
         </div>
-        <span className="font-mono inline-block font-bold text-2xl text-primary ml-4">Podverse</span>
+        <span className="text-primary ml-4 inline-block font-mono text-2xl font-bold">Podverse</span>
       </Link>
       <div className="hidden md:block">
         {items?.length ? (
@@ -29,7 +29,7 @@ export function MainNav({ items }: MainNavProps) {
                     key={index}
                     href={item.href}
                     className={cn(
-                      'flex items-center text-sm font-medium text-muted-foreground',
+                      'text-muted-foreground flex items-center text-sm font-medium',
                       item.disabled && 'cursor-not-allowed opacity-80',
                     )}
                   >

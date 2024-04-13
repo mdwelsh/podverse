@@ -10,7 +10,7 @@ export async function Dashboard() {
   if (!userId) {
     return null;
   }
-  const podcasts: PodcastStat[] = await getPodcastStats();
+  const podcasts: PodcastStat[] = await (await getPodcastStats()).filter((podcast) => podcast.owner === userId);
 
   return (
     <div className="mx-auto mt-8 flex w-3/5 flex-col gap-4">
@@ -23,7 +23,8 @@ export async function Dashboard() {
           podcasts.map((podcast, index) => <PodcastStrip key={index} podcast={podcast} manageable />)
         ) : (
           <div className="text-muted-foreground mt-6 font-mono text-base">
-            You have not imported any podcasts yet. Click the <span className="text-primary">New podcast</span> button above to get started.
+            You have not imported any podcasts yet. Click the <span className="text-primary">New podcast</span> button
+            above to get started.
           </div>
         )}
       </div>

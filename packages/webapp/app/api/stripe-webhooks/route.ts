@@ -65,7 +65,7 @@ async function handleSessionCompleted(event: any) {
   if (!user) {
     throw new Error(`User not found: ${userId}`);
   }
-  const subscriptions = await GetSubscriptions(supabase, userId);
+  const subscriptions = await GetSubscriptions(supabase);
   if (subscriptions.filter((s) => s.state === SubscriptionState.Active).length > 0) {
     throw new Error(`User already has an active subscription: ${userId}`);
   }
