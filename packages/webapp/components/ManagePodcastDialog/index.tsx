@@ -27,7 +27,7 @@ import {
   refreshPodcast,
   getPodcastWithEpisodes,
 } from '@/lib/actions';
-import { usePlanLimit } from '@/lib/limits';
+import { useEpisodeLimit } from '@/lib/limits';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const router = useRouter();
@@ -78,7 +78,7 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
 }
 
 function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
-  const planLimit = usePlanLimit(podcast.id);
+  const planLimit = useEpisodeLimit(podcast.id);
   if (!planLimit) {
     return null;
   }
@@ -90,8 +90,9 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
       <ExclamationTriangleIcon className="text-primary size-20" />
       <div>
         You have processed <span className="text-primary">{planLimit.processedEpisodes}</span> out of{' '}
-        <span className="text-primary">{planLimit.maxEpisodesPerPodcast}</span> episodes allowed for this podcast. You can{' '}
-        <Link href="/plans" className="text-primary underline">
+        <span className="text-primary">{planLimit.maxEpisodesPerPodcast}</span> episodes allowed for this podcast. You
+        can{' '}
+        <Link href="/pricing" className="text-primary underline">
           upgrade your plan
         </Link>{' '}
         to process more episodes.

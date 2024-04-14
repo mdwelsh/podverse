@@ -11,6 +11,9 @@ import { Icons } from '@/components/icons';
 import { Episode, Podcast, PodcastWithEpisodes, PodcastWithEpisodesMetadata } from 'podverse-utils';
 import { EpisodeStrip } from '../PodcastEpisodeList';
 import { readPodcastFeed, importPodcast } from '@/lib/actions';
+import { usePodcastLimit } from '@/lib/limits';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 
 enum importStage {
   ENTER_URL,
@@ -23,6 +26,10 @@ export function NewPodcastDialog() {
   const [error, setError] = useState<string | null>(null);
   const [stage, setStage] = useState<importStage>(importStage.ENTER_URL);
   const [podcast, setPodcast] = useState<PodcastWithEpisodesMetadata | null>(null);
+  const planLimit = usePodcastLimit();
+  if (!planLimit) {
+    return null;
+  }
 
   const onImportClicked = async () => {
     setError(null);
@@ -74,6 +81,19 @@ export function NewPodcastDialog() {
     toast.info('Podcast import cancelled');
   };
 
+  let upgradeMessage = (
+    <div className="flex flex-row items-center gap-4">
+      <ExclamationTriangleIcon className="text-primary size-20" />
+      <div>
+        You have already imported <span className="text-primary">{planLimit.totalPodcasts}</span> podcasts.{' '}
+        <Link href="/pricing" className="text-primary underline">
+          Upgrade your plan
+        </Link>{' '}
+        to import additional podcasts.
+      </div>
+    </div>
+  );
+
   return (
     <Dialog>
       <DialogTrigger>
@@ -84,32 +104,40 @@ export function NewPodcastDialog() {
           <DialogTitle className="font-mono">Import Podcast</DialogTitle>
         </DialogHeader>
         <div className="text-sm text-muted-foreground flex flex-col gap-4 font-mono">
-          <div className="flex flex-row gap-2 items-center">
-            <Input
-              className="w-full"
-              placeholder="https://example.com/rss"
-              value={rssUrl || ''}
-              onInput={(e) => {
-                setRssUrl((e.target as HTMLInputElement).value);
-              }}
-            />
-            <Button onClick={onImportClicked} disabled={stage !== importStage.ENTER_URL} className="font-mono">
-              Import
-            </Button>
-          </div>
-          {stage === importStage.ENTER_URL && (
-            <div className="text-primary text-sm font-mono">First, enter the URL of your podcast&apos;s RSS feed.</div>
+          {planLimit.leftOnPlan === 0 ? (
+            upgradeMessage
+          ) : (
+            <>
+              <div className="flex flex-row gap-2 items-center">
+                <Input
+                  className="w-full"
+                  placeholder="https://example.com/rss"
+                  value={rssUrl || ''}
+                  onInput={(e) => {
+                    setRssUrl((e.target as HTMLInputElement).value);
+                  }}
+                />
+                <Button onClick={onImportClicked} disabled={stage !== importStage.ENTER_URL} className="font-mono">
+                  Import
+                </Button>
+              </div>
+              {stage === importStage.ENTER_URL && (
+                <div className="text-primary text-sm font-mono">
+                  First, enter the URL of your podcast&apos;s RSS feed.
+                </div>
+              )}
+              {stage === importStage.LOADING && (
+                <div className="text-primary text-sm font-mono">Loading podcast RSS feed...</div>
+              )}
+              <div>{error && <div className="text-primary">{error}</div>}</div>
+              <div>{stage === importStage.LOADING && <Icons.spinner className="mx-auto h-6 w-6 animate-spin" />}</div>
+              <div>
+                {stage === importStage.VALIDATING && podcast && (
+                  <PodcastPreview podcast={podcast} onConfirm={onConfirmClicked} onCancel={onCancelClicked} />
+                )}
+              </div>
+            </>
           )}
-          {stage === importStage.LOADING && (
-            <div className="text-primary text-sm font-mono">Loading podcast RSS feed...</div>
-          )}
-          <div>{error && <div className="text-primary">{error}</div>}</div>
-          <div>{stage === importStage.LOADING && <Icons.spinner className="mx-auto h-6 w-6 animate-spin" />}</div>
-          <div>
-            {stage === importStage.VALIDATING && podcast && (
-              <PodcastPreview podcast={podcast} onConfirm={onConfirmClicked} onCancel={onCancelClicked} />
-            )}
-          </div>
         </div>
       </DialogContent>
     </Dialog>

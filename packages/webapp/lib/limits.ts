@@ -1,9 +1,54 @@
 import { useEffect, useState } from 'react';
 import { PodcastStat, Plan, PLANS } from 'podverse-utils';
 import { getCurrentSubscription, getPodcastStats } from '@/lib/actions';
+import { useAuth } from '@clerk/nextjs';
 
-/** The return value of usePlanLimit. */
 export interface PodcastLimit {
+  totalPodcasts: number;
+  leftOnPlan: number;
+}
+
+export function usePodcastLimit(): PodcastLimit | null {
+  const [stats, setStats] = useState<PodcastStat[] | null>(null);
+  const [plan, setPlan] = useState<Plan | null>(null);
+  const { userId } = useAuth();
+
+  useEffect(() => {
+    if (!stats) {
+      getPodcastStats()
+        .then((newStats) => {
+          setStats(newStats.filter((p) => p.owner === userId));
+        })
+        .catch((e) => console.error(e));
+    }
+    if (!plan) {
+      getCurrentSubscription()
+        .then((newSub) => {
+          if (!newSub) {
+            setPlan(PLANS.free);
+          } else {
+            setPlan(PLANS[newSub.plan]);
+          }
+        })
+        .catch((e) => console.error(e));
+    }
+  }, [stats, plan]);
+
+  if (!stats || !plan) {
+    return null;
+  }
+
+  const total = stats.length;
+  const leftOnPlan = plan.maxPodcasts ? Math.max(0, plan.maxPodcasts - total) : Infinity;
+
+  return {
+    totalPodcasts: total,
+    leftOnPlan,
+  };
+}
+
+/** The return value of useEpisodeLimit. */
+export interface EpisodeLimit {
   totalEpisodes: number;
   processedEpisodes: number;
   unprocessedEpisodes: number;
@@ -13,7 +58,7 @@ export interface PodcastLimit {
 }
 
 /** Returns the state of the user's ability to process episodes for the given podcast. */
-export function usePlanLimit(podcastId: number): PodcastLimit | null {
+export function useEpisodeLimit(podcastId: number): EpisodeLimit | null {
   const [stats, setStats] = useState<PodcastStat[] | null>(null);
   const [plan, setPlan] = useState<Plan | null>(null);
 

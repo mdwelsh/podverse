@@ -31,7 +31,7 @@ export function PodcastStrip({
       <div className="flex size-full flex-row gap-4">
         <div className="w-1/5">{podcast.imageUrl && <img src={podcast.imageUrl} />}</div>
         <div className="line-clamp-3 flex w-4/5 flex-col gap-4 truncate text-wrap">
-          <div className="text-primary text-lg">{podcast.title}</div>
+          <div className="text-primary line-clamp-2 text-lg">{podcast.title}</div>
           {/* {podcast.copyright && <div className="text-muted-foreground text-xs">{podcast.copyright}</div>} */}
           {numReadyEpisodes > 0 ? (
             <div className="text-sm">

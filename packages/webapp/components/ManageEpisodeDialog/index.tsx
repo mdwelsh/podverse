@@ -21,12 +21,12 @@ import { EpisodeIndicator } from '../Indicators';
 import { isPending, isProcessing, isError, isReady } from '@/lib/episode';
 import { BoltIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { processEpisode } from '@/lib/actions';
-import { usePlanLimit } from '@/lib/limits';
+import { useEpisodeLimit } from '@/lib/limits';
 import { cn } from '@/lib/utils';
 
 export function ManageEpisodeDialog({ episode, children }: { episode: Episode; children?: React.ReactNode }) {
   const [force, setForce] = useState(false);
-  const planLimit = usePlanLimit(episode.podcast);
+  const planLimit = useEpisodeLimit(episode.podcast);
   if (!planLimit) {
     return null;
   }
@@ -51,7 +51,7 @@ export function ManageEpisodeDialog({ episode, children }: { episode: Episode; c
         You have processed <span className="text-primary">{planLimit.processedEpisodes}</span> out of{' '}
         <span className="text-primary">{planLimit.maxEpisodesPerPodcast}</span> episodes allowed for this podcast. You
         can{' '}
-        <Link href="/plans" className="text-primary underline">
+        <Link href="/pricing" className="text-primary underline">
           upgrade your plan
         </Link>{' '}
         to process more episodes.
