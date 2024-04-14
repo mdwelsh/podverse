@@ -1,6 +1,6 @@
 /** This module contains Inngest Functions that are invoked in response to Inngest events. */
 
-import { getSupabaseClientWithToken } from '../lib/supabase';
+import { getAdminSupabaseClient, getSupabaseClient, getSupabaseClientWithToken } from '../lib/supabase';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { inngest } from './client';
 import {
@@ -14,19 +14,22 @@ import {
   GetCurrentSubscription,
   GetPodcastStats,
   PLANS,
+  GetEpisodeWithPodcast,
+  EpisodeWithPodcast,
+  EpisodeWithPodcastToEpisode,
 } from 'podverse-utils';
 import { TranscribeEpisode, SummarizeEpisode, SpeakerIDEpisode, EmbedEpisode, SuggestEpisode } from '@/lib/process';
 import { isReady } from '@/lib/episode';
 
 /** Return false if the user's plan does not permit processing of this Episode. */
-async function checkUserPlanLimit(supabase: SupabaseClient, episode: Episode): Promise<boolean> {
+async function checkUserPlanLimit(supabase: SupabaseClient, episode: EpisodeWithPodcast): Promise<boolean> {
   const podcastStats = await GetPodcastStats(supabase);
-  const subscription = await GetCurrentSubscription(supabase);
+  const subscription = await GetCurrentSubscription(supabase, episode.podcast.owner || undefined);
   let plan = PLANS.free;
   if (subscription) {
     plan = PLANS[subscription.plan as keyof typeof PLANS];
   }
-  const stat = podcastStats.find((p) => p.id === episode.podcast);
+  const stat = podcastStats.find((p) => p.id === episode.podcast.id);
   if (!stat) {
     throw new Error(`Podcast ${episode.podcast} not found in podcast stats`);
   }
@@ -51,12 +54,19 @@ export const processEpisode = inngest.createFunction(
       throw new Error('process/episode - Missing episodeId in event data');
     }
     console.log(`process/episode event received for episodeId ${episodeId}`, event);
-    const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
 
-    let episode = await GetEpisode(supabase, episodeId);
+    let supabase = null;
+    if (supabaseAccessToken) {
+      supabase = await getSupabaseClientWithToken(supabaseAccessToken);
+    } else {
+      supabase = await getAdminSupabaseClient();
+    }
+    let episodeWithPodcast = await GetEpisodeWithPodcast(supabase, episodeId);
+    let episode = EpisodeWithPodcastToEpisode(episodeWithPodcast);
 
     // Check plan limit and bail out if we've hit it.
-    if (!checkUserPlanLimit(supabase, episode)) {
+    if (!checkUserPlanLimit(supabase, episodeWithPodcast)) {
+      console.log(`process/episode - Plan limit reached for episode ${episodeId}`);
       episode.error = { message: 'Plan limit reached' };
       episode.status = {
         ...(episode.status as EpisodeStatus),
@@ -190,19 +200,26 @@ export const processPodcast = inngest.createFunction(
   },
   { event: 'process/podcast' },
   async ({ event, step, runId }) => {
-    const { podcastId, force, supabaseAccessToken } = event.data;
-    console.log(`process/podcast - event ${runId} received for ${podcastId}, force ${force}`);
+    const { podcastId, force, supabaseAccessToken, episodeLimit } = event.data;
+    console.log(`process/podcast - event ${runId} received for ${podcastId}, force ${force}, episodeLimit ${episodeLimit}`);
 
-    const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
+    let supabase = null;
+    if (supabaseAccessToken) {
+      supabase = await getSupabaseClientWithToken(supabaseAccessToken);
+    } else {
+      supabase = await getAdminSupabaseClient();
+    }
+
     const podcast = await GetPodcastWithEpisodesByID(supabase, podcastId);
-    // XXX MDW - For now, only do 10 episodes.
-    const episodesToProcess = (
+    let episodesToProcess = (
       force ? podcast.Episodes : podcast.Episodes.filter((episode) => !isReady(episode))
-    ).slice(0, 10);
-
+    );
+    if (episodeLimit) {
+      episodesToProcess = episodesToProcess.slice(0, episodeLimit);
+    }
+    console.log(`process/podcast - Processing ${episodesToProcess.length} episodes for podcast ${podcastId}`);
     const results = await Promise.all(
       episodesToProcess.map(async (episode) => {
-        console.log(`process/podcast - Processing episode ${episode.id}`);
         const result = step.sendEvent('process-episode', {
           name: 'process/episode',
           data: {
@@ -233,10 +250,16 @@ export const ingestPodcast = inngest.createFunction(
     const { podcastId, rssUrl, supabaseAccessToken } = event.data;
     console.log(`ingest/podcast - event ${runId}, podcastId ${podcastId}, rssUrl ${rssUrl}`);
 
-    const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
+    let supabase = null;
+    if (supabaseAccessToken) {
+      supabase = await getSupabaseClientWithToken(supabaseAccessToken);
+    } else {
+      supabase = await getAdminSupabaseClient();
+    }
     let rssFeed = rssUrl;
     if (podcastId) {
       // We are refreshing an existing podcast.
+      console.log(`ingest/podcast - Refreshing existing podcast ${podcastId}`);
       const podcast = await GetPodcastWithEpisodesByID(supabase, podcastId);
       if (!podcast.rssUrl) {
         throw new Error('Podcast has no RSS feed URL');
@@ -249,5 +272,53 @@ export const ingestPodcast = inngest.createFunction(
     } else {
       return { message: `Ingested podcast ${newPodcast.id}` };
     }
+  },
+);
+
+/** Refresh all podcast feeds. Runs daily. */
+export const refreshPodcasts = inngest.createFunction(
+  {
+    id: 'refresh-podcasts',
+    retries: 5,
+  },
+  { cron: '0 1 * * *' },  // Run daily at 1am UTC
+  async ({ step }) => {
+    console.log(`refreshPodcasts - Starting`);
+    const supabase = await getSupabaseClient();
+    const stats = await GetPodcastStats(supabase);
+
+    console.log(`refreshPodcasts - Refreshing ${stats.length} podcasts`);
+    await Promise.all(
+      stats.map(async (stat) => {
+        console.log(`refreshPodcasts - Refreshing podcast ${stat.id}`);
+        const result = step.sendEvent('ingest-podcast', {
+          name: 'ingest/podcast',
+          data: {
+            podcastId: stat.id,
+          },
+        });
+        return result;
+      }),
+    );
+    console.log(`refreshPodcasts - Done ingesting.`);
+
+    console.log(`refreshPodcasts - Processing ${stats.length} podcasts`);
+    await Promise.all(
+      stats.map(async (stat) => {
+        console.log(`refreshPodcasts - Processing podcast ${stat.id}`);
+        const result = step.sendEvent('process-podcast', {
+          name: 'process/podcast',
+          data: {
+            podcastId: stat.id,
+          },
+        });
+        return result;
+      }),
+    );
+    console.log(`refreshPodcasts - Done processing.`);
+
+    return {
+      message: `Finished refreshing ${stats.length} podcasts`,
+    };
   },
 );

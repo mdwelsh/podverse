@@ -501,10 +501,13 @@ export async function UploadLargeFile(
 /** Subscriptions ***************************************************************************/
 
 /** Get subscriptions for the current user. */
-export async function GetSubscriptions(supabase: SupabaseClient): Promise<Subscription[]> {
-  // This works because the RLS policy on the Subscriptions table should only return subs
-  // for the requesting user.
-  const { data, error } = await supabase.from('Subscriptions').select('*');
+export async function GetSubscriptions(supabase: SupabaseClient, userId?: string): Promise<Subscription[]> {
+  let query = supabase.from('Subscriptions').select('*');
+  // If userId is not specified, the RLS policy will only return the current user's subscriptions.
+  if (userId) {
+    query = query.eq('user', userId);
+  }
+  const { data, error } = await query;
   if (error) {
     console.error('error', error);
     throw error;
@@ -512,9 +515,9 @@ export async function GetSubscriptions(supabase: SupabaseClient): Promise<Subscr
   return data;
 }
 
-/** Return the active subscription for the current user, or null if they have no subscription. */
-export async function GetCurrentSubscription(supabase: SupabaseClient): Promise<Subscription | null> {
-  const allsubs = await GetSubscriptions(supabase);
+/** Return the active subscription for the given user, or the current user if no user is specified. */
+export async function GetCurrentSubscription(supabase: SupabaseClient, userId?: string): Promise<Subscription | null> {
+  const allsubs = await GetSubscriptions(supabase, userId);
   // First check for an active sub.
   const activeSubs = allsubs.filter((s) => s.state === SubscriptionState.Active);
   if (activeSubs.length > 0) {

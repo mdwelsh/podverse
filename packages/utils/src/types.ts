@@ -68,3 +68,10 @@ export type EpisodeStatus = {
   completedAt?: string;
 };
 
+export function EpisodeWithPodcastToEpisode(episode: EpisodeWithPodcast): Episode {
+  const { podcast, suggestions, ...rest } = episode;
+  return {
+    ...rest,
+    podcast: episode.podcast.id,
+  };
+}

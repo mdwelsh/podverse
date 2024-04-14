@@ -127,7 +127,7 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const forceEnabled = processEnabled && planLimit.processedEpisodes > 0;
 
   const onProcess = () => {
-    processPodcast(podcast.id.toString(), false)
+    processPodcast(podcast.id.toString(), false, planLimit.maxEpisodesPerPodcast || undefined)
       .then(() => {
         toast.success(`Started processing for ${podcast.title}`);
       })

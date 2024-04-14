@@ -100,7 +100,7 @@ export async function processEpisode(episodeId: string, force: boolean): Promise
 }
 
 /** Kick off processing for the given podcast. */
-export async function processPodcast(podcastId: string, force: boolean): Promise<string> {
+export async function processPodcast(podcastId: string, force: boolean, episodeLimit?: number): Promise<string> {
   console.log(`Kicking off processing for podcast: ${podcastId}`);
   const { userId, getToken } = auth();
 
@@ -121,6 +121,7 @@ export async function processPodcast(podcastId: string, force: boolean): Promise
       podcastId: podcast.id,
       force,
       supabaseAccessToken,
+      episodeLimit
     },
   });
   revalidatePath('/podcast/[podcastSlug]', 'layout');

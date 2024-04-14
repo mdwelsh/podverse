@@ -175,9 +175,7 @@ export async function Ingest({
         return oldEpisode.guid === episode.guid;
       });
       if (oldEpisode) {
-        console.log(`Updating episode ${oldEpisode.id}`);
         const mergedEpisode = UpdateEpisode(oldEpisode, episode);
-        console.log('Merged episode:', mergedEpisode);
         const { error } = await supabase.from('Episodes').upsert(mergedEpisode);
         if (error) {
           console.error('Error updating episode: ', error);

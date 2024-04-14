@@ -24,3 +24,13 @@ export async function getSupabaseClient() {
     );
   }
 }
+
+/**
+ * Returns a Supabase client for the Supabase Service Role, which can bypass RLS.
+ * This should only be used in places where we don't have a user access token, or the user
+ * is not otherwise authenticated - such as background processing tasks.
+ */
+export async function getAdminSupabaseClient() {
+  console.warn('Creating admin Supabase client');
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL as string, process.env.SUPABASE_SERVICE_ROLE_KEY as string);
+}
