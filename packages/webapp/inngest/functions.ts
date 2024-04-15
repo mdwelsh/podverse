@@ -17,6 +17,7 @@ import {
   GetEpisodeWithPodcast,
   EpisodeWithPodcast,
   EpisodeWithPodcastToEpisode,
+  ClearPodcastErrors,
 } from 'podverse-utils';
 import { TranscribeEpisode, SummarizeEpisode, SpeakerIDEpisode, EmbedEpisode, SuggestEpisode } from '@/lib/process';
 import { isReady } from '@/lib/episode';
@@ -256,6 +257,22 @@ export const ingestPodcast = inngest.createFunction(
   },
 );
 
+/** Clear errors and processing state for a podcast. */
+export const clearErrors = inngest.createFunction(
+  {
+    id: 'clear-errors',
+    retries: 5,
+  },
+  { event: 'clear/errors' },
+  async ({ event, step, runId }) => {
+    const { podcastId, supabaseAccessToken } = event.data;
+    console.log(`clear/errors - event ${runId}, podcastId ${podcastId}`);
+    const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
+    await ClearPodcastErrors({supabase, podcastId});
+    return { message: `Cleared errors for podcast ${podcastId}` };
+  },
+);
+
 /** Refresh all podcast feeds. Runs daily. */
 export const refreshPodcasts = inngest.createFunction(
   {
@@ -267,6 +284,22 @@ export const refreshPodcasts = inngest.createFunction(
     console.log(`refreshPodcasts - Starting`);
     const supabase = await getSupabaseClientWithToken(process.env.SUPABASE_SERVICE_ROLE_KEY as string);
     const stats = await GetPodcastStats(supabase);
+
+    console.log(`refreshPodcasts - Clearing errors for ${stats.length} podcasts`);
+    await Promise.all(
+      stats.map(async (stat) => {
+        console.log(`refreshPodcasts - Clearing podcast ${stat.id}`);
+        const result = step.sendEvent('clear-errors', {
+          name: 'clear/errors',
+          data: {
+            podcastId: stat.id,
+            supabaseAccessToken: process.env.SUPABASE_SERVICE_ROLE_KEY,
+          },
+        });
+        return result;
+      }),
+    );
+    console.log(`refreshPodcasts - Done clearing errors.`);
 
     console.log(`refreshPodcasts - Refreshing ${stats.length} podcasts`);
     await Promise.all(

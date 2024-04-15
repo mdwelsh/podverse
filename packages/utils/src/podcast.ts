@@ -1,10 +1,44 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Episode, EpisodeMetadata, PodcastWithEpisodes, PodcastWithEpisodesMetadata } from './types.js';
-import { SetPodcast, SetEpisodes, GetPodcastWithEpisodes } from './storage.js';
+import {
+  Episode,
+  EpisodeStatus,
+  EpisodeMetadata,
+  EpisodeWithPodcast,
+  PodcastWithEpisodes,
+  PodcastWithEpisodesMetadata,
+} from './types.js';
+import { SetPodcast, SetEpisodes, GetPodcastWithEpisodes, GetPodcastWithEpisodesByID } from './storage.js';
 import slug from 'slug';
 import Parser from 'rss-parser';
 
 export type EpisodeMeta = Omit<Episode, 'id'>;
+
+export function isPublished(episode: Episode | EpisodeWithPodcast): boolean {
+  return episode.published === true;
+}
+
+export function isPending(episode: Episode | EpisodeWithPodcast): boolean {
+  const status = episode.status as EpisodeStatus;
+  return !status || !status.startedAt;
+}
+
+export function isProcessing(episode: Episode | EpisodeWithPodcast): boolean {
+  const status = episode.status as EpisodeStatus;
+  return (status && status.startedAt && !status.completedAt) || false;
+}
+
+export function isError(episode: Episode | EpisodeWithPodcast): boolean {
+  const status = episode.status as EpisodeStatus;
+  return (status && status.message && status.message.startsWith('Error')) || false;
+}
+
+export function isReady(episode: Episode | EpisodeWithPodcast): boolean {
+  const status = episode.status as EpisodeStatus;
+  return (
+    (!isPending(episode) && !isProcessing(episode) && !isError(episode) && status && status.completedAt !== null) ||
+    false
+  );
+}
 
 /** Merge the two episode entries. */
 function UpdateEpisode(oldEpisode: Episode, newEpisode: EpisodeMetadata): Episode {
@@ -208,4 +242,21 @@ export async function Ingest({
   }
   console.log(`Ingested podcast ${newPodcast.slug} with ${newPodcast.Episodes.length} episodes`);
   return await GetPodcastWithEpisodes(supabase, slug || newPodcast.slug);
+}
+
+/** Clear errors and stale processing states from the given podcast. */
+export async function ClearPodcastErrors({ podcastId, supabase }: { podcastId: number; supabase: SupabaseClient }) {
+  const podcast = await GetPodcastWithEpisodesByID(supabase, podcastId.toString());
+  for (const episode of podcast.Episodes) {
+    const status = episode.status as EpisodeStatus;
+    if (!status) {
+      continue;
+    }
+    const timeSinceStart = status.startedAt ? new Date().getTime() - new Date(status.startedAt).getTime() : 0;
+    // Clear if the episode has been processing for more than 24 hours, or if it has an error.
+    if ((isProcessing(episode) && timeSinceStart > 1000 * 60 * 60 * 24) || isError(episode)) {
+      console.log(`Clearing error and processing state for episode ${episode.id}`);
+      await supabase.from('Episodes').update({ error: null, status: null }).eq('id', episode.id);
+    }
+  }
 }
