@@ -8,12 +8,21 @@ import { ManagePodcastDialog } from '@/components/ManagePodcastDialog';
 import { ContextAwareChat } from '@/components/Chat';
 import { ChatContextProvider } from '@/components/ChatContext';
 import { isReady } from '@/lib/episode';
+import { getEpisodeLimit } from '@/lib/actions';
 
 async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
+  const planLimit = await getEpisodeLimit(podcast.id);
   return (
     <div className="flex w-full flex-col gap-4 font-mono">
       <div className="flex w-full flex-row gap-4">
-        <div className="w-[250px]">{podcast.imageUrl && <img src={podcast.imageUrl} />}</div>
+        <div className="w-[250px] flex flex-col gap-2">
+          <div>{podcast.imageUrl && <img src={podcast.imageUrl} />}</div>
+          {planLimit && (
+            <div className="mt-2 w-fit">
+              {planLimit && <ManagePodcastDialog podcast={podcast} planLimit={planLimit} />}
+            </div>
+          )}
+        </div>
         <div className="flex w-full flex-col gap-4">
           <div className="text-primary text-2xl font-bold">
             <Link href={podcast.url || `/podcast/${podcast.slug}`}>
@@ -30,11 +39,6 @@ async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
               </div>
               <PodcastLinks podcast={podcast} />
             </div>
-            <Owner owner={podcast.owner}>
-              <div className="mt-2 w-fit">
-                <ManagePodcastDialog podcastSlug={podcast.slug} />
-              </div>
-            </Owner>
           </div>
         </div>
       </div>

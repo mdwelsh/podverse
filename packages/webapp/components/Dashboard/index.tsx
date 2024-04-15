@@ -20,7 +20,7 @@ export async function Dashboard() {
       </div>
       <div className="flex size-full flex-col gap-2 overflow-y-auto p-2 text-xs">
         {podcasts.length > 0 ? (
-          podcasts.map((podcast, index) => <PodcastStrip key={index} podcast={podcast} manageable />)
+          podcasts.map((podcast, index) => <PodcastStrip key={index} slug={podcast.slug} />)
         ) : (
           <div className="text-muted-foreground mt-6 font-mono text-base">
             You have not imported any podcasts yet. Click the <span className="text-primary">New podcast</span> button

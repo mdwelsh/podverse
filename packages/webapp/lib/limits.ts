@@ -32,7 +32,7 @@ export function usePodcastLimit(): PodcastLimit | null {
         })
         .catch((e) => console.error(e));
     }
-  }, [stats, plan]);
+  }, [stats, plan, userId]);
 
   if (!stats || !plan) {
     return null;

@@ -25,6 +25,7 @@ import {
   Subscription,
   PodcastStat,
   GetPodcastStats,
+  PLANS,
 } from 'podverse-utils';
 import { SubscriptionState } from 'podverse-utils/src/plans';
 import { getSupabaseClient, getSupabaseClientWithToken } from '@/lib/supabase';
@@ -33,6 +34,7 @@ import { revalidatePath } from 'next/cache';
 import { inngest } from '@/inngest/client';
 import { ReportIssueTemplate } from '@/components/EmailTemplates';
 import { Resend } from 'resend';
+import { EpisodeLimit } from '@/lib//limits';
 
 /** Get the given podcast. */
 export async function getPodcast(podcastId: string): Promise<Podcast> {
@@ -121,7 +123,7 @@ export async function processPodcast(podcastId: string, force: boolean, episodeL
       podcastId: podcast.id,
       force,
       supabaseAccessToken,
-      episodeLimit
+      episodeLimit,
     },
   });
   revalidatePath('/podcast/[podcastSlug]', 'layout');
@@ -272,4 +274,38 @@ export async function reportIssue(email: string, issue: string): Promise<string>
 export async function getPodcastStats(): Promise<PodcastStat[]> {
   const supabase = await getSupabaseClient();
   return await GetPodcastStats(supabase);
+}
+
+export async function getEpisodeLimit(podcastId: number): Promise<EpisodeLimit | null> {
+  const { userId } = auth();
+  if (!userId) {
+    return null;
+  }
+  const stats = await getPodcastStats();
+  const sub = await getCurrentSubscription();
+  let plan = PLANS.free;
+  if (sub) {
+    plan = PLANS[sub.plan];
+  }
+  const stat = stats.find((p) => p.id === podcastId);
+  if (!stat) {
+    throw new Error(`No stats found for podcast ${podcastId}`);
+  }
+  if (stat.owner !== userId) {
+    return null;
+  }
+  const total = stat?.allepisodes || 0;
+  const processed = stat?.processed || 0;
+  const unprocessed = total - processed;
+  const leftOnPlan = plan.maxEpisodesPerPodcast ? Math.max(0, plan.maxEpisodesPerPodcast - processed) : Infinity;
+  const numToProcess = Math.min(unprocessed, leftOnPlan);
+
+  return {
+    totalEpisodes: total,
+    processedEpisodes: processed,
+    unprocessedEpisodes: unprocessed,
+    maxEpisodesPerPodcast: plan.maxEpisodesPerPodcast || Infinity,
+    leftOnPlan,
+    numToProcess,
+  };
 }

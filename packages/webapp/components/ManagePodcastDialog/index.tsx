@@ -1,6 +1,6 @@
 'use client';
 
-import { PodcastWithEpisodes, PodcastStat, Plan, PLANS } from 'podverse-utils';
+import { PodcastWithEpisodes } from 'podverse-utils';
 import {
   Dialog,
   DialogClose,
@@ -16,18 +16,10 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { ArrowPathIcon, TrashIcon, BoltIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { useEffect, useState } from 'react';
 import { isReady } from '@/lib/episode';
 import Link from 'next/link';
-import {
-  getCurrentSubscription,
-  getPodcastStats,
-  deletePodcast,
-  processPodcast,
-  refreshPodcast,
-  getPodcastWithEpisodes,
-} from '@/lib/actions';
-import { useEpisodeLimit } from '@/lib/limits';
+import { deletePodcast, processPodcast, refreshPodcast } from '@/lib/actions';
+import { useEpisodeLimit, EpisodeLimit } from '@/lib/limits';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const router = useRouter();
@@ -77,12 +69,7 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   );
 }
 
-function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
-  const planLimit = useEpisodeLimit(podcast.id);
-  if (!planLimit) {
-    return null;
-  }
-
+function ProcessPodcastDialog({ podcast, planLimit }: { podcast: PodcastWithEpisodes; planLimit: EpisodeLimit }) {
   const showUpgradeMessage = planLimit.unprocessedEpisodes > planLimit.leftOnPlan;
 
   let upgradeMessage = (
@@ -188,15 +175,7 @@ function ProcessPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   );
 }
 
-export function ManagePodcastDialog({ podcastSlug }: { podcastSlug: string }) {
-  const [podcast, setPodcast] = useState<PodcastWithEpisodes | null>(null);
-
-  useEffect(() => {
-    getPodcastWithEpisodes(podcastSlug)
-      .then((podcast) => setPodcast(podcast))
-      .catch((e) => console.error(e));
-  }, [podcastSlug]);
-
+export function ManagePodcastDialog({ podcast, planLimit }: { podcast: PodcastWithEpisodes; planLimit: EpisodeLimit }) {
   const doRefresh = () => {
     if (podcast) {
       refreshPodcast(podcast.id.toString())
@@ -254,7 +233,7 @@ export function ManagePodcastDialog({ podcastSlug }: { podcastSlug: string }) {
               Fetch new episodes
             </Button>
           </DialogClose>
-          <ProcessPodcastDialog podcast={podcast} />
+          <ProcessPodcastDialog podcast={podcast} planLimit={planLimit} />
           <DeletePodcastDialog podcast={podcast} />
         </DialogFooter>
       </DialogContent>

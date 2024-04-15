@@ -1,30 +1,25 @@
-import { Podcast, PodcastWithEpisodes, PodcastStat } from 'podverse-utils';
 import Link from 'next/link';
 import { ManagePodcastDialog } from '@/components/ManagePodcastDialog';
 import { buttonVariants } from '@/components/ui/button';
 import { isError, isProcessing, isReady } from '@/lib/episode';
 import { Icons } from '@/components/icons';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { getPodcastWithEpisodes, getEpisodeLimit } from '@/lib/actions';
 
-export function PodcastStrip({
-  podcast,
-  manageable,
+export async function PodcastStrip({
+  slug,
 }: {
-  podcast: PodcastStat | Podcast | PodcastWithEpisodes;
-  manageable?: boolean;
+  slug: string;
 }) {
-  const numEpisodes =
-    'Episodes' in podcast ? podcast.Episodes?.length : 'allepisodes' in podcast ? podcast.allepisodes : 0;
-  const numReadyEpisodes =
-    'Episodes' in podcast ? podcast.Episodes?.filter(isReady).length : 'processed' in podcast ? podcast.processed : 0;
-  const numProcessing =
-    'Episodes' in podcast
-      ? podcast.Episodes?.filter(isProcessing).length
-      : 'inprogress' in podcast
-        ? podcast.inprogress
-        : 0;
-  const numError =
-    'Episodes' in podcast ? podcast.Episodes?.filter(isError).length : 'errors' in podcast ? podcast.errors : 0;
+  const podcast = await getPodcastWithEpisodes(slug);
+  const planLimit = await getEpisodeLimit(podcast.id);
+  if (!planLimit) {
+    throw new Error('Plan limit not found');
+  }
+  const numEpisodes = podcast.Episodes?.length;
+  const numReadyEpisodes = podcast.Episodes?.filter(isReady).length;
+  const numProcessing = podcast.Episodes?.filter(isProcessing).length;
+  const numError = podcast.Episodes?.filter(isError).length;
 
   return (
     <div className="flex w-full flex-row gap-4 overflow-hidden rounded-lg border bg-gray-700 p-4 font-mono text-white dark:bg-gray-700 dark:text-white">
@@ -63,7 +58,7 @@ export function PodcastStrip({
             <Link className={buttonVariants({ variant: 'default' })} href={`/podcast/${podcast.slug}`}>
               View
             </Link>
-            <ManagePodcastDialog podcastSlug={podcast.slug} />
+            <ManagePodcastDialog podcast={podcast} planLimit={planLimit} />
           </div>
         </div>
       </div>
