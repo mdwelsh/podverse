@@ -53,7 +53,7 @@ export async function TranscribeEpisode({
   force,
 }: {
   supabase: SupabaseClient;
-  supabaseToken: string;
+  supabaseToken: string | null;
   episode: Episode;
   callbackUrl: string;
   force: boolean;
@@ -91,6 +91,11 @@ export async function TranscribeEpisode({
     await body.pipeTo(Writable.toWeb(stream));
     console.log(`Finished writing audio to ${path}`);
     const file = createReadStream(path);
+
+    // XXX XXX XXX MDW STOPPED HERE. Need to figure out how to get the bucket upload and
+    // transcription callback to work without a Supabase token. Or maybe we get a token
+    // from our service role key?
+
     audioUrl = await UploadLargeFile(
       supabase,
       supabaseToken,

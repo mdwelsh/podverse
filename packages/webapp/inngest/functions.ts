@@ -1,6 +1,6 @@
 /** This module contains Inngest Functions that are invoked in response to Inngest events. */
 
-import { getAdminSupabaseClient, getSupabaseClient, getSupabaseClientWithToken } from '../lib/supabase';
+import { getSupabaseClientWithToken } from '../lib/supabase';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { inngest } from './client';
 import {
@@ -54,13 +54,7 @@ export const processEpisode = inngest.createFunction(
       throw new Error('process/episode - Missing episodeId in event data');
     }
     console.log(`process/episode event received for episodeId ${episodeId}`, event);
-
-    let supabase = null;
-    if (supabaseAccessToken) {
-      supabase = await getSupabaseClientWithToken(supabaseAccessToken);
-    } else {
-      supabase = await getAdminSupabaseClient();
-    }
+    const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
     let episodeWithPodcast = await GetEpisodeWithPodcast(supabase, episodeId);
     let episode = EpisodeWithPodcastToEpisode(episodeWithPodcast);
 
@@ -201,19 +195,12 @@ export const processPodcast = inngest.createFunction(
   { event: 'process/podcast' },
   async ({ event, step, runId }) => {
     const { podcastId, force, supabaseAccessToken, episodeLimit } = event.data;
-    console.log(`process/podcast - event ${runId} received for ${podcastId}, force ${force}, episodeLimit ${episodeLimit}`);
-
-    let supabase = null;
-    if (supabaseAccessToken) {
-      supabase = await getSupabaseClientWithToken(supabaseAccessToken);
-    } else {
-      supabase = await getAdminSupabaseClient();
-    }
-
-    const podcast = await GetPodcastWithEpisodesByID(supabase, podcastId);
-    let episodesToProcess = (
-      force ? podcast.Episodes : podcast.Episodes.filter((episode) => !isReady(episode))
+    console.log(
+      `process/podcast - event ${runId} received for ${podcastId}, force ${force}, episodeLimit ${episodeLimit}`,
     );
+    const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
+    const podcast = await GetPodcastWithEpisodesByID(supabase, podcastId);
+    let episodesToProcess = force ? podcast.Episodes : podcast.Episodes.filter((episode) => !isReady(episode));
     if (episodeLimit) {
       episodesToProcess = episodesToProcess.slice(0, episodeLimit);
     }
@@ -249,13 +236,7 @@ export const ingestPodcast = inngest.createFunction(
   async ({ event, step, runId }) => {
     const { podcastId, rssUrl, supabaseAccessToken } = event.data;
     console.log(`ingest/podcast - event ${runId}, podcastId ${podcastId}, rssUrl ${rssUrl}`);
-
-    let supabase = null;
-    if (supabaseAccessToken) {
-      supabase = await getSupabaseClientWithToken(supabaseAccessToken);
-    } else {
-      supabase = await getAdminSupabaseClient();
-    }
+    const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
     let rssFeed = rssUrl;
     if (podcastId) {
       // We are refreshing an existing podcast.
@@ -281,10 +262,10 @@ export const refreshPodcasts = inngest.createFunction(
     id: 'refresh-podcasts',
     retries: 5,
   },
-  { cron: '0 1 * * *' },  // Run daily at 1am UTC
+  { cron: '0 1 * * *' }, // Run daily at 1am UTC
   async ({ step }) => {
     console.log(`refreshPodcasts - Starting`);
-    const supabase = await getSupabaseClient();
+    const supabase = await getSupabaseClientWithToken(process.env.SUPABASE_SERVICE_ROLE_KEY as string);
     const stats = await GetPodcastStats(supabase);
 
     console.log(`refreshPodcasts - Refreshing ${stats.length} podcasts`);
@@ -295,6 +276,7 @@ export const refreshPodcasts = inngest.createFunction(
           name: 'ingest/podcast',
           data: {
             podcastId: stat.id,
+            supabaseAccessToken: process.env.SUPABASE_SERVICE_ROLE_KEY,
           },
         });
         return result;
@@ -310,6 +292,7 @@ export const refreshPodcasts = inngest.createFunction(
           name: 'process/podcast',
           data: {
             podcastId: stat.id,
+            supabaseAccessToken: process.env.SUPABASE_SERVICE_ROLE_KEY,
           },
         });
         return result;

@@ -442,7 +442,7 @@ export async function Upload(
 /** Use to upload a large file. Calls the Supabase TUS endpoint directly. */
 export async function UploadLargeFile(
   supabase: SupabaseClient,
-  supabaseToken: string,
+  supabaseToken: string | null,
   data: Readable,
   contentType: string,
   bucket: string,
@@ -454,13 +454,19 @@ export async function UploadLargeFile(
   }
   return new Promise((resolve, reject) => {
     console.log(`Uploading ${fileName} to ${bucket}...`);
+    let headers: { [key: string]: string } = {
+      'x-upsert': 'true',
+    };
+    if (supabaseToken) {
+      headers = {
+        ...headers,
+        authorization: `Bearer ${supabaseToken}`,
+      };
+    }
     const upload = new TusUpload(data, {
       endpoint: `${supabaseUrl}/storage/v1/upload/resumable`,
       retryDelays: [0, 3000, 5000, 10000, 20000],
-      headers: {
-        authorization: `Bearer ${supabaseToken}`,
-        'x-upsert': 'true',
-      },
+      headers,
       uploadDataDuringCreation: true,
       removeFingerprintOnSuccess: true,
       metadata: {
@@ -539,4 +545,4 @@ export async function GetPodcastStats(supabase: SupabaseClient): Promise<Podcast
     throw error;
   }
   return data;
-};
+}
