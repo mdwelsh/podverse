@@ -200,7 +200,7 @@ program
       await inngest.send({
         name: 'process/episodes',
         data: {
-          podcastId,
+          podcastId: podcastId ? podcastId?.toString(): undefined,
           repeat: opts.repeat,
           stage: opts.stage,
         },
@@ -228,7 +228,7 @@ program
       await inngest.send({
         name: 'process/transcribe',
         data: {
-          episodeId: parseInt(episodeId),
+          episodeId,
         },
       });
       term.green(`Started transcription for episode ${episodeId}.\n`);

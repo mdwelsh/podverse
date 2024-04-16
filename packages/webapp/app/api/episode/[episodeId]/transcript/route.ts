@@ -32,12 +32,13 @@ export async function POST(req: Request, { params }: { params: { episodeId: stri
   console.log(`TranscribeEpisodeCallback result: ${result}`);
 
   // Send the transcription received event so we can continue processing.
-  await inngest.send({
+  const retval = await inngest.send({
     name: 'process/transcript',
     data: {
-      episodeId: parseInt(params.episodeId),
+      episodeId: params.episodeId,
     },
   });
 
+  console.log(`Sent process/transcript event: ${JSON.stringify(retval, null, 2)}`);
   return Response.json({ message: 'Thank you for uploading your transcript.' });
 }

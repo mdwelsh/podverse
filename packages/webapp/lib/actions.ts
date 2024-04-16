@@ -89,7 +89,7 @@ export async function processEpisode(episodeId: string, force: boolean): Promise
   await inngest.send({
     name: 'process/episode',
     data: {
-      episodeId: parseInt(episodeId),
+      episodeId,
       force,
       supabaseAccessToken,
     },
@@ -120,7 +120,7 @@ export async function processPodcast(podcastId: string, force: boolean, episodeL
   await inngest.send({
     name: 'process/podcast',
     data: {
-      podcastId: podcast.id,
+      podcastId: podcast.id.toString(),
       force,
       supabaseAccessToken,
       episodeLimit,
@@ -150,7 +150,7 @@ export async function refreshPodcast(podcastId: string): Promise<string> {
   await inngest.send({
     name: 'ingest/podcast',
     data: {
-      podcastId: podcast.id,
+      podcastId: podcast.id.toString(),
       supabaseAccessToken,
     },
   });
