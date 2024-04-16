@@ -317,21 +317,21 @@ export const refreshPodcasts = inngest.createFunction(
     );
     console.log(`refreshPodcasts - Done ingesting.`);
 
-    console.log(`refreshPodcasts - Processing ${stats.length} podcasts`);
-    await Promise.all(
-      stats.map(async (stat) => {
-        console.log(`refreshPodcasts - Processing podcast ${stat.id}`);
-        const result = step.sendEvent('process-podcast', {
-          name: 'process/podcast',
-          data: {
-            podcastId: stat.id,
-            supabaseAccessToken: process.env.SUPABASE_SERVICE_ROLE_KEY,
-          },
-        });
-        return result;
-      }),
-    );
-    console.log(`refreshPodcasts - Done processing.`);
+    // console.log(`refreshPodcasts - Processing ${stats.length} podcasts`);
+    // await Promise.all(
+    //   stats.map(async (stat) => {
+    //     console.log(`refreshPodcasts - Processing podcast ${stat.id}`);
+    //     const result = step.sendEvent('process-podcast', {
+    //       name: 'process/podcast',
+    //       data: {
+    //         podcastId: stat.id,
+    //         supabaseAccessToken: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    //       },
+    //     });
+    //     return result;
+    //   }),
+    // );
+    // console.log(`refreshPodcasts - Done processing.`);
 
     return {
       message: `Finished refreshing ${stats.length} podcasts`,
