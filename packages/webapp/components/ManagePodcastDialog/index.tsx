@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { PodcastWithEpisodes } from 'podverse-utils';
 import {
   Dialog,
@@ -19,7 +20,8 @@ import { ArrowPathIcon, TrashIcon, BoltIcon, ExclamationTriangleIcon } from '@he
 import { isReady } from '@/lib/episode';
 import Link from 'next/link';
 import { deletePodcast, processPodcast, refreshPodcast } from '@/lib/actions';
-import { useEpisodeLimit, EpisodeLimit } from '@/lib/limits';
+import { EpisodeLimit } from '@/lib/limits';
+import { Slider } from '@/components/ui/slider';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const router = useRouter();
@@ -70,6 +72,7 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
 }
 
 function ProcessPodcastDialog({ podcast, planLimit }: { podcast: PodcastWithEpisodes; planLimit: EpisodeLimit }) {
+  const [numEpisodes, setNumEpisodes] = useState(planLimit.numToProcess);
   const showUpgradeMessage = planLimit.unprocessedEpisodes > planLimit.leftOnPlan;
 
   let upgradeMessage = (
@@ -102,7 +105,7 @@ function ProcessPodcastDialog({ podcast, planLimit }: { podcast: PodcastWithEpis
         {showUpgradeMessage && upgradeMessage}
         {planLimit.leftOnPlan > 0 && (
           <div>
-            This will start processing <span className="text-primary">{planLimit.numToProcess}</span> out of{' '}
+            This will start processing <span className="text-primary">{numEpisodes}</span> out of{' '}
             <span className="text-primary">{planLimit.unprocessedEpisodes}</span> un-processed episodes.
           </div>
         )}
@@ -114,7 +117,7 @@ function ProcessPodcastDialog({ podcast, planLimit }: { podcast: PodcastWithEpis
   const forceEnabled = processEnabled && planLimit.processedEpisodes > 0;
 
   const onProcess = () => {
-    processPodcast(podcast.id.toString(), false, planLimit.maxEpisodesPerPodcast || undefined)
+    processPodcast(podcast.id.toString(), false, numEpisodes)
       .then(() => {
         toast.success(`Started processing for ${podcast.title}`);
       })
@@ -134,8 +137,21 @@ function ProcessPodcastDialog({ podcast, planLimit }: { podcast: PodcastWithEpis
         <DialogHeader>
           <DialogTitle className="font-mono">Process episodes</DialogTitle>
         </DialogHeader>
-        <div>
-          <div className="text-muted-foreground flex flex-col gap-1 font-mono text-sm">{message}</div>
+        <div className="flex flex-col gap-8">
+          <div className="text-muted-foreground my-4 flex flex-col gap-2 font-mono text-sm">{message}</div>
+          {planLimit.numToProcess > 0 && (
+            <div className="flex w-full flex-row items-center justify-between gap-4">
+              <div className="font-mono text-xs">1</div>
+              <Slider
+                defaultValue={[planLimit.numToProcess]}
+                min={1}
+                max={planLimit.numToProcess}
+                step={1}
+                onValueChange={(x) => setNumEpisodes(x[0])}
+              />
+              <div className="text-muted-foreground font-mono text-xs">{planLimit.numToProcess}</div>
+            </div>
+          )}
           {/* <div className="items-top mt-4 flex space-x-2"> */}
           {/* <Checkbox
               id="force"
