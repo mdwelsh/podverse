@@ -13,7 +13,7 @@ import { FloatingChatPanel } from '@/components/ChatPanel';
 import { dark } from '@clerk/themes';
 import { Analytics } from '@vercel/analytics/react';
 import { ChatContextProvider } from '@/components/ChatContext';
-import { Chat } from '@/components/Chat';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
   title: {
@@ -69,27 +69,28 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           <head />
           <body className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
             <ThemeProvider attribute="class" forcedTheme="dark" defaultTheme="dark">
-                <div className="relative flex min-h-screen flex-col w-full">
-                  {comingSoon ? (
-                    'Coming soon'
-                  ) : (
-                    <>
-                      <SiteHeader />
-                      <div className="flex-1">{children}</div>
-                      <ChatContextProvider>
-                        <FloatingChatPanel />
-                      </ChatContextProvider>
-                      <Footer />
-                      <Toaster richColors />
-                    </>
-                  )}
-                </div>
-                <TailwindIndicator />
+              <div className="relative flex min-h-screen flex-col w-full">
+                {comingSoon ? (
+                  'Coming soon'
+                ) : (
+                  <>
+                    <SiteHeader />
+                    <div className="flex-1">{children}</div>
+                    <ChatContextProvider>
+                      <FloatingChatPanel />
+                    </ChatContextProvider>
+                    <Footer />
+                    <Toaster richColors />
+                  </>
+                )}
+              </div>
+              <TailwindIndicator />
             </ThemeProvider>
             <Analytics />
           </body>
         </html>
       </ClerkProvider>
+      <SpeedInsights />
     </>
   );
 }
