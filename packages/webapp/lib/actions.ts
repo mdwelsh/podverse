@@ -26,6 +26,7 @@ import {
   PodcastStat,
   GetPodcastStats,
   PLANS,
+  EpisodeWithPodcastToEpisode,
 } from 'podverse-utils';
 import { SubscriptionState } from 'podverse-utils/src/plans';
 import { getSupabaseClient, getSupabaseClientWithToken } from '@/lib/supabase';
@@ -308,4 +309,57 @@ export async function getEpisodeLimit(podcastId: number): Promise<EpisodeLimit |
     leftOnPlan,
     numToProcess,
   };
+}
+
+export async function getEpisodes({
+  owner,
+  podcastId,
+  limit,
+  offset,
+  pending,
+  processing,
+  error,
+  ready,
+}: {
+  owner?: string;
+  podcastId?: number;
+  limit?: number;
+  offset?: number;
+  pending?: boolean;
+  processing?: boolean;
+  error?: boolean;
+  ready?: boolean;
+}): Promise<Episode[]> {
+  const supabase = await getSupabaseClient();
+  let query = supabase.from('Episodes').select('*, podcast (*)').order('pubDate', { ascending: false });
+  if (owner !== undefined) {
+    query = query.eq('podcast.owner', owner);
+  }
+  if (podcastId !== undefined) {
+    query = query.eq('podcast.id', podcastId);
+  }
+  if (limit !== undefined && offset !== undefined) {
+    query = query.range(offset, offset + limit - 1);
+  }
+  let filters = [];
+  if (pending === true) {
+    filters.push('status.is.null');
+  }
+  if (processing === true) {
+    filters.push('and(status->>startedAt.neq.null,status->>completedAt.eq.null)');
+  }
+  if (error === true) {
+    filters.push('status->>message.match.^Error');
+  }
+  if (ready === true) {
+    filters.push('and(status->>message.not.match.^Error,status->>startedAt.neq.null,status->>completedAt.neq.null)');
+  }
+  if (filters.length > 0) {
+    query = query.or(filters.join(','));
+  }
+  const { data, error: e2 } = await query;
+  if (e2) {
+    throw e2;
+  }
+  return data;
 }
