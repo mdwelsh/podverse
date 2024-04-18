@@ -18,9 +18,9 @@ import {
   EpisodeWithPodcast,
   EpisodeWithPodcastToEpisode,
   ClearPodcastErrors,
+  isReady,
 } from 'podverse-utils';
 import { TranscribeEpisode, SummarizeEpisode, SpeakerIDEpisode, EmbedEpisode, SuggestEpisode } from '@/lib/process';
-import { isReady } from '@/lib/episode';
 
 /** Return false if the user's plan does not permit processing of this Episode. */
 async function checkUserPlanLimit(supabase: SupabaseClient, episode: EpisodeWithPodcast): Promise<boolean> {

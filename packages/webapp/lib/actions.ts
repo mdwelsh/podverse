@@ -35,7 +35,7 @@ import { revalidatePath } from 'next/cache';
 import { inngest } from '@/inngest/client';
 import { ReportIssueTemplate } from '@/components/EmailTemplates';
 import { Resend } from 'resend';
-import { EpisodeLimit } from '@/lib//limits';
+import { EpisodeLimit } from '@/lib/limits';
 
 /** Get the given podcast. */
 export async function getPodcast(podcastId: string): Promise<Podcast> {
@@ -314,52 +314,82 @@ export async function getEpisodeLimit(podcastId: number): Promise<EpisodeLimit |
 export async function getEpisodes({
   owner,
   podcastId,
+  sortBy = 'pubDate',
+  ascending = false,
   limit,
   offset,
-  pending,
-  processing,
-  error,
-  ready,
+  pending = true,
+  processing = true,
+  error = true,
+  ready = true,
+  searchTerm,
 }: {
   owner?: string;
   podcastId?: number;
+  sortBy?: string;
+  ascending?: boolean;
   limit?: number;
   offset?: number;
   pending?: boolean;
   processing?: boolean;
   error?: boolean;
   ready?: boolean;
-}): Promise<Episode[]> {
+  searchTerm?: string;
+}): Promise<[EpisodeWithPodcast[], number]> {
+  console.log(
+    `Getting episodes for owner=${owner}, podcastId=${podcastId}, sortBy=${sortBy}, ascending=${ascending}, limit=${limit}, offset=${offset}, searchTerm=${searchTerm}, pending=${pending}, processing=${processing}, error=${error}, ready=${ready}`,
+  );
+
   const supabase = await getSupabaseClient();
-  let query = supabase.from('Episodes').select('*, podcast (*)').order('pubDate', { ascending: false });
+
+  // We need two (nearly) identical queries, since we need the complete row count before
+  // offset and limit are applied.
+  let countQuery = supabase.from('Episodes_with_state').select('*, podcast!inner(*)', { count: 'exact', head: true });
+  let dataQuery = supabase.from('Episodes_with_state').select('*, podcast!inner(*)');
+  dataQuery = dataQuery.order(sortBy, { ascending });
+
   if (owner !== undefined) {
-    query = query.eq('podcast.owner', owner);
+    countQuery = countQuery.eq('podcast.owner', owner);
+    dataQuery = dataQuery.eq('podcast.owner', owner);
   }
   if (podcastId !== undefined) {
-    query = query.eq('podcast.id', podcastId);
+    countQuery = countQuery.eq('podcast.id', podcastId);
+    dataQuery = dataQuery.eq('podcast.id', podcastId);
   }
-  if (limit !== undefined && offset !== undefined) {
-    query = query.range(offset, offset + limit - 1);
+  if (searchTerm && searchTerm.length > 0) {
+    countQuery = countQuery.filter('title', 'imatch', searchTerm);
+    dataQuery = dataQuery.filter('title', 'imatch', searchTerm);
   }
+
   let filters = [];
-  if (pending === true) {
-    filters.push('status.is.null');
+  if (pending) {
+    filters.push('pending');
   }
-  if (processing === true) {
-    filters.push('and(status->>startedAt.neq.null,status->>completedAt.eq.null)');
+  if (processing) {
+    filters.push('processing');
   }
-  if (error === true) {
-    filters.push('status->>message.match.^Error');
+  if (ready) {
+    filters.push('ready');
   }
-  if (ready === true) {
-    filters.push('and(status->>message.not.match.^Error,status->>startedAt.neq.null,status->>completedAt.neq.null)');
+  if (error) {
+    filters.push('error');
   }
-  if (filters.length > 0) {
-    query = query.or(filters.join(','));
+  countQuery = countQuery.filter('state', 'in', `(${filters.join(',')})`);
+  dataQuery = dataQuery.filter('state', 'in', `(${filters.join(',')})`);
+
+  if (limit !== undefined && offset !== undefined) {
+    dataQuery = dataQuery.range(offset, offset + limit - 1);
   }
-  const { data, error: e2 } = await query;
+  const { count, error: e2 } = await countQuery;
   if (e2) {
+    console.error('Error getting episode count:', e2);
     throw e2;
   }
-  return data;
+  const { data, error: e3 } = await dataQuery;
+  console.log(`Got ${data?.length} episodes, total count is ${count}`);
+  if (e3) {
+    console.error('Error fetching episode data:', e3);
+    throw e3;
+  }
+  return [data, count as number];
 }

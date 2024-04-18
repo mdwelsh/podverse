@@ -3,11 +3,10 @@
 // component elsewhere.
 'use client';
 
-import { Episode, EpisodeStatus, EpisodeWithPodcast } from 'podverse-utils';
+import { Episode, EpisodeStatus, EpisodeWithPodcast, isError, isProcessing, isPending } from 'podverse-utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Icons } from '@/components/icons';
 import { BoltIcon, BoltSlashIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { isPending, isProcessing, isError, isReady, isPublished } from '@/lib/episode';
 
 export function EpisodeIndicator({ episode }: { episode: Episode | EpisodeWithPodcast }) {
   // The default is the "ready" state.
@@ -23,12 +22,10 @@ export function EpisodeIndicator({ episode }: { episode: Episode | EpisodeWithPo
   return <div className="w-fit">{icon}</div>;
 }
 
-export function EpisodeTooltip({ episode }: { episode: Episode | EpisodeWithPodcast }) {
+export function EpisodeTooltip({ episode, iconOnly }: { episode: Episode | EpisodeWithPodcast; iconOnly?: boolean }) {
   const status = episode.status as EpisodeStatus;
   let message = 'Ready';
-  if (isPublished(episode as Episode)) {
-    message = 'Published';
-  } else if (isPending(episode as Episode)) {
+  if (isPending(episode as Episode)) {
     message = 'Processing not started';
   } else if (isProcessing(episode as Episode)) {
     message = (status && status.message) ?? 'Processing';
@@ -42,7 +39,7 @@ export function EpisodeTooltip({ episode }: { episode: Episode | EpisodeWithPodc
         <Tooltip>
           <TooltipTrigger>
             <div className="flex flex-row gap-1 items-center text-muted-foreground">
-              <EpisodeIndicator episode={episode} /> {message}
+              <EpisodeIndicator episode={episode} /> {!iconOnly && message}
             </div>
           </TooltipTrigger>
           <TooltipContent className="text-primary text-xs">
