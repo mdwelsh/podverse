@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Episode, EpisodeStatus } from 'podverse-utils';
+import { Episode, EpisodeStatus, isPending, isProcessing, isError, isReady } from 'podverse-utils';
 import {
   Dialog,
   DialogClose,
@@ -18,7 +18,6 @@ import { buttonVariants } from '@/components/ui/button';
 import moment from 'moment';
 import { toast } from 'sonner';
 import { EpisodeIndicator } from '../Indicators';
-import { isPending, isProcessing, isError, isReady } from '@/lib/episode';
 import { BoltIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { processEpisode } from '@/lib/actions';
 import { useEpisodeLimit } from '@/lib/limits';

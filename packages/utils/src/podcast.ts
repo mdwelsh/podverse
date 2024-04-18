@@ -13,31 +13,41 @@ import Parser from 'rss-parser';
 
 export type EpisodeMeta = Omit<Episode, 'id'>;
 
-export function isPublished(episode: Episode | EpisodeWithPodcast): boolean {
-  return episode.published === true;
+export type EpisodeState = 'pending' | 'processing' | 'error' | 'ready';
+
+/** Return the state of this Episode. */
+export function episodeState(episode: Episode | EpisodeWithPodcast): EpisodeState {
+  const status = episode.status as EpisodeStatus;
+  if (!status || !status.startedAt) {
+    return 'pending';
+  }
+  if (status.startedAt && status.completedAt && status.message && status.message.startsWith('Error')) {
+    return 'error';
+  }
+  if (status.startedAt && !status.completedAt) {
+    return 'processing';
+  }
+  return 'ready';
 }
 
+/** Return whether this Episode is in the pending state. */
 export function isPending(episode: Episode | EpisodeWithPodcast): boolean {
-  const status = episode.status as EpisodeStatus;
-  return !status || !status.startedAt;
+  return episodeState(episode) === 'pending';
 }
 
+/** Return whether this Episode is in the processing state. */
 export function isProcessing(episode: Episode | EpisodeWithPodcast): boolean {
-  const status = episode.status as EpisodeStatus;
-  return (status && status.startedAt && !status.completedAt) || false;
+  return episodeState(episode) === 'processing';
 }
 
+/** Return whether this Episode is in the error state. */
 export function isError(episode: Episode | EpisodeWithPodcast): boolean {
-  const status = episode.status as EpisodeStatus;
-  return (status && status.message && status.message.startsWith('Error')) || false;
+  return episodeState(episode) === 'error';
 }
 
+/** Return whether this Episode is in the ready state. */
 export function isReady(episode: Episode | EpisodeWithPodcast): boolean {
-  const status = episode.status as EpisodeStatus;
-  return (
-    (!isPending(episode) && !isProcessing(episode) && !isError(episode) && status && status.completedAt !== null) ||
-    false
-  );
+  return episodeState(episode) === 'ready';
 }
 
 /** Merge the two episode entries. */

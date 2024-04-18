@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ManagePodcastDialog } from '@/components/ManagePodcastDialog';
 import { buttonVariants } from '@/components/ui/button';
-import { isError, isProcessing, isReady } from '@/lib/episode';
+import { isError, isProcessing, isReady } from 'podverse-utils';
 import { Icons } from '@/components/icons';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { getPodcastWithEpisodes, getEpisodeLimit } from '@/lib/actions';

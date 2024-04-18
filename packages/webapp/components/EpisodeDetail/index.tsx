@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getSupabaseClient } from '@/lib/supabase';
-import { EpisodeWithPodcast, GetEpisodeWithPodcastBySlug } from 'podverse-utils';
+import { EpisodeWithPodcast, GetEpisodeWithPodcastBySlug, isReady } from 'podverse-utils';
 import moment from 'moment';
 import { EpisodeIndicator } from '../Indicators';
 import { ArrowTopRightOnSquareIcon, RssIcon, GlobeAmericasIcon } from '@heroicons/react/24/outline';
@@ -10,7 +10,6 @@ import { ManageEpisodeDialog } from '../ManageEpisodeDialog';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { EpisodeClient } from '@/components/EpisodeClient';
-import { isReady } from '@/lib/episode';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: episode.podcast.id };

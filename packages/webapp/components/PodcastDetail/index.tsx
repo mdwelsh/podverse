@@ -1,13 +1,11 @@
 import { getSupabaseClient } from '@/lib/supabase';
-import { PodcastWithEpisodes, GetPodcastWithEpisodes } from 'podverse-utils';
+import { PodcastWithEpisodes, GetPodcastWithEpisodes, isReady } from 'podverse-utils';
 import { PodcastEpisodeList } from '@/components/PodcastEpisodeList';
 import Link from 'next/link';
 import { ArrowTopRightOnSquareIcon, RssIcon, GlobeAmericasIcon } from '@heroicons/react/24/outline';
-import { Owner } from '@/components/Owner';
 import { ManagePodcastDialog } from '@/components/ManagePodcastDialog';
 import { ContextAwareChat } from '@/components/Chat';
 import { ChatContextProvider } from '@/components/ChatContext';
-import { isReady } from '@/lib/episode';
 import { getEpisodeLimit } from '@/lib/actions';
 
 async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { PodcastWithEpisodes } from 'podverse-utils';
+import { PodcastWithEpisodes, isReady } from 'podverse-utils';
 import {
   Dialog,
   DialogClose,
@@ -17,7 +17,6 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { ArrowPathIcon, TrashIcon, BoltIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { isReady } from '@/lib/episode';
 import Link from 'next/link';
 import { deletePodcast, processPodcast, refreshPodcast } from '@/lib/actions';
 import { EpisodeLimit } from '@/lib/limits';

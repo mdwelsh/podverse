@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Episode, PodcastWithEpisodes } from 'podverse-utils';
+import { Episode, PodcastWithEpisodes, isReady } from 'podverse-utils';
 import moment from 'moment';
 import {
   Pagination,
@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/pagination';
 import { EpisodeTooltip } from '../Indicators';
 import { useAuth } from '@clerk/nextjs';
-import { isReady } from '@/lib/episode';
 import { durationString } from '@/lib/time';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
