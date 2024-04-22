@@ -25,6 +25,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Image from 'next/image';
 
 type EpisodeColumn = Column<EpisodeWithPodcast, unknown>;
 
@@ -36,7 +37,7 @@ function columnHeader(title: string) {
     return (
       <Button className={text} variant={variant} onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
         {title}
-        <ArrowsUpDownIcon className="ml-2 h-4 w-4" />
+        <ArrowsUpDownIcon className="ml-2 size-4" />
       </Button>
     );
   };
@@ -49,11 +50,12 @@ const columns: ColumnDef<EpisodeWithPodcast>[] = [
     header: 'Thumbnail',
     cell: ({ row, getValue }) => {
       const ep = row.original as EpisodeWithPodcast;
+      const imageUrl = getValue() ?? ('' as string);
       return (
         <Link href={`/podcast/${ep.podcast.slug}/episode/${ep.slug}`}>
-          <div className="hover:ring-2 ring-primary flex h-[100px] flex-col overflow-y-clip border">
+          <div className="ring-primary flex h-[100px] flex-col overflow-y-clip border hover:ring-2">
             <div className="m-auto flex w-[100px]">
-              <img src={getValue() as string} width={100} />
+              {imageUrl && <Image src={getValue() as string} width={100} height={100} alt="Episode thumbnail" />}
             </div>
           </div>
         </Link>
@@ -67,7 +69,7 @@ const columns: ColumnDef<EpisodeWithPodcast>[] = [
       const ep = row.original as EpisodeWithPodcast;
       return (
         <Link href={`/podcast/${ep.podcast.slug}/episode/${ep.slug}`}>
-          <span className="hover:underline line-clamp-2 font-mono text-sm">{getValue() as string}</span>
+          <span className="line-clamp-2 font-mono text-sm hover:underline">{getValue() as string}</span>
         </Link>
       );
     },
@@ -80,7 +82,7 @@ const columns: ColumnDef<EpisodeWithPodcast>[] = [
       const ep = row.original as EpisodeWithPodcast;
       return (
         <Link href={`/podcast/${ep.podcast.slug}`}>
-          <span className="hover:underline text-primary line-clamp-2 font-mono text-sm">{getValue() as string}</span>
+          <span className="text-primary line-clamp-2 font-mono text-sm hover:underline">{getValue() as string}</span>
         </Link>
       );
     },
@@ -90,7 +92,7 @@ const columns: ColumnDef<EpisodeWithPodcast>[] = [
     header: columnHeader('Published'),
     cell: ({ getValue }) => {
       return (
-        <span className="w-[130px] text-muted-foreground line-clamp-2 text-sm">
+        <span className="text-muted-foreground line-clamp-2 w-[130px] text-sm">
           {moment(getValue() as string).format('D MMM YYYY')}
         </span>
       );
@@ -118,7 +120,7 @@ const columns: ColumnDef<EpisodeWithPodcast>[] = [
       const episode = row.original as EpisodeWithPodcast;
       const status = episode.status as EpisodeStatus;
       return (
-        <span className="w-[130px] text-muted-foreground line-clamp-2 text-sm">
+        <span className="text-muted-foreground line-clamp-2 w-[130px] text-sm">
           {status ? moment(status.startedAt as string).format('D MMM YYYY') : 'never'}
         </span>
       );
@@ -132,7 +134,7 @@ const columns: ColumnDef<EpisodeWithPodcast>[] = [
       const episode = row.original as EpisodeWithPodcast;
       const status = episode.status as EpisodeStatus;
       return (
-        <span className="w-[130px] text-muted-foreground line-clamp-2 text-sm">
+        <span className="text-muted-foreground line-clamp-2 w-[130px] text-sm">
           {status ? moment(status.completedAt as string).format('D MMM YYYY') : 'never'}
         </span>
       );
@@ -160,11 +162,11 @@ function PodcastSelector({
         <SelectValue placeholder="Podcast" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value={'all'} className="overflow-hidden w-[400px] truncate">
+        <SelectItem value={'all'} className="w-[400px] overflow-hidden truncate">
           All podcasts
         </SelectItem>
         {podcasts.map((podcast) => (
-          <SelectItem key={podcast.id} value={podcast.id.toString()} className="overflow-hidden w-[400px] truncate">
+          <SelectItem key={podcast.id} value={podcast.id.toString()} className="w-[400px] overflow-hidden truncate">
             {podcast.title}
           </SelectItem>
         ))}
@@ -242,7 +244,7 @@ export function EpisodeTable<TData, TValue>() {
       loading
         ? columns.map((column) => ({
             ...column,
-            cell: () => <Skeleton className="w-full h-4" />,
+            cell: () => <Skeleton className="h-4 w-full" />,
           }))
         : columns,
     [loading],
@@ -309,7 +311,7 @@ export function EpisodeTable<TData, TValue>() {
     <div>
       <div className="flex flex-row items-center justify-between">
         {loading && rowCount === 0 ? (
-          <Skeleton className="w-full h-8 my-2" />
+          <Skeleton className="my-2 h-8 w-full" />
         ) : (
           <>
             <span className="text-primary font-mono text-sm">{rowCount} episodes</span>
@@ -357,8 +359,8 @@ export function EpisodeTable<TData, TValue>() {
           </>
         )}
       </div>
-      <div className="mt-4 flex flex-row justify-between items-center">
-        <div className="mb-2 flex flex-row gap-2 items-center">
+      <div className="mt-4 flex flex-row items-center justify-between">
+        <div className="mb-2 flex flex-row items-center gap-2">
           <Input
             placeholder="Filter episodes"
             value={searchTerm}
@@ -372,7 +374,7 @@ export function EpisodeTable<TData, TValue>() {
           />
         </div>
 
-        <div className="mb-2 flex flex-row gap-2 items-center">
+        <div className="mb-2 flex flex-row items-center gap-2">
           <ToggleGroup
             size="sm"
             variant="outline"

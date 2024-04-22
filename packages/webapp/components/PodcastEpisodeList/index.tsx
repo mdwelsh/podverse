@@ -18,6 +18,7 @@ import { useAuth } from '@clerk/nextjs';
 import { durationString } from '@/lib/time';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import Image from 'next/image';
 
 export function ShowAllSwitch({
   checked,
@@ -139,7 +140,11 @@ export function EpisodeStrip({
     <div className="flex w-full flex-row gap-4 overflow-hidden rounded-lg border bg-gray-700 p-4 font-mono text-white dark:bg-gray-700 dark:text-white">
       <div className="flex size-full flex-row gap-4">
         <div className="w-1/5">
-          {episode.imageUrl ? <img src={episode.imageUrl} /> : <img src={podcast.imageUrl || ''} />}
+          {episode.imageUrl ? (
+            <Image src={episode.imageUrl} alt="Episode thumbnail" width={100} height={100} />
+          ) : (
+            <Image src={podcast.imageUrl || ''} alt="Episode thumbnail" width={100} height={100} />
+          )}
         </div>
         <div className="line-clamp-3 flex w-4/5 flex-col gap-2 truncate text-wrap">
           <div className="text-lg">{episode.title}</div>

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { LatestEpisode } from 'podverse-utils';
+import Image from 'next/image';
 
 /** A card showing information about a given episode. */
 export function EpisodeCard({ episode }: { episode: LatestEpisode }) {
@@ -10,7 +11,11 @@ export function EpisodeCard({ episode }: { episode: LatestEpisode }) {
           <div className="mx-auto flex size-32 flex-col overflow-y-hidden bg-black md:size-40">
             <div className="grow" />
             <div className="w-full">
-              {episode.imageUrl ? <img src={episode.imageUrl} /> : <img src={episode.podcast.imageUrl || ''} />}
+              {episode.imageUrl ? (
+                <Image alt="Episode thumbnail" src={episode.imageUrl} width={160} height={160} />
+              ) : (
+                <Image alt="Episode thumbnail" src={episode.podcast.imageUrl || ''} width={160} height={160} />
+              )}
             </div>
             <div className="grow" />
           </div>

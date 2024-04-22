@@ -10,6 +10,7 @@ import { ManageEpisodeDialog } from '../ManageEpisodeDialog';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { EpisodeClient } from '@/components/EpisodeClient';
+import Image from 'next/image';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: episode.podcast.id };
@@ -24,9 +25,11 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
       </div>
       <div className="block md:block">
         {episode.imageUrl ? (
-          <img src={episode.imageUrl} />
+          <Image src={episode.imageUrl} width={400} height={400} alt="Episode thumbnail image" />
         ) : (
-          episode.podcast.imageUrl && <img src={episode.podcast.imageUrl} />
+          episode.podcast.imageUrl && (
+            <Image src={episode.podcast.imageUrl} width={400} height={400} alt="Episode thumbnail image" />
+          )
         )}
       </div>
       <div className="col-span-3">

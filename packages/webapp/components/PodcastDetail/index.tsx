@@ -7,14 +7,17 @@ import { ManagePodcastDialog } from '@/components/ManagePodcastDialog';
 import { ContextAwareChat } from '@/components/Chat';
 import { ChatContextProvider } from '@/components/ChatContext';
 import { getEpisodeLimit } from '@/lib/actions';
+import Image from 'next/image';
 
 async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
   const planLimit = await getEpisodeLimit(podcast.id);
   return (
     <div className="flex w-full flex-col gap-4 font-mono">
       <div className="flex w-full flex-row gap-4">
-        <div className="w-[250px] flex flex-col gap-2">
-          <div>{podcast.imageUrl && <img src={podcast.imageUrl} />}</div>
+        <div className="flex w-[250px] flex-col gap-2">
+          <div>
+            {podcast.imageUrl && <Image src={podcast.imageUrl} alt="Podcast thumbnail" width={400} height={400} />}
+          </div>
           {planLimit && (
             <div className="mt-2 w-fit">
               {planLimit && <ManagePodcastDialog podcast={podcast} planLimit={planLimit} />}
@@ -31,7 +34,7 @@ async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
           <div className="font-sans text-sm">{podcast.description}</div>
           {podcast.copyright && <div className="text-muted-foreground font-mono text-sm">{podcast.copyright}</div>}
           <div className="flex flex-col gap-2">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <div className="text-muted-foreground col-span-3 font-mono text-sm md:col-span-1">
                 <div>{podcast.Episodes.length} episodes</div>
               </div>

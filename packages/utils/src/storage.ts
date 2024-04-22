@@ -35,11 +35,14 @@ export type PodcastListEntry = Podcast & { newestEpisode: string };
 
 /** Return list of Podcasts. */
 export async function GetPodcasts(supabase: SupabaseClient, limit?: number): Promise<PodcastListEntry[]> {
+  const t1 = Date.now();
   const { data, error } = await supabase.rpc('all_podcasts', { limit: limit || 100 });
   if (error) {
     console.error('error', error);
     throw error;
   }
+  const t2 = Date.now();
+  console.log(`GetPodcasts took ${t2 - t1} ms`);
   return data;
 }
 
@@ -208,11 +211,14 @@ export async function GetLatestEpisodes({
   supabase: SupabaseClient;
   limit?: number;
 }): Promise<LatestEpisode[]> {
+  const t1 = Date.now();
   const { data, error } = await supabase.rpc('latest_episodes', { limit });
   if (error) {
     console.error('error', error);
     throw error;
   }
+  const t2 = Date.now();
+  console.log(`GetLatestEpisodes took ${t2 - t1} ms`);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((e: any) => {
     return {

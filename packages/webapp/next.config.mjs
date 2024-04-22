@@ -5,11 +5,17 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '**.supabase.co',
-        port: '',
+        protocol: "https",
+        hostname: "**",
       },
     ],
+    // remotePatterns: [
+    //   {
+    //     protocol: 'https',
+    //     hostname: '**.supabase.co',
+    //     port: '',
+    //   },
+    // ],
   },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack }) => {
     config.module.rules.push({
