@@ -45,7 +45,7 @@ export function SearchPanel() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger>
-        <div className="text-primary flex flex-row gap-2 font-mono text-sm">
+        <div className="text-primary flex flex-row items-center gap-2 font-mono text-sm">
           <MagnifyingGlassIcon className="text-primary size-6" />
           <span className="hidden md:inline">Search</span>
         </div>

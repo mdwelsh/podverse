@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
 import { ChatPanel } from '@/components/ChatPanel';
 import Image from 'next/image';
+import { SignupOrLogin } from '@/components/SignupOrLogin';
 
 export default async function HomePage() {
   const { userId } = auth();
@@ -43,14 +44,7 @@ export default async function HomePage() {
           </Link>
         ) : (
           <>
-            <Link
-              href="/signup"
-              target="_blank"
-              rel="noreferrer"
-              className={cn('font-mono', buttonVariants({ variant: 'default' }))}
-            >
-              Sign up now
-            </Link>
+            <SignupOrLogin text="Sign up now" />
             <Link href="/about" className={cn('font-mono', buttonVariants({ variant: 'secondary' }))}>
               Learn more
             </Link>
@@ -65,7 +59,10 @@ export default async function HomePage() {
         <div className="flex flex-row items-center gap-8">
           <div className="font-mono text-base sm:text-xl">Explore podcasts</div>
           <div className="text-xs">
-            <Link className={cn(buttonVariants({ variant: 'outline' }), 'font-mono text-xs sm:text-sm')} href="/explore">
+            <Link
+              className={cn(buttonVariants({ variant: 'outline' }), 'font-mono text-xs sm:text-sm')}
+              href="/explore"
+            >
               View all
               <ChevronDoubleRightIcon className="ml-2 inline size-4" />
             </Link>
