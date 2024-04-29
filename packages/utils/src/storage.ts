@@ -15,6 +15,7 @@ import { PodcastStat, SubscriptionState } from './plans.js';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Upload as TusUpload } from 'tus-js-client';
 import { Readable } from 'stream';
+import { v4 as uuidv4 } from 'uuid';
 
 /** User ********************************************************************************/
 
@@ -33,14 +34,14 @@ export async function GetUser(supabase: SupabaseClient, userId: string): Promise
 /** Return type of GetPodcasts. */
 export type PodcastListEntry = Podcast & { newestEpisode: string };
 
-/** Return list of Podcasts. */
+/** Return list of public Podcasts. */
 export async function GetPodcasts(supabase: SupabaseClient, limit?: number): Promise<PodcastListEntry[]> {
   const { data, error } = await supabase.rpc('all_podcasts', { limit: limit || 100 });
   if (error) {
     console.error('error', error);
     throw error;
   }
-  return data;
+  return data.filter((podcast: PodcastListEntry) => !podcast.private);
 }
 
 /** Return metadata for the given podcast. */
@@ -187,6 +188,37 @@ export async function GetPodcastWithEpisodesByID(
   }
   if (!data || data.length === 0) {
     throw new Error(`Podcast with ID ${podcastId} not found.`);
+  }
+  const podcast = data[0];
+  return {
+    ...podcast,
+    suggestions: await GetPodcastSuggestions(supabase, podcast.id),
+  };
+}
+
+/** Return podcasts with episodes by podcast UUID. */
+export async function GetPodcastWithEpisodesByUUID(
+  supabase: SupabaseClient,
+  uuid: string,
+): Promise<PodcastWithEpisodes> {
+  // Expect a UUIDv4 without dashes.
+  if (uuid.length !== 32) {
+    throw new Error(`Invalid UUID: ${uuid}`);
+  }
+  const bytes = Uint8Array.from(Buffer.from(uuid, 'hex'));
+  const parsed = uuidv4({ random: bytes });
+  const { data, error } = await supabase
+    .from('Podcasts')
+    .select('*, Episodes (*)')
+    .eq('uuid', parsed)
+    .order('pubDate', { referencedTable: 'Episodes', ascending: false })
+    .limit(1);
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
+  if (!data || data.length === 0) {
+    throw new Error(`Podcast with UUID ${uuid} not found.`);
   }
   const podcast = data[0];
   return {

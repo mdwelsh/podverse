@@ -10,6 +10,7 @@ import {
 import { SetPodcast, SetEpisodes, GetPodcastWithEpisodes, GetPodcastWithEpisodesByID } from './storage.js';
 import slug from 'slug';
 import Parser from 'rss-parser';
+import { v4 as uuidv4 } from 'uuid';
 
 export type EpisodeMeta = Omit<Episode, 'id'>;
 
@@ -134,6 +135,8 @@ export async function ReadPodcastFeed(podcastUrl: string, podcastSlug?: string):
     author: feed.itunes?.author || null,
     copyright: feed.copyright || null,
     Episodes: episodes,
+    private: true,
+    uuid: uuidv4(),
   };
   return newPodcast;
 }

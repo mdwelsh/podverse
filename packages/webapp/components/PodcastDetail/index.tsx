@@ -1,5 +1,5 @@
 import { getSupabaseClient } from '@/lib/supabase';
-import { PodcastWithEpisodes, GetPodcastWithEpisodes, isReady } from 'podverse-utils';
+import { PodcastWithEpisodes, GetPodcastWithEpisodes, GetPodcastWithEpisodesByUUID, isReady } from 'podverse-utils';
 import { PodcastEpisodeList } from '@/components/PodcastEpisodeList';
 import Link from 'next/link';
 import { ArrowTopRightOnSquareIcon, RssIcon, GlobeAmericasIcon } from '@heroicons/react/24/outline';
@@ -94,12 +94,44 @@ export function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
   );
 }
 
+function PrivateIndicator({ podcast }: { podcast: PodcastWithEpisodes }) {
+  return (
+    <div className="flex flex-row bg-red-900 p-2 text-center text-white">
+      <div className="mx-auto w-2/5">
+        <div className="flex flex-col gap-3">
+          <div className="font-mono">You are viewing a private link to this podcast.</div>
+          <div className="text-sm">
+            The content here is only visible through the private link and is intended as a preview.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export async function PodcastDetail({ podcastSlug }: { podcastSlug: string }) {
   try {
     const supabase = await getSupabaseClient();
-    const podcast = await GetPodcastWithEpisodes(supabase, podcastSlug);
+
+    let podcast = null;
+    try {
+      podcast = await GetPodcastWithEpisodes(supabase, podcastSlug);
+      if (podcast.private) {
+        throw new Error('Podcast is private');
+      }
+    } catch (error) {
+      // See if the slug contains a UUID.
+      const uuid = podcastSlug.split('-').pop();
+      if (uuid && uuid.length == 32) {
+        podcast = await GetPodcastWithEpisodesByUUID(supabase, uuid);
+      } else {
+        throw error;
+      }
+    }
+
     return (
       <ChatContextProvider podcast={podcast}>
+        {podcast.private && <PrivateIndicator podcast={podcast} />}
         <div className="mx-auto mt-8 w-11/12 md:w-4/5">
           <PodcastHeader podcast={podcast} />
           <div className="flex flex-row gap-4">
