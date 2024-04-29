@@ -8,7 +8,7 @@ export function PublishEpisodeSwitch({ episode, checked, onCheckedChange }: { ep
   return (
     <div className="flex items-center space-x-2">
       <Switch id="publish-episode" checked={checked} onCheckedChange={onCheckedChange} />
-      <Label className="font-mono text-sm text-muted-foreground" htmlFor="publish-episode">Publish</Label>
+      <Label className="text-muted-foreground font-mono text-sm" htmlFor="publish-episode">Publish</Label>
     </div>
   );
 }

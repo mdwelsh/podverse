@@ -35,13 +35,22 @@ export async function GetUser(supabase: SupabaseClient, userId: string): Promise
 export type PodcastListEntry = Podcast & { newestEpisode: string };
 
 /** Return list of public Podcasts. */
-export async function GetPodcasts(supabase: SupabaseClient, limit?: number): Promise<PodcastListEntry[]> {
-  const { data, error } = await supabase.rpc('all_podcasts', { limit: limit || 100 });
+export async function GetPodcasts(
+  supabase: SupabaseClient,
+  limit?: number,
+  isPrivate?: boolean,
+  isPublished?: boolean,
+): Promise<PodcastListEntry[]> {
+  const { data, error } = await supabase.rpc('all_podcasts', {
+    limit: limit || 100,
+    isPrivate: isPrivate ?? false,
+    isPublished: isPublished ?? true,
+  });
   if (error) {
     console.error('error', error);
     throw error;
   }
-  return data.filter((podcast: PodcastListEntry) => !podcast.private);
+  return data;
 }
 
 /** Return metadata for the given podcast. */
@@ -72,7 +81,10 @@ export async function GetPodcastByID(supabase: SupabaseClient, podcastId: string
 
 /** Set metadata for the given podcast. */
 export async function SetPodcast(supabase: SupabaseClient, podcast: Podcast | PodcastMetadata): Promise<Podcast> {
-  const { data, error } = await supabase.from('Podcasts').insert(podcast).select('*');
+  const { data, error } = await supabase
+    .from('Podcasts')
+    .upsert(podcast, { onConflict: 'id,slug', ignoreDuplicates: false })
+    .select('*');
   if (error) {
     console.error('Error setting podcast: ', error);
     throw error;

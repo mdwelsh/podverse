@@ -13,6 +13,8 @@ export async function PodcastStrip({
   slug: string;
 }) {
   const podcast = await getPodcastWithEpisodes(slug);
+  const podcastUuid = podcast.uuid?.replace(/-/g, '');
+  const podcastLink = `${slug}-${podcastUuid}`;
   const planLimit = await getEpisodeLimit(podcast.id);
   if (!planLimit) {
     throw new Error('Plan limit not found');
@@ -56,7 +58,7 @@ export async function PodcastStrip({
             </div>
           )}
           <div className="flex flex-row gap-2">
-            <Link className={buttonVariants({ variant: 'default' })} href={`/podcast/${podcast.slug}`}>
+            <Link className={buttonVariants({ variant: 'default' })} href={`/podcast/${podcastLink}`}>
               View
             </Link>
             <ManagePodcastDialog podcast={podcast} planLimit={planLimit} />

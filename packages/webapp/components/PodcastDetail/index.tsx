@@ -97,7 +97,7 @@ export function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
 function PrivateIndicator({ podcast }: { podcast: PodcastWithEpisodes }) {
   return (
     <div className="flex flex-row bg-red-900 p-2 text-center text-white">
-      <div className="mx-auto w-2/5">
+      <div className="mx-auto w-full">
         <div className="flex flex-col gap-3">
           <div className="font-mono">You are viewing a private link to this podcast.</div>
           <div className="text-sm">

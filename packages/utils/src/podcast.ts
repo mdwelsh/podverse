@@ -136,6 +136,7 @@ export async function ReadPodcastFeed(podcastUrl: string, podcastSlug?: string):
     copyright: feed.copyright || null,
     Episodes: episodes,
     private: true,
+    published: false,
     uuid: uuidv4(),
   };
   return newPodcast;

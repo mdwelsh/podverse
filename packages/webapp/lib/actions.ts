@@ -26,7 +26,7 @@ import {
   PodcastStat,
   GetPodcastStats,
   PLANS,
-  EpisodeWithPodcastToEpisode,
+  SetPodcast,
 } from 'podverse-utils';
 import { SubscriptionState } from 'podverse-utils/src/plans';
 import { getSupabaseClient, getSupabaseClientWithToken } from '@/lib/supabase';
@@ -157,6 +157,16 @@ export async function refreshPodcast(podcastId: string): Promise<string> {
   });
   revalidatePath('/podcast/[podcastSlug]', 'layout');
   return `Refreshing podcast ${podcastId}`;
+}
+
+/** Update the given podcast metadata. */
+export async function updatePodcast(podcast: Podcast): Promise<Podcast> {
+  console.log(`Updating podcast: ${podcast.id}`);
+  const supabase = await getSupabaseClient();
+  revalidatePath('/explore');
+  revalidatePath('/podcast/[podcastSlug]');
+  revalidatePath('/podcast/[podcastSlug]/episode/[episodeSlug]');
+  return SetPodcast(supabase, podcast);
 }
 
 /** Import the given podcast. */

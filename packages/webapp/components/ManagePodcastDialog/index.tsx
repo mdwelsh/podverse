@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { PodcastWithEpisodes, isReady } from 'podverse-utils';
+import { Podcast, PodcastWithEpisodes, isReady } from 'podverse-utils';
 import {
   Dialog,
   DialogClose,
@@ -18,9 +18,11 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { ArrowPathIcon, TrashIcon, BoltIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { deletePodcast, processPodcast, refreshPodcast } from '@/lib/actions';
+import { deletePodcast, processPodcast, refreshPodcast, updatePodcast } from '@/lib/actions';
 import { EpisodeLimit } from '@/lib/limits';
 import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const router = useRouter();
@@ -190,7 +192,46 @@ function ProcessPodcastDialog({ podcast, planLimit }: { podcast: PodcastWithEpis
   );
 }
 
+export function PublicPodcastSwitch({
+  checked,
+  onCheckedChange,
+}: {
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center space-x-2">
+      <Switch id="publish-episode" checked={checked} onCheckedChange={onCheckedChange} />
+      <Label className="text-muted-foreground font-mono text-sm" htmlFor="publish-episode">
+        Make podcast link public
+      </Label>
+    </div>
+  );
+}
+
+export function PublishPodcastSwitch({
+  checked,
+  onCheckedChange,
+  disabled,
+}: {
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  disabled: boolean;
+}) {
+  return (
+    <div className="flex items-center space-x-2">
+      <Switch id="publish-episode" checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />
+      <Label className="text-muted-foreground font-mono text-sm" htmlFor="publish-episode">
+        Show podcast on home page
+      </Label>
+    </div>
+  );
+}
+
 export function ManagePodcastDialog({ podcast, planLimit }: { podcast: PodcastWithEpisodes; planLimit: EpisodeLimit }) {
+  const [isPublic, setIsPublic] = useState(!podcast.private);
+  const [isPublished, setIsPublished] = useState(podcast.published || false);
+
   const doRefresh = () => {
     if (podcast) {
       refreshPodcast(podcast.id.toString())
@@ -201,6 +242,37 @@ export function ManagePodcastDialog({ podcast, planLimit }: { podcast: PodcastWi
           toast.error('Failed to start refreshing: ' + e.message);
         });
     }
+  };
+
+  const onPublicChange = (checked: boolean) => {
+    setIsPublic(checked);
+    podcast.private = !checked;
+    // Un-publish the podcast if it's private.
+    if (!checked) {
+      setIsPublished(false);
+      podcast.published = false;
+    }
+    const { Episodes, suggestions, ...rest } = podcast;
+    updatePodcast({ ...rest })
+      .then(() => {
+        toast.success(`Set public status to ${checked}`);
+      })
+      .catch((e) => {
+        toast.error('Failed to update podcast: ' + e.message);
+      });
+  };
+
+  const onPublishChange = (checked: boolean) => {
+    setIsPublished(checked);
+    podcast.published = checked;
+    const { Episodes, suggestions, ...rest } = podcast;
+    updatePodcast({ ...rest })
+      .then(() => {
+        toast.success(`Set published status to ${checked}`);
+      })
+      .catch((e) => {
+        toast.error('Failed to update podcast: ' + e.message);
+      });
   };
 
   if (!podcast) {
@@ -238,18 +310,25 @@ export function ManagePodcastDialog({ podcast, planLimit }: { podcast: PodcastWi
               <span className="text-primary">{podcast.Episodes.filter((episode) => isReady(episode)).length}</span>{' '}
               episodes processed out of <span className="text-primary">{podcast.Episodes.length}</span> total
             </div>
-            <div></div>
+          </div>
+          <div className="my-4 flex flex-col items-start gap-2">
+            <PublicPodcastSwitch checked={isPublic} onCheckedChange={onPublicChange} />
+            <PublishPodcastSwitch checked={isPublished} onCheckedChange={onPublishChange} disabled={!isPublic} />
           </div>
         </div>
         <DialogFooter>
-          <DialogClose>
-            <Button className="font-mono" variant="secondary" onClick={doRefresh}>
-              <ArrowPathIcon className="mr-2 inline size-5" />
-              Fetch new episodes
-            </Button>
-          </DialogClose>
-          <ProcessPodcastDialog podcast={podcast} planLimit={planLimit} />
-          <DeletePodcastDialog podcast={podcast} />
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row gap-2">
+              <DialogClose>
+                <Button className="font-mono" variant="secondary" onClick={doRefresh}>
+                  <ArrowPathIcon className="mr-2 inline size-5" />
+                  Fetch new episodes
+                </Button>
+              </DialogClose>
+              <ProcessPodcastDialog podcast={podcast} planLimit={planLimit} />
+              <DeletePodcastDialog podcast={podcast} />
+            </div>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

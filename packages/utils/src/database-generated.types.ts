@@ -170,6 +170,7 @@ export type Database = {
           imageUrl: string | null
           owner: string | null
           private: boolean | null
+          published: boolean | null
           rssUrl: string | null
           slug: string
           title: string
@@ -185,6 +186,7 @@ export type Database = {
           imageUrl?: string | null
           owner?: string | null
           private?: boolean | null
+          published?: boolean | null
           rssUrl?: string | null
           slug: string
           title: string
@@ -200,6 +202,7 @@ export type Database = {
           imageUrl?: string | null
           owner?: string | null
           private?: boolean | null
+          published?: boolean | null
           rssUrl?: string | null
           slug?: string
           title?: string
