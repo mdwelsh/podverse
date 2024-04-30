@@ -8,6 +8,7 @@ import { ContextAwareChat } from '@/components/Chat';
 import { ChatContextProvider } from '@/components/ChatContext';
 import { getEpisodeLimit } from '@/lib/actions';
 import Image from 'next/image';
+import { auth } from '@clerk/nextjs/server';
 
 async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
   const planLimit = await getEpisodeLimit(podcast.id);
@@ -94,15 +95,36 @@ export function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
   );
 }
 
-function PrivateIndicator({ podcast }: { podcast: PodcastWithEpisodes }) {
+function PodcastLinkHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
+  const { userId } = auth();
+  if (!userId || userId !== podcast.owner) {
+    return null;
+  }
+  const link = `/podcast/${podcast.slug}-${podcast.uuid?.replace(/-/g, '')}`;
+  if (podcast.private) {
+    return (
+      <div className="flex flex-row bg-red-900 p-2 text-center text-white">
+        <div className="mx-auto w-full">
+          <div className="flex flex-col gap-3">
+            <div className="font-mono">You are viewing a private link to this podcast.</div>
+            <div className="text-sm">
+              The content here is only visible through the{' '}
+              <Link href={link} className="text-primary underline">
+                private link
+              </Link>{' '}
+              and is intended as a preview.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="flex flex-row bg-red-900 p-2 text-center text-white">
+    <div className="flex flex-row bg-muted p-2 text-center text-white">
       <div className="mx-auto w-full">
         <div className="flex flex-col gap-3">
-          <div className="font-mono">You are viewing a private link to this podcast.</div>
-          <div className="text-sm">
-            The content here is only visible through the private link and is intended as a preview.
-          </div>
+          <div className="font-mono text-sm">This podcast is public at the link:</div>
+          <div className="font-mono text-primary">https://podverse.ai/podcast/{podcast.slug}</div>
         </div>
       </div>
     </div>
@@ -131,7 +153,7 @@ export async function PodcastDetail({ podcastSlug }: { podcastSlug: string }) {
 
     return (
       <ChatContextProvider podcast={podcast}>
-        {podcast.private && <PrivateIndicator podcast={podcast} />}
+        <PodcastLinkHeader podcast={podcast} />
         <div className="mx-auto mt-8 w-11/12 md:w-4/5">
           <PodcastHeader podcast={podcast} />
           <div className="flex flex-row gap-4">

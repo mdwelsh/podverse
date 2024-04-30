@@ -1,6 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { VectorSearch } from './embed.js';
-import { GetEpisodeWithPodcast } from './storage.js';
 
 export interface SearchResultPodcast {
   id: number;
@@ -57,7 +56,12 @@ export async function Search({
   const documentIds = new Set();
   const episodeIds = new Set();
 
+  console.log(JSON.stringify(episodeResults, null, 2));
+
+  console.log(`${episodeResults.data.length} episode results`);
   for (const episodeData of episodeResults.data || []) {
+    console.log('EPISODE RESULT');
+    console.log(episodeData);
     podcastIds.add(episodeData.podcast);
   }
   for (const result of vectorResults) {

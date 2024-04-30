@@ -16,13 +16,20 @@ import moment from 'moment';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { ArrowPathIcon, TrashIcon, BoltIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowPathIcon,
+  TrashIcon,
+  BoltIcon,
+  ExclamationTriangleIcon,
+  QuestionMarkCircleIcon,
+} from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { deletePodcast, processPodcast, refreshPodcast, updatePodcast } from '@/lib/actions';
 import { EpisodeLimit } from '@/lib/limits';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const router = useRouter();
@@ -193,9 +200,11 @@ function ProcessPodcastDialog({ podcast, planLimit }: { podcast: PodcastWithEpis
 }
 
 export function PublicPodcastSwitch({
+  podcast,
   checked,
   onCheckedChange,
 }: {
+  podcast: Podcast;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
 }) {
@@ -204,6 +213,18 @@ export function PublicPodcastSwitch({
       <Switch id="publish-episode" checked={checked} onCheckedChange={onCheckedChange} />
       <Label className="text-muted-foreground font-mono text-sm" htmlFor="publish-episode">
         Make podcast link public
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <QuestionMarkCircleIcon className="text-primary size-5 ml-1" />
+            </TooltipTrigger>
+            <TooltipContent className="text-muted-foreground w-[400px] font-sans text-sm">
+              When this option is enabled, your podcast link will be public at{' '}
+              <span className="text-primary font-mono">https://podverse.ai/podcast/{podcast.slug}</span>.
+              Keep this option disabled if you wish to keep your podcast link private.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </Label>
     </div>
   );
@@ -221,8 +242,20 @@ export function PublishPodcastSwitch({
   return (
     <div className="flex items-center space-x-2">
       <Switch id="publish-episode" checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />
-      <Label className="text-muted-foreground font-mono text-sm" htmlFor="publish-episode">
-        Show podcast on home page
+      <Label className="text-muted-foreground items-center font-mono text-sm" htmlFor="publish-episode">
+        Discoverable
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <QuestionMarkCircleIcon className="text-primary size-5 ml-1" />
+            </TooltipTrigger>
+            <TooltipContent className="text-muted-foreground w-[400px] font-sans text-sm">
+              When this option is enabled, your podcast will be featured on the home page, and discoverable through the
+              search and AI Chat feature across the site. Keep this option disabled if you only wish your listeners to
+              access your podcast via a direct link.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </Label>
     </div>
   );
@@ -312,7 +345,7 @@ export function ManagePodcastDialog({ podcast, planLimit }: { podcast: PodcastWi
             </div>
           </div>
           <div className="my-4 flex flex-col items-start gap-2">
-            <PublicPodcastSwitch checked={isPublic} onCheckedChange={onPublicChange} />
+            <PublicPodcastSwitch podcast={podcast} checked={isPublic} onCheckedChange={onPublicChange} />
             <PublishPodcastSwitch checked={isPublished} onCheckedChange={onPublishChange} disabled={!isPublic} />
           </div>
         </div>
