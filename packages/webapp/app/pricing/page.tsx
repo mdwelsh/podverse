@@ -2,15 +2,23 @@ import { PurchaseButton } from '@/components/PurchaseButton';
 import { PurchaseConfirmation } from '@/components/PurchaseConfirmation';
 import { Subscription, Plan, PLANS, SubscriptionState } from 'podverse-utils';
 import { SignupOrLogin } from '@/components/SignupOrLogin';
+import { auth } from '@clerk/nextjs/server';
 import { getCurrentSubscription } from '@/lib/actions';
 
-
 export default async function Page() {
-  const existingSubscription = await getCurrentSubscription();
+  const { userId } = auth();
+  let existingSubscription = null;
+  if (userId) {
+    try {
+      existingSubscription = await getCurrentSubscription();
+    } catch (e) {
+      console.error('Error getting current subscription:', e);
+    }
+  }
   let existingPlan: Plan | undefined = undefined;
   if (existingSubscription) {
     existingPlan = Object.values(PLANS).find((p) => p.id === existingSubscription?.plan) ?? PLANS.free;
-  } else if (existingSubscription === null) {
+  } else if (userId && existingSubscription === null) {
     existingPlan = PLANS.free;
   }
 
@@ -84,7 +92,11 @@ function PlanCard({
               <span className="text-primary font-bold">${plan.price}</span> / month
             </div>
             {existingPlan ? (
-              <PurchaseButton plan={plan} existingPlan={existingPlan} existingSubscription={existingSubscription || undefined} />
+              <PurchaseButton
+                plan={plan}
+                existingPlan={existingPlan}
+                existingSubscription={existingSubscription || undefined}
+              />
             ) : (
               <SignupOrLogin />
             )}

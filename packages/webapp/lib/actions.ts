@@ -163,7 +163,7 @@ export async function refreshPodcast(podcastId: string): Promise<string> {
 export async function updatePodcast(podcast: Podcast): Promise<Podcast> {
   console.log(`Updating podcast: ${podcast.id}`);
   const supabase = await getSupabaseClient();
-  revalidatePath('/explore');
+  revalidatePath('/featured');
   revalidatePath('/podcast/[podcastSlug]');
   revalidatePath('/podcast/[podcastSlug]/episode/[episodeSlug]');
   return SetPodcast(supabase, podcast);
