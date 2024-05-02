@@ -33,16 +33,16 @@ export default async function HomePage() {
           <h1 className="font-mono text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
             AI superpowers for your podcast.
           </h1>
-          <p className="text-muted-foreground max-w-[700px] font-mono text-base md:text-lg text-pretty">
+          <p className="text-muted-foreground max-w-[700px] text-pretty font-mono text-base md:text-lg">
             Automatic episode transcripts, summaries, AI chat, and more.
             Take your podcast to the next level.
           </p>
-          <div className="md:hidden flex flex-row w-full">
+          <div className="flex w-full flex-row md:hidden">
             <div className="mx-auto">
               <DesktopHeroImage width={350} height={350} />
             </div>
           </div>
-          <div className="flex flex-row gap-4 md:px-20 md:flex-row md:px-0">
+          <div className="flex flex-row gap-4 px-0 md:flex-row md:px-20">
             <ChatPanel>
               <div className={cn(buttonVariants({ variant: 'outline' }), 'border-primary w-full font-mono')}>
                 <div className="flex flex-row items-center gap-2">
@@ -70,7 +70,7 @@ export default async function HomePage() {
             )}
           </div>
         </div>
-        <div className="w-2/5 hidden md:block">
+        <div className="hidden w-2/5 md:block">
           <DesktopHeroImage />
         </div>
       </div>
