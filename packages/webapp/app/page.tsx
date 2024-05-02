@@ -10,14 +10,16 @@ import Image from 'next/image';
 import { SignupOrLogin } from '@/components/SignupOrLogin';
 import { ZoomableImage } from '@/components/ZoomableImage';
 
-function DesktopHeroImage() {
+function DesktopHeroImage({width, height}: { width?: number, height?: number }) {
   return (
     <ZoomableImage
       src="/images/podverse-episode-screenshot.png"
       alt="Podverse Episode Screenshot"
-      width={600}
-      height={600}
-    />
+      width={width || 600}
+      height={height || 600}
+    >
+      The Podverse episode page, with transcript, summary, and AI chat.
+    </ZoomableImage>
   );
 }
 
@@ -25,18 +27,22 @@ export default async function HomePage() {
   const { userId } = auth();
 
   return (
-    <section className="container grid w-full items-center gap-6 p-2 pb-8 pt-6 md:p-4 md:py-10">
+    <section className="container grid w-full items-center gap-6 p-4 pb-8 pt-6 md:p-4 md:py-10">
       <div className="flex w-full flex-row gap-2">
         <div className="flex w-4/5 flex-col items-start gap-6">
           <h1 className="font-mono text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
             AI superpowers for your podcast.
           </h1>
-          <p className="text-muted-foreground max-w-[700px] font-mono text-base md:text-lg">
+          <p className="text-muted-foreground max-w-[700px] font-mono text-base md:text-lg text-pretty">
             Automatic episode transcripts, summaries, AI chat, and more.
-            <br />
             Take your podcast to the next level.
           </p>
-          <div className="flex flex-col gap-4 px-20 md:flex-row md:px-0">
+          <div className="md:hidden flex flex-row w-full">
+            <div className="mx-auto">
+              <DesktopHeroImage width={350} height={350} />
+            </div>
+          </div>
+          <div className="flex flex-row gap-4 md:px-20 md:flex-row md:px-0">
             <ChatPanel>
               <div className={cn(buttonVariants({ variant: 'outline' }), 'border-primary w-full font-mono')}>
                 <div className="flex flex-row items-center gap-2">
@@ -64,7 +70,7 @@ export default async function HomePage() {
             )}
           </div>
         </div>
-        <div className="w-2/5">
+        <div className="w-2/5 hidden md:block">
           <DesktopHeroImage />
         </div>
       </div>

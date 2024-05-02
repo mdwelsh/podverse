@@ -9,7 +9,10 @@ function Feature({ heading, image, children }: { heading: string; image?: string
       <div className="text-muted-foreground text-base">{children}</div>
       {image && (
         <div className="mx-auto">
-          <ZoomableImage src={image} alt={heading} />
+          <ZoomableImage src={image} alt={heading}>
+            <div className="text-primary text-lg font-mono">{heading}</div>
+            {children}
+          </ZoomableImage>
         </div>
       )}
     </div>
@@ -27,7 +30,9 @@ export default async function Page() {
           alt="Podverse episode screenshot"
           width={600}
           height={600}
-        />
+        >
+          The Podverse episode page, with transcript, summary, and AI chat.
+        </ZoomableImage>
       </div>
       <div className="text-muted-foreground mt-4">
         Podverse uses AI to help you and your listeners get the most out of your podcast.
@@ -74,16 +79,24 @@ export default async function Page() {
 
       <div className="mt-4 font-mono text-3xl">What&apos;s it cost?</div>
       <div className="text-muted-foreground mt-4">
-        Podverse is <span className="text-primary">absolutely free to get started</span>.
-        You can import up to 10 podcast episodes on the free plan. We have more generous
-        plans available for creators who want to fully leverage the power of Podverse.
-        Check out our <Link className="underline text-primary" href="/pricing">pricing page</Link> for more details.
+        Podverse is <span className="text-primary">absolutely free to get started</span>. You can import up to 10
+        podcast episodes on the free plan. We have more generous plans available for creators who want to fully leverage
+        the power of Podverse. Check out our{' '}
+        <Link className="underline text-primary" href="/pricing">
+          pricing page
+        </Link>{' '}
+        for more details.
       </div>
-
 
       <div className="mt-4 font-mono text-3xl">Who made this thing?</div>
       <div className="text-muted-foreground">
-        <Image className="float-right mb-4 ml-8" src="/images/ziggylabs-logo.svg" alt="Ziggylabs logo" width={200} height={200} />
+        <Image
+          className="float-right mb-4 ml-8"
+          src="/images/ziggylabs-logo.svg"
+          alt="Ziggylabs logo"
+          width={200}
+          height={200}
+        />
         Podverse was created by{' '}
         <a href="https://www.mdw.la" className="text-primary underline">
           Matt Welsh
@@ -96,10 +109,9 @@ export default async function Page() {
         , a new company started by Matt to build AI-powered tools that help people learn and grow.
       </div>
       <div className="text-muted-foreground">
-        We built Podverse because we love learning from podcasts, but found that podcast content can be
-        hard to discover, hard to reference later, and hard to share with others. Bringing all of the
-        amazing content from podcasts into a text-based format makes it easier to search, share, and
-        learn from podcasts. 
+        We built Podverse because we love learning from podcasts, but found that podcast content can be hard to
+        discover, hard to reference later, and hard to share with others. Bringing all of the amazing content from
+        podcasts into a text-based format makes it easier to search, share, and learn from podcasts.
       </div>
       <div className="text-muted-foreground">
         We&apos;d love to hear from you! If you have feedback, questions, or suggestions on how to make Podverse better,
