@@ -15,10 +15,9 @@ function DesktopHeroImage({width, height}: { width?: number, height?: number }) 
     <ZoomableImage
       src="/images/podverse-episode-screenshot.png"
       alt="Podverse Episode Screenshot"
-      width={width || 600}
-      height={height || 600}
+      width={width || 350}
+      height={height || 350}
     >
-      The Podverse episode page, with transcript, summary, and AI chat.
     </ZoomableImage>
   );
 }
@@ -28,9 +27,9 @@ export default async function HomePage() {
 
   return (
     <section className="container grid w-full items-center gap-6 p-4 pb-8 pt-6 md:p-4 md:py-10">
-      <div className="flex w-full flex-row gap-2">
+      <div className="flex w-full flex-row gap-8">
         <div className="flex w-4/5 flex-col items-start gap-6">
-          <h1 className="font-mono text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
+          <h1 className="font-mono text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl text-pretty">
             AI superpowers for your podcast.
           </h1>
           <p className="text-muted-foreground max-w-[700px] text-pretty font-mono text-base md:text-lg">
@@ -43,14 +42,14 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="flex flex-row gap-4 px-0 md:flex-row md:px-20">
-            <ChatPanel>
+            {/* <ChatPanel>
               <div className={cn(buttonVariants({ variant: 'outline' }), 'border-primary w-full font-mono')}>
                 <div className="flex flex-row items-center gap-2">
                   <Image src="/images/podverse-logo.svg" alt="Podverse" width={30} height={30} />
                   AI Chat
                 </div>
               </div>
-            </ChatPanel>
+            </ChatPanel> */}
             {userId ? (
               <Link
                 href="/dashboard"
@@ -63,19 +62,19 @@ export default async function HomePage() {
             ) : (
               <>
                 <SignupOrLogin text="Get started for free" />
-                <Link href="/about" className={cn('font-mono', buttonVariants({ variant: 'secondary' }))}>
+                <Link href="/about" className={cn('font-mono text-center', buttonVariants({ variant: 'secondary' }))}>
                   Learn more
                 </Link>
               </>
             )}
           </div>
         </div>
-        <div className="hidden w-2/5 md:block">
+        <div className="hidden md:block">
           <DesktopHeroImage />
         </div>
       </div>
       <div className="mt-4 flex flex-col gap-4">
-        <div className="font-mono text-base sm:text-xl">Featured episodes</div>
+        <div className="font-mono text-base sm:text-xl">Latest featured episodes</div>
         <EpisodeList />
       </div>
       <div className="mt-4 flex flex-col gap-4">

@@ -23,7 +23,7 @@ export default async function Page() {
   }
 
   return (
-    <div className="mx-auto mt-8 flex w-2/5 flex-col gap-4 md:w-4/5 xl:w-3/5">
+    <div className="mx-auto mt-8 flex w-3/5 flex-col gap-4 md:w-4/5 xl:w-3/5">
       <PurchaseConfirmation />
       <div className="text-primary font-mono text-lg">Pricing and Plans</div>
       <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-4">
