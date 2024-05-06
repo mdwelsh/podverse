@@ -2,6 +2,11 @@
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb', // Should be large enough for anybody.
+    },
+  },
   images: {
     remotePatterns: [
       {

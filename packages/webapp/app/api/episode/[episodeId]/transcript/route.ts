@@ -1,13 +1,3 @@
-// Increase body size limit to 1MB to avoid 413 errors
-// when Deepgram hits this API.
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '1mb',
-    },
-  },
-};
-
 import { getSupabaseClientWithToken } from '@/lib/supabase';
 import { TranscribeEpisodeCallback } from '@/lib/process';
 import { inngest } from '@/inngest/client';
