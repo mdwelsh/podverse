@@ -49,7 +49,7 @@ export default async function Page() {
       </Feature>
 
       <Feature heading="AI-generated episode summaries" image="/images/podverse-summary-screenshot.png">
-        Podverse use sthe latest AI models to read the transcript and come up with a short, pithy summary to make it
+        Podverse uses the latest AI models to read the transcript and come up with a short, pithy summary to make it
         easier for listeners to learn more about your podcast.
       </Feature>
 

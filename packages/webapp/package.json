@@ -39,6 +39,7 @@
     "ai": "^2.2.35",
     "class-variance-authority": "^0.4.0",
     "clsx": "^1.2.1",
+    "embla-carousel-react": "^8.0.4",
     "inngest": "^3.13.0",
     "lucide-react": "^0.331.0",
     "micro-cors": "^0.1.1",
