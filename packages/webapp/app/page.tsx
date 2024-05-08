@@ -33,7 +33,7 @@ function CallToActionButtons() {
       ) : (
         <>
           <SignupOrLogin text="Get started for free" />
-          <Link href="/about" className={cn('font-mono text-center', buttonVariants({ variant: 'secondary' }))}>
+          <Link href="/about" className={cn('text-center font-mono', buttonVariants({ variant: 'secondary' }))}>
             See all features
           </Link>
         </>
@@ -50,9 +50,9 @@ function DesktopHeroImage({ width, height }: { width?: number; height?: number }
       width={width || 700}
       height={height || 700}
     >
-      <div className="w-3/5 flex flex-col gap-2 mx-auto">
+      <div className="mx-auto flex w-3/5 flex-col gap-2">
         <div className="font-mono text-base">Podverse supercharges your podcast with AI.</div>
-        <div className="flex flex-col md:flex-row items-center gap-2 mx-auto">
+        <div className="mx-auto flex flex-col items-center gap-2 md:flex-row">
           <CallToActionButtons />
         </div>
       </div>
@@ -64,16 +64,16 @@ export default async function HomePage() {
   return (
     <section className="container grid w-full items-center gap-6 p-4 pb-8 pt-6 md:p-4 md:py-10">
       <div className="flex w-full flex-col gap-4">
-        <h1 className="font-mono text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl text-pretty mt-4">
+        <h1 className="mt-4 text-pretty font-mono text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
           AI superpowers for your podcast.
         </h1>
-        <p className="text-muted-foreground max-w-[700px] text-pretty font-mono text-base md:text-lg mt-4">
+        <p className="text-muted-foreground mt-4 max-w-[700px] text-pretty font-mono text-base md:text-lg">
           Automatic episode transcripts, summaries, AI chat, and more. Take your podcast to the next level.
         </p>
-        <div className="flex flex-col md:flex-row gap-2 md:gap-4 px-0 md:flex-row mt-4">
+        <div className="mt-4 flex flex-col gap-2 px-0 md:flex-row md:gap-4">
           <CallToActionButtons />
         </div>
-        <div className="w-full mt-4">
+        <div className="mt-4 w-full">
           <FeatureCarousel />
         </div>
       </div>

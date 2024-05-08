@@ -234,7 +234,15 @@ export async function Ingest({
     console.log(`Updated ${updatedEpisodes.length} episodes`);
 
     // Update podcast metadata.
-    const { Episodes, ...podcastMetadata } = newPodcast;
+    const newPodcastMetadata = { 
+      ...newPodcast,
+      // Keep original private, published, and uuid fields.
+      private: oldPodcast.private,
+      published: oldPodcast.published,
+      uuid: oldPodcast.uuid,
+    };
+    // Don't want to update the episodes right here.
+    const { Episodes, ...podcastMetadata } = newPodcastMetadata;
     const { error } = await supabase.from('Podcasts').update(podcastMetadata).eq('id', oldPodcast.id);
     if (error) {
       console.error('Error updating podcast metadata: ', error);
