@@ -73,7 +73,7 @@ export default async function HomePage() {
         <div className="flex flex-col md:flex-row gap-2 md:gap-4 px-0 md:flex-row mt-4">
           <CallToActionButtons />
         </div>
-        <div className="w-full">
+        <div className="w-full mt-4">
           <FeatureCarousel />
         </div>
       </div>

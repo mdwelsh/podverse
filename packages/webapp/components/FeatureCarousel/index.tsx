@@ -5,22 +5,23 @@ import { ZoomableImage } from '@/components/ZoomableImage';
 
 function FeatureCard({ heading, image, children }: { heading: string; image: string; children: React.ReactNode }) {
   return (
-    <div className="flex aspect-square flex-col items-center justify-center gap-4">
-      <div className="mx-auto">
+    <div className="flex aspect-square flex-col items-center justify-center gap-1">
+      <div className="mx-auto rounded-lg border border-[#684c1c] p-4">
         <ZoomableImage src={image} alt={heading} width={800} height={800}>
           <div className="text-primary font-mono text-lg">{heading}</div>
           {children}
         </ZoomableImage>
       </div>
+      <div className="text-muted-foreground font-mono text-sm">{heading}</div>
     </div>
   );
 }
 
 const features = [
-  <FeatureCard heading="Podverse episode view" image="/images/screenshot-episode.png">
+  <FeatureCard heading="ChatGPT for your podcast" image="/images/screenshot-episode.png">
     Bring your podcast into the AI area with Podverse.
   </FeatureCard>,
-  <FeatureCard heading="Podverse episode view" image="/images/screenshot-podcast.png">
+  <FeatureCard heading="Podcast details page" image="/images/screenshot-podcast.png">
     Bring your podcast into the AI area with Podverse.
   </FeatureCard>,
   <FeatureCard heading="Automatic episode transcripts" image="/images/screenshot-transcript.png">
@@ -31,7 +32,7 @@ const features = [
     Podverse uses the latest AI models to read the transcript and come up with a short, pithy summary to make it easier
     for listeners to learn more about your podcast.
   </FeatureCard>,
-  <FeatureCard heading="AI-powered chat" image="/images/screenshot-chat.png">
+  <FeatureCard heading="AI-powered chat and Q&A" image="/images/screenshot-chat.png">
     Podverse builds an AI chatbot that knows everything about your podcast and the content of every episode, helping
     listeners dig deeper by asking questions and getting more information about your content. It&apos;s just like
     ChatGPT, but for your podcast.
@@ -43,19 +44,25 @@ const features = [
 
 export function FeatureCarousel() {
   return (
-    <Carousel className="mx-auto w-10/12 md:max-w-lg lg:max-w-2xl" opts={{
+    <div className="group relative mx-auto w-8/12 md:max-w-lg lg:max-w-2xl">
+    <Carousel opts={{
       align: "center",
       loop: true,
     }}>
-      <CarouselContent className="-ml-2 md:-ml-8 w-full">
+      <CarouselContent className="-ml-2 w-full md:-ml-8">
         {features.map((feature, index) => (
-          <CarouselItem className="basis-11/12 md:basis-9/12 pl-2 md:pl-8" key={index}>
+          <CarouselItem className="basis-10/12 pl-2 md:basis-9/12 md:pl-8" key={index}>
             {feature}
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious variant="ghost" />
-      <CarouselNext variant="ghost" />
+      <CarouselPrevious variant="secondary" />
+      <CarouselNext variant="secondary" />
     </Carousel>
+    <div className="absolute w-full inset-0 z-5 flex flex-row gap-0">
+    <div className="w-1/2 bg-gradient-to-r from-background from-0% to-10% to-transparent opacity-100" />
+    <div className="w-1/2 bg-gradient-to-r from-transparent from-90% to-100% to-background opacity-100" />
+    </div>
+    </div>
   );
 }
