@@ -4,14 +4,14 @@ import { PodcastEpisodeList } from '@/components/PodcastEpisodeList';
 import Link from 'next/link';
 import { ArrowTopRightOnSquareIcon, RssIcon, GlobeAmericasIcon } from '@heroicons/react/24/outline';
 import { ManagePodcastDialog } from '@/components/ManagePodcastDialog';
+import { AcceptPodcastDialog } from '../AcceptPodcastDialog';
 import { ContextAwareChat } from '@/components/Chat';
-import { ChatContextProvider } from '@/components/ChatContext';
 import { getEpisodeLimit } from '@/lib/actions';
+import { EpisodeLimit } from '@/lib/limits';
 import Image from 'next/image';
 import { auth } from '@clerk/nextjs/server';
 
-async function PodcastHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
-  const planLimit = await getEpisodeLimit(podcast.id);
+async function PodcastHeader({ podcast, planLimit }: { podcast: PodcastWithEpisodes; planLimit: EpisodeLimit | null }) {
   return (
     <div className="flex w-full flex-col gap-4 font-mono">
       <div className="flex w-full flex-row gap-4">
@@ -95,29 +95,62 @@ export function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
   );
 }
 
-function PodcastLinkHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
+function PodcastLinkHeader({
+  podcast,
+  planLimit,
+  activationCode,
+}: {
+  podcast: PodcastWithEpisodes;
+  planLimit: EpisodeLimit | null;
+  activationCode?: string;
+}) {
   const { userId } = auth();
-  if (!userId || userId !== podcast.owner) {
-    return null;
-  }
-  const link = `/podcast/${podcast.slug}-${podcast.uuid?.replace(/-/g, '')}`;
+  const numEpisodes = podcast.Episodes.filter(isReady).length;
+  const link = `/podcast/${podcast.slug}?uuid=${podcast.uuid?.replace(/-/g, '')}`;
   if (podcast.private) {
-    return (
-      <div className="flex flex-row bg-red-900 p-2 text-center text-white">
-        <div className="mx-auto w-full">
-          <div className="flex flex-col gap-3">
-            <div className="font-mono">You are viewing a private link to this podcast.</div>
-            <div className="text-sm">
-              The content here is only visible through the{' '}
-              <Link href={link} className="text-primary underline">
-                private link
-              </Link>{' '}
-              and is intended as a preview.
+    if (activationCode) {
+      return (
+        <div className="flex flex-row bg-sky-900 p-4 text-center text-white">
+          <div className="mx-auto w-3/5">
+            <div className="flex flex-col gap-3">
+              <div className="font-mono underline underline-offset-8">Thanks for checking out Podverse!</div>
+              <div className="text-base text-pretty">
+                This page is a <b>private</b> demo of Podverse for <b className="text-primary">{podcast.title}</b>.
+                We&apos;ve imported {numEpisodes} recent episodes to get started. Feel free to click around and try out
+                all the features.
+              </div>
+              <div className="text-base text-pretty">
+                As part of our initial launch, you&apos;re invited to claim a <b>one-year free subscription</b> to
+                Podverse &mdash; no strings attached. Just click below and we&apos;ll set up your free account, after
+                which you can manage your podcast, import more episodes, and share links with your listeners.
+              </div>
+              <AcceptPodcastDialog podcast={podcast} />
+
             </div>
           </div>
         </div>
-      </div>
-    );
+      );
+    } else {
+      if (!userId || userId !== podcast.owner) {
+        return null;
+      }
+      return (
+        <div className="flex flex-row bg-red-900 p-2 text-center text-white">
+          <div className="mx-auto w-full">
+            <div className="flex flex-col gap-3">
+              <div className="font-mono">This podcast is not yet published.</div>
+              <div className="text-sm">
+                The content here is only visible through the{' '}
+                <Link href={link} className="text-primary underline">
+                  private link
+                </Link>{' '}
+                and is intended as a preview.
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
   }
   return (
     <div className="flex flex-row bg-muted p-2 text-center text-white">
@@ -131,37 +164,46 @@ function PodcastLinkHeader({ podcast }: { podcast: PodcastWithEpisodes }) {
   );
 }
 
-export async function PodcastDetail({ podcastSlug }: { podcastSlug: string }) {
+export async function PodcastDetail({
+  podcastSlug,
+  uuid,
+  activationCode,
+}: {
+  podcastSlug: string;
+  uuid?: string;
+  activationCode?: string;
+}) {
   try {
     const supabase = await getSupabaseClient();
 
     let podcast = null;
-    try {
-      podcast = await GetPodcastWithEpisodes(supabase, podcastSlug);
-      if (podcast.private) {
-        throw new Error('Podcast is private');
-      }
-    } catch (error) {
-      // See if the slug contains a UUID.
-      const uuid = podcastSlug.split('-').pop();
-      if (uuid && uuid.length == 32) {
-        podcast = await GetPodcastWithEpisodesByUUID(supabase, uuid);
+    podcast = await GetPodcastWithEpisodes(supabase, podcastSlug);
+    if (podcast.private && podcast.uuid) {
+      if (uuid) {
+        if (uuid !== podcast.uuid.replace(/-/g, '')) {
+          throw new Error('Podcast is private and UUID does not match');
+        }
+      } else if (activationCode) {
+        if (activationCode !== podcast.uuid.replace(/-/g, '')) {
+          throw new Error('Podcast is private and activation code does not match');
+        }
       } else {
-        throw error;
+        throw new Error('Podcast is private and no UUID or activation code provided');
       }
     }
+    const planLimit = await getEpisodeLimit(podcast.id);
 
     return (
-      <ChatContextProvider podcast={podcast}>
-        <PodcastLinkHeader podcast={podcast} />
+      <>
+        <PodcastLinkHeader podcast={podcast} planLimit={planLimit} activationCode={activationCode} />
         <div className="mx-auto mt-8 w-11/12 md:w-4/5">
-          <PodcastHeader podcast={podcast} />
+          <PodcastHeader podcast={podcast} planLimit={planLimit} />
           <div className="flex flex-row gap-4">
             <PodcastEpisodeList podcast={podcast} episodes={podcast.Episodes} />
             {podcast.Episodes.filter(isReady).length > 0 && <PodcastChat podcast={podcast} />}
           </div>
         </div>
-      </ChatContextProvider>
+      </>
     );
   } catch (error) {
     console.error('Error looking up podcast:', error);

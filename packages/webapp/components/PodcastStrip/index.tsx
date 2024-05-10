@@ -10,7 +10,7 @@ import Image from 'next/image';
 export async function PodcastStrip({ slug }: { slug: string }) {
   const podcast = await getPodcastWithEpisodes(slug);
   const podcastUuid = podcast.uuid?.replace(/-/g, '');
-  const podcastLink = `${slug}-${podcastUuid}`;
+  const podcastLink = `${slug}?uuid=${podcastUuid}`;
   const planLimit = await getEpisodeLimit(podcast.id);
   if (!planLimit) {
     throw new Error('Plan limit not found');

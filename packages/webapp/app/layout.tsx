@@ -12,7 +12,6 @@ import { Toaster } from '@/components/ui/sonner';
 import { FloatingChatPanel } from '@/components/ChatPanel';
 import { dark } from '@clerk/themes';
 import { Analytics } from '@vercel/analytics/react';
-import { ChatContextProvider } from '@/components/ChatContext';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
@@ -76,9 +75,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                   <>
                     <SiteHeader />
                     <div className="flex-1">{children}</div>
-                    <ChatContextProvider>
-                      <FloatingChatPanel />
-                    </ChatContextProvider>
+                    <FloatingChatPanel />
                     <Footer />
                     <Toaster richColors />
                   </>

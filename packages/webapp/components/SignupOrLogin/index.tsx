@@ -4,7 +4,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 
 /** Create a new Users table record, if needed, for the currently logged-in user. */
-async function createUser() {
+export async function createUser() {
   const { userId, getToken } = auth();
   if (!userId) {
     return;

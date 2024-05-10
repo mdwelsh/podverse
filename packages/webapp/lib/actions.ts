@@ -20,6 +20,7 @@ import {
   SearchResult,
   GetPodcastSuggestions,
   GetPodcastWithEpisodes,
+  GetPodcastWithEpisodesByUUID,
   GetSubscriptions,
   GetEpisodeWithPodcastBySlug,
   Subscription,
@@ -47,6 +48,12 @@ export async function getPodcast(podcastId: string): Promise<Podcast> {
 export async function getPodcastWithEpisodes(slug: string): Promise<PodcastWithEpisodes> {
   const supabase = await getSupabaseClient();
   return GetPodcastWithEpisodes(supabase, slug);
+}
+
+/** Get the given podcast and episodes by UUID. */
+export async function getPodcastWithEpisodesByUUID(uuid: string): Promise<PodcastWithEpisodes> {
+  const supabase = await getSupabaseClient();
+  return GetPodcastWithEpisodesByUUID(supabase, uuid);
 }
 
 /** Get the given episode and podcast metadata. */
@@ -260,7 +267,7 @@ export async function updateSpeaker(episodeId: number, speaker: string, name: st
 }
 
 /** Perform a full-text search. */
-export async function search(query: string): Promise<SearchResult[]> {
+export async function search(query: string, podcastSlug?: string): Promise<SearchResult[]> {
   const supabase = await getSupabaseClient();
   return Search({ supabase, input: query, includeVector: false });
 }
@@ -402,4 +409,18 @@ export async function getEpisodes({
     throw e3;
   }
   return [data, count as number];
+}
+
+export async function assignPodcastToUser(podcastId: number, userId: string, activationCode: string): Promise<void> {
+  console.log(`Assigning podcast ${podcastId} to user ${userId}`);
+  const supabase = await getSupabaseClient();
+  const { error } = await supabase.rpc('assign_podcast_owner', {
+    id: podcastId,
+    owner: userId,
+    activation_code: activationCode,
+  });
+  if (error) {
+    console.error('error', error);
+    throw error;
+  }
 }

@@ -4,7 +4,14 @@ export const dynamicParams = true;
 export const revalidate = 0;
 
 import { PodcastDetail } from '@/components/PodcastDetail';
+import { search } from '@/lib/actions';
 
-export default async function Page({ params }: { params: { podcastSlug: string } }) {
-  return <PodcastDetail podcastSlug={params.podcastSlug} />;
+export default async function Page({
+  params,
+  searchParams,
+}: {
+  params: { podcastSlug: string };
+  searchParams: { [key: string]: string };
+}) {
+  return <PodcastDetail podcastSlug={params.podcastSlug} uuid={searchParams['uuid']} activationCode={searchParams['activationCode']} />;
 }

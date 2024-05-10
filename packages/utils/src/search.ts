@@ -34,10 +34,12 @@ export interface SearchResult {
 export async function Search({
   supabase,
   input,
+  podcastSlug,
   includeVector = true,
 }: {
   supabase: SupabaseClient;
   input: string;
+  podcastSlug?: string;
   includeVector?: boolean;
 }): Promise<SearchResult[]> {
   const results: SearchResult[] = [];

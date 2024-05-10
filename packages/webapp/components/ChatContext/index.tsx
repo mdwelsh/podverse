@@ -3,7 +3,7 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { PodcastWithEpisodes, EpisodeWithPodcast } from 'podverse-utils';
 import { getPodcastWithEpisodes, getEpisodeWithPodcast } from '@/lib/actions';
-import { usePathname } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 
 interface ChatContextType {
   podcast?: PodcastWithEpisodes;
@@ -21,6 +21,7 @@ export function useChatContext(): ChatContextType {
   }
 }
 
+/** A Context provider that provides the current podcast and episode, if designated by the path. */
 export function ChatContextProvider({
   podcast,
   episode,
@@ -30,31 +31,34 @@ export function ChatContextProvider({
   episode?: EpisodeWithPodcast;
   children: React.ReactNode;
 }) {
-  const [currentPodcast, setCurrentPodcast] = useState<PodcastWithEpisodes | undefined>(undefined);
-  const [currentEpisode, setCurrentEpisode] = useState<EpisodeWithPodcast | undefined>(undefined);
-  const pathname = usePathname();
+  // Here, null means not yet checked, and undefined means we're not in a podcast or episode context.
+  const [currentPodcast, setCurrentPodcast] = useState<PodcastWithEpisodes | null | undefined>(null);
+  const [currentEpisode, setCurrentEpisode] = useState<EpisodeWithPodcast | null | undefined>(null);
+  const { podcastSlug, episodeSlug } = useParams<{ podcastSlug: string; episodeSlug: string }>();
+  const searchParams = useSearchParams();
+  const uuid = searchParams.get('uuid');
 
   useEffect(() => {
     // Fetch podcast and/or episode if needed.
-    if (!podcast && !episode) {
-      const path = pathname.split('/');
-      if (path.length === 3 && path[1] === 'podcast') {
-        const podcastSlug = path[2];
-        getPodcastWithEpisodes(podcastSlug).then(setCurrentPodcast);
-      } else if (path.length === 5 && path[1] === 'podcast' && path[3] === 'episode') {
-        const podcastSlug = path[2];
-        const episodeSlug = path[4];
-        getEpisodeWithPodcast(podcastSlug, episodeSlug).then(setCurrentEpisode);
-      } else {
-        setCurrentPodcast(undefined);
-        setCurrentEpisode(undefined);
-      }
+    if (podcast === null && podcastSlug) {
+      getPodcastWithEpisodes(podcastSlug).then((podcast) => {
+        // Bypass private check if correct UUID is provided.
+        if (podcast.private && !uuid && podcast.uuid !== uuid) {
+          console.error(`Podcast ${podcastSlug} is private`);
+          setCurrentPodcast(undefined);
+        } else {
+          setCurrentPodcast(podcast);
+          if (episode === null && episodeSlug) {
+            getEpisodeWithPodcast(podcastSlug, episodeSlug).then(setCurrentEpisode);
+          }
+        }
+      });
     }
-  }, [podcast, episode, pathname]);
+  }, [podcast, episode, podcastSlug, episodeSlug, uuid]);
 
   const value: ChatContextType = {
-    podcast: podcast ?? currentPodcast,
-    episode: episode ?? currentEpisode,
+    podcast: currentPodcast || undefined,
+    episode: currentEpisode || undefined,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

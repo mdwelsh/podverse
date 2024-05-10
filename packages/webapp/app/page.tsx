@@ -77,7 +77,9 @@ export default async function HomePage() {
           <FeatureCarousel />
         </div>
       </div>
-      <div className="mt-4 flex flex-col gap-4">
+
+      {/* Bring this back once we have some featured podcasts. */}
+      {/* <div className="mt-4 flex flex-col gap-4">
         <div className="font-mono text-base sm:text-xl">Latest featured episodes</div>
         <EpisodeList />
       </div>
@@ -95,7 +97,7 @@ export default async function HomePage() {
           </div>
         </div>
         <PodcastList limit={8} />
-      </div>
+      </div> */}
     </section>
   );
 }

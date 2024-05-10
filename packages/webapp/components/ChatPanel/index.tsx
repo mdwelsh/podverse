@@ -11,6 +11,7 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import Image from 'next/image';
+import { ChatContextProvider } from '../ChatContext';
 import { ContextAwareChat } from '@/components/Chat';
 import { usePathname } from 'next/navigation';
 
@@ -31,7 +32,9 @@ export function ChatPanel({ children, suggestedQueries }: { children: React.Reac
           <DrawerTitle className="text-primary mx-auto font-mono">Podverse AI Chat</DrawerTitle>
         </DrawerHeader>
         <div className="mx-auto w-full overflow-scroll md:w-3/5">
-          <ContextAwareChat />
+          <ChatContextProvider>
+            <ContextAwareChat />
+          </ChatContextProvider>
         </div>
         <DrawerFooter>
           <DrawerClose>

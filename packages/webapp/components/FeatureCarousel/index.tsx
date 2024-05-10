@@ -12,7 +12,7 @@ function FeatureCard({ heading, image, children }: { heading: string; image: str
           {children}
         </ZoomableImage>
       </div>
-      <div className="text-muted-foreground font-mono text-sm">{heading}</div>
+      <div className="font-mono text-sm">{heading}</div>
     </div>
   );
 }

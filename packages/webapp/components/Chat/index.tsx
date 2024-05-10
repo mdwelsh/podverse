@@ -21,7 +21,7 @@ import { timeString } from '@/lib/time';
 import { useScrollAnchor } from '@/lib/use-scroll-anchor';
 import { Icons } from '@/components/icons';
 import { EpisodeWithPodcast, PodcastWithEpisodes } from 'podverse-utils';
-import { useChatContext } from '../ChatContext';
+import { useChatContext } from '@/components/ChatContext';
 
 export const MemoizedReactMarkdown: FC<Options> = memo(
   ReactMarkdown,

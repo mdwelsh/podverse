@@ -10,6 +10,7 @@ import { SearchResult } from 'podverse-utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useChatContext } from '@/components/ChatContext';
 
 export function SearchPanel() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -18,6 +19,12 @@ export function SearchPanel() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const [open, setOpen] = useState(false);
+  const { podcast } = useChatContext();
+
+  // For now, we don't allow search when we aren't in a podcast context.
+  if (!podcast) {
+    return null;
+  }
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
@@ -40,7 +47,7 @@ export function SearchPanel() {
   const onFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSubmit();
-  }
+  };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
