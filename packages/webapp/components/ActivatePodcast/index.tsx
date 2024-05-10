@@ -1,6 +1,7 @@
 import { getPodcastWithEpisodesByUUID } from '@/lib/actions';
 import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
+import { assignPodcastToUser } from '@/lib/actions';
 
 export async function ActivatePodcast({ activationCode }: { activationCode: string }) {
   const { userId } = auth();
@@ -15,8 +16,11 @@ export async function ActivatePodcast({ activationCode }: { activationCode: stri
   }
   try {
     await assignPodcastToUser(podcast.id, userId, activationCode);
-    redirect('/dashboard?assigned=' + podcast.slug);
+    console.log('Activated podcast: ' + podcast.slug);
   } catch (error) {
+    console.error('Error activating podcast:', error);
     return <div>Unable to activate: {JSON.stringify(error)}</div>;
+  } finally {
+    redirect('/dashboard?assigned=' + podcast.slug);
   }
 }

@@ -413,7 +413,9 @@ export async function getEpisodes({
 
 export async function assignPodcastToUser(podcastId: number, userId: string, activationCode: string): Promise<void> {
   console.log(`Assigning podcast ${podcastId} to user ${userId}`);
-  const supabase = await getSupabaseClient();
+  // This function needs to run as the service role, since it's reassigning the owner
+  // field on the Podcast, which overrides RLS.
+  const supabase = await getSupabaseClientWithToken(process.env.SUPABASE_SERVICE_ROLE_KEY as string);
   const { error } = await supabase.rpc('assign_podcast_owner', {
     id: podcastId,
     owner: userId,

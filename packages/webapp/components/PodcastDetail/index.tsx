@@ -108,7 +108,7 @@ function PodcastLinkHeader({
   const numEpisodes = podcast.Episodes.filter(isReady).length;
   const link = `/podcast/${podcast.slug}?uuid=${podcast.uuid?.replace(/-/g, '')}`;
   if (podcast.private) {
-    if (activationCode) {
+    if (activationCode && (!userId || userId !== podcast.owner)) {
       return (
         <div className="flex flex-row bg-sky-900 p-4 text-center text-white">
           <div className="mx-auto w-3/5">
