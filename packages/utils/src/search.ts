@@ -69,10 +69,10 @@ export async function Search({
   }
 
   const podcastMetadataQueries = [...podcastIds].map((podcastId) =>
-    supabase.from('Podcasts').select('*').eq('id', podcastId).limit(1),
+    supabase.from('Podcasts').select('*').eq('id', podcastId).limit(1)
   );
   const documentMetadataQueries = [...documentIds].map((documentId) =>
-    supabase.from('Documents').select('*').eq('id', documentId).limit(1),
+    supabase.from('Documents').select('*').eq('id', documentId).limit(1)
   );
   const [podcastMetadata, documentMetadata] = await Promise.all([podcastMetadataQueries, documentMetadataQueries]);
   for (const podcastResult of podcastMetadata) {
@@ -98,7 +98,7 @@ export async function Search({
     episodeIds.add(episodeId);
   }
   const episodeMetadataqueries = [...episodeIds].map((episodeId) =>
-    supabase.from('Episodes').select('*').eq('id', episodeId).limit(1),
+    supabase.from('Episodes').select('*').eq('id', episodeId).limit(1)
   );
   const episodeMetadata = await Promise.all(episodeMetadataqueries);
   for (const episodeResult of episodeMetadata) {

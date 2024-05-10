@@ -19,7 +19,7 @@ export const siteConfig = {
     {
       title: 'Pricing',
       href: '/pricing',
-    }
+    },
   ],
   links: {
     twitter: 'https://twitter.com/shadcn',

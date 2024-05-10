@@ -180,7 +180,7 @@ export const processEpisode = inngest.createFunction(
       };
       await UpdateEpisode(supabase, episode);
     }
-  },
+  }
 );
 
 /** Scan for unprocessed episodes and fire off events to process them. */
@@ -197,7 +197,7 @@ export const processPodcast = inngest.createFunction(
   async ({ event, step, runId }) => {
     const { podcastId, force, supabaseAccessToken, episodeLimit } = event.data;
     console.log(
-      `process/podcast - event ${runId} received for ${podcastId}, force ${force}, episodeLimit ${episodeLimit}`,
+      `process/podcast - event ${runId} received for ${podcastId}, force ${force}, episodeLimit ${episodeLimit}`
     );
     const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
     const podcast = await GetPodcastWithEpisodesByID(supabase, podcastId);
@@ -217,14 +217,14 @@ export const processPodcast = inngest.createFunction(
           },
         });
         return result;
-      }),
+      })
     );
 
     console.log(`process/episodes for podcast ${podcastId} - Done.`);
     return {
       message: `Finished processing ${results.length} episodes for podcast ${podcastId}`,
     };
-  },
+  }
 );
 
 /** Import or refresh a podcast RSS feed. */
@@ -254,7 +254,7 @@ export const ingestPodcast = inngest.createFunction(
     } else {
       return { message: `Ingested podcast ${newPodcast.id}` };
     }
-  },
+  }
 );
 
 /** Clear errors and processing state for a podcast. */
@@ -268,9 +268,9 @@ export const clearErrors = inngest.createFunction(
     const { podcastId, supabaseAccessToken } = event.data;
     console.log(`clear/errors - event ${runId}, podcastId ${podcastId}`);
     const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
-    await ClearPodcastErrors({supabase, podcastId});
+    await ClearPodcastErrors({ supabase, podcastId });
     return { message: `Cleared errors for podcast ${podcastId}` };
-  },
+  }
 );
 
 /** Refresh all podcast feeds. Runs daily. */
@@ -297,7 +297,7 @@ export const refreshPodcasts = inngest.createFunction(
           },
         });
         return result;
-      }),
+      })
     );
     console.log(`refreshPodcasts - Done clearing errors.`);
 
@@ -313,7 +313,7 @@ export const refreshPodcasts = inngest.createFunction(
           },
         });
         return result;
-      }),
+      })
     );
     console.log(`refreshPodcasts - Done ingesting.`);
 
@@ -336,5 +336,5 @@ export const refreshPodcasts = inngest.createFunction(
     return {
       message: `Finished refreshing ${stats.length} podcasts`,
     };
-  },
+  }
 );

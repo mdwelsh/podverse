@@ -15,7 +15,7 @@ export function SiteHeader() {
         <div className="flex flex-1 items-center justify-end space-x-4">
           <SearchPanel />
           <div className="flex items-center space-x-1">
-            { userId && (
+            {userId && (
               <Link href="/dashboard" className="mx-4">
                 <Button variant="secondary">Dashboard</Button>
               </Link>

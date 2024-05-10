@@ -8,7 +8,7 @@ export async function getSupabaseClientWithToken(token: string) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
     {
       global: { headers: { Authorization: `Bearer ${token}` } },
-    },
+    }
   );
 }
 
@@ -24,7 +24,7 @@ export async function getSupabaseClient() {
   } catch (error) {
     return createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
     );
   }
 }

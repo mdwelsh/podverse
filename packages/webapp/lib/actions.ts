@@ -347,7 +347,7 @@ export async function getEpisodes({
   searchTerm?: string;
 }): Promise<[EpisodeWithPodcast[], number]> {
   console.log(
-    `Getting episodes for owner=${owner}, podcastId=${podcastId}, sortBy=${sortBy}, ascending=${ascending}, limit=${limit}, offset=${offset}, searchTerm=${searchTerm}, pending=${pending}, processing=${processing}, error=${error}, ready=${ready}`,
+    `Getting episodes for owner=${owner}, podcastId=${podcastId}, sortBy=${sortBy}, ascending=${ascending}, limit=${limit}, offset=${offset}, searchTerm=${searchTerm}, pending=${pending}, processing=${processing}, error=${error}, ready=${ready}`
   );
 
   const supabase = await getSupabaseClient();

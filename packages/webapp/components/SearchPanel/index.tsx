@@ -40,7 +40,7 @@ export function SearchPanel() {
   const onFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSubmit();
-  }
+  };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

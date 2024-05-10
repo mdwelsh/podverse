@@ -47,7 +47,7 @@ export async function POST(req: Request) {
         message: `Problem handling webhook: ${(error as { message: string }).message}`,
         ok: false,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -111,7 +111,7 @@ async function handleSubscriptionUpdated(event: any) {
   // have any abuse vectors.
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-    process.env.SUPABASE_SERVICE_ROLE_KEY as string,
+    process.env.SUPABASE_SERVICE_ROLE_KEY as string
   );
 
   const newSub = event.data.object;
@@ -163,7 +163,7 @@ async function handleSubscriptionDeleted(event: any) {
   // have any abuse vectors.
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-    process.env.SUPABASE_SERVICE_ROLE_KEY as string,
+    process.env.SUPABASE_SERVICE_ROLE_KEY as string
   );
 
   const deletedSub = event.data.object;

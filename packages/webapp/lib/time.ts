@@ -18,5 +18,5 @@ export function durationString(seconds: number): string {
       hours += 1;
     }
   }
-  return `${hours > 0 ? hours.toString()+'h' : ''} ${minutes.toString().padStart(2, '0')}m`;
+  return `${hours > 0 ? hours.toString() + 'h' : ''} ${minutes.toString().padStart(2, '0')}m`;
 }

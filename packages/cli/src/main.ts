@@ -200,7 +200,7 @@ program
       await inngest.send({
         name: 'process/episodes',
         data: {
-          podcastId: podcastId ? podcastId?.toString(): undefined,
+          podcastId: podcastId ? podcastId?.toString() : undefined,
           repeat: opts.repeat,
           stage: opts.stage,
         },

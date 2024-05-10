@@ -179,7 +179,7 @@ export async function POST(req: Request) {
               content: string;
             }[];
             const chunkResults = await Promise.all(
-              chunks.map(async (chunk, index) => await processChunk(chunk, index, supabase)),
+              chunks.map(async (chunk, index) => await processChunk(chunk, index, supabase))
             );
             const newMessages = appendToolCallMessage({
               tool_call_id: toolCall.id,
@@ -211,10 +211,7 @@ export async function POST(req: Request) {
               },
             });
             return openai.chat.completions.create({
-              messages: [
-                ...messages,
-                ...newMessages,
-              ],
+              messages: [...messages, ...newMessages],
               model: 'gpt-4-turbo-preview',
               stream: true,
               tools,

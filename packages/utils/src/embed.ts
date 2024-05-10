@@ -8,7 +8,7 @@ export async function EmbedText(
   supabase: SupabaseClient,
   url: string,
   episodeId?: number,
-  meta?: object,
+  meta?: object
 ): Promise<number> {
   console.log(`Embedding text from ${url}`);
   const res = await fetch(url);
@@ -24,7 +24,7 @@ export async function EmbedTranscript(
   supabase: SupabaseClient,
   url: string,
   episodeId?: number,
-  meta?: object,
+  meta?: object
 ): Promise<number> {
   console.log(`Embedding transcript from ${url} for episode ${episodeId}`);
   const res = await fetch(url);
@@ -43,7 +43,7 @@ async function EmbedChunks(
   sourceUrl: string,
   checksum: string,
   episodeId?: number,
-  meta?: object,
+  meta?: object
 ): Promise<number> {
   // Generate embedding for each chunk.
   console.log(`Embedding ${chunks.length} chunks for episode ${episodeId} from ${sourceUrl} with checksum ${checksum}`);
@@ -60,7 +60,7 @@ async function EmbedChunks(
         source: sourceUrl,
         meta,
       },
-      { onConflict: 'episode,source' },
+      { onConflict: 'episode,source' }
     )
     .select()
     .limit(1)
@@ -87,7 +87,7 @@ async function EmbedChunks(
           .select()
           .limit(1)
           .single();
-      }),
+      })
     );
     console.log(`Embedded ${chunks.length} chunks for document ID ${document.id}`);
     return document.id;

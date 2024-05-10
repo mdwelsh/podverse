@@ -21,7 +21,7 @@ export async function Transcribe(audioUrl: string): Promise<SyncPrerecordedRespo
       paragraphs: true,
       speaker_labels: true,
       smart_format: true,
-    },
+    }
   );
   if (error) {
     console.log('Error transcribing audio: ', error);
@@ -51,7 +51,7 @@ export async function TranscribeAsync(audioUrl: string, callbackUrl: string): Pr
       paragraphs: true,
       speaker_labels: true,
       smart_format: true,
-    },
+    }
   );
   if (error) {
     console.log('Error transcribing audio: ', error);

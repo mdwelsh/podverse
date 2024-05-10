@@ -191,7 +191,7 @@ export async function Ingest({
       });
     });
     console.log(
-      `Found ${newEpisodes.length} new episodes, ${updatedEpisodes.length} updated episodes, and ${deletedEpisodes.length} deleted episodes.`,
+      `Found ${newEpisodes.length} new episodes, ${updatedEpisodes.length} updated episodes, and ${deletedEpisodes.length} deleted episodes.`
     );
 
     for (const episode of deletedEpisodes) {
@@ -209,7 +209,7 @@ export async function Ingest({
         supabase,
         newEpisodes.map((episode) => {
           return { ...episode, podcast: oldPodcast!.id };
-        }),
+        })
       );
       console.log(`Inserted ${newEpisodes.length} new episodes`);
     } catch (err) {
@@ -234,7 +234,7 @@ export async function Ingest({
     console.log(`Updated ${updatedEpisodes.length} episodes`);
 
     // Update podcast metadata.
-    const newPodcastMetadata = { 
+    const newPodcastMetadata = {
       ...newPodcast,
       // Keep original private, published, and uuid fields.
       private: oldPodcast.private,
@@ -259,7 +259,7 @@ export async function Ingest({
       supabase,
       newPodcast.Episodes.map((episode) => {
         return { ...episode, podcast: podcastId };
-      }),
+      })
     );
   }
   console.log(`Ingested podcast ${newPodcast.slug} with ${newPodcast.Episodes.length} episodes`);

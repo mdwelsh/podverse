@@ -28,7 +28,7 @@ export function ClientNavMenu({ items }: { items?: NavItem[] }) {
                         {item.title}
                       </Link>
                     </NavigationMenuLink>
-                  ),
+                  )
               )}
             </div>
           </NavigationMenuContent>

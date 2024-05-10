@@ -29,7 +29,9 @@ export async function SignupOrLogin({ text }: { text?: string }) {
       </SignedIn>
       <SignedOut>
         <SignInButton>
-          <Button variant="default" className="font-mono">{ text || 'Sign in' }</Button>
+          <Button variant="default" className="font-mono">
+            {text || 'Sign in'}
+          </Button>
         </SignInButton>
       </SignedOut>
     </>

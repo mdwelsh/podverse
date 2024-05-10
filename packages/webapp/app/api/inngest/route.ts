@@ -1,6 +1,12 @@
 import { serve } from 'inngest/next';
 import { inngest } from '../../../inngest/client';
-import { processEpisode, processPodcast, ingestPodcast, refreshPodcasts, clearErrors } from '../../../inngest/functions';
+import {
+  processEpisode,
+  processPodcast,
+  ingestPodcast,
+  refreshPodcasts,
+  clearErrors,
+} from '../../../inngest/functions';
 import { clear } from 'console';
 
 // Allow max duration (can be increased on enterprise plan).
