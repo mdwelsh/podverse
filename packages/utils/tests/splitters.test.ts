@@ -86,7 +86,7 @@ describe('splitTranscript tests', () => {
     expect(chunks[0].meta?.startTime).toBe(5.92);
     expect(chunks[0].meta?.endTime).toBe(308.965);
 
-    expect(chunks[16].text.indexOf('So by Diddy\'s corollary,')).toBe(0);
+    expect(chunks[16].text.indexOf("So by Diddy's corollary,")).toBe(0);
     expect(chunks[16].numTokens).toBe(317);
     expect(chunks[16].meta?.startTime).toBe(4438.695);
     expect(chunks[16].meta?.endTime).toBe(4525.815);

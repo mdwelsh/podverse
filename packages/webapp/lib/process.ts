@@ -73,7 +73,9 @@ export async function TranscribeEpisode({
     headers: { 'User-Agent': 'Podverse' },
   });
   console.log(
-    `Fetched audio for episode ${episode.id}: ${res.status} ${res.statusText} - size is ${res.headers.get('content-length')} bytes.`,
+    `Fetched audio for episode ${episode.id}: ${res.status} ${res.statusText} - size is ${res.headers.get(
+      'content-length'
+    )} bytes.`
   );
   if (!res.ok) {
     throw new Error(`Error fetching audio: ${res.status} ${res.statusText}`);
@@ -102,7 +104,7 @@ export async function TranscribeEpisode({
       file,
       res.headers.get('content-type') || 'audio/mp3',
       'audio',
-      `${episode.podcast}/${episode.id}/audio.mp3`,
+      `${episode.podcast}/${episode.id}/audio.mp3`
     );
 
     console.log(`Saved audio for ${episode.id} to: ${audioUrl}`);
@@ -136,7 +138,7 @@ export async function TranscribeEpisodeCallback({
     supabase,
     JSON.stringify(result, null, 2),
     'transcripts',
-    `${episode.podcast}/${episode.id}/transcript.json`,
+    `${episode.podcast}/${episode.id}/transcript.json`
   );
 
   // Extract just the transcript text.
@@ -148,7 +150,7 @@ export async function TranscribeEpisodeCallback({
     supabase,
     transcript,
     'transcripts',
-    `${episode.podcast}/${episode.id}/transcript.txt`,
+    `${episode.podcast}/${episode.id}/transcript.txt`
   );
 
   // Update Episode.

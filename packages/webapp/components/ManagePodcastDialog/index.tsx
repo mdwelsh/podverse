@@ -220,8 +220,8 @@ export function PublicPodcastSwitch({
             </TooltipTrigger>
             <TooltipContent className="text-muted-foreground w-[400px] font-sans text-sm">
               When this option is enabled, your podcast link will be public at{' '}
-              <span className="text-primary font-mono">https://podverse.ai/podcast/{podcast.slug}</span>.
-              Keep this option disabled if you wish to keep your podcast link private.
+              <span className="text-primary font-mono">https://podverse.ai/podcast/{podcast.slug}</span>. Keep this
+              option disabled if you wish to keep your podcast link private.
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

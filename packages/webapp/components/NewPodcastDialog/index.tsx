@@ -149,7 +149,9 @@ function PodcastPreviewHeader({ podcast }: { podcast: PodcastWithEpisodesMetadat
   return (
     <div className="flex w-full flex-row gap-4 overflow-hidden rounded-lg border bg-gray-700 p-4 font-mono text-white dark:bg-gray-700 dark:text-white">
       <div className="flex size-full flex-row gap-4">
-        <div className="w-1/5">{podcast.imageUrl && <Image src={podcast.imageUrl} width={100} height={100} alt="Podcast thumbnail" />}</div>
+        <div className="w-1/5">
+          {podcast.imageUrl && <Image src={podcast.imageUrl} width={100} height={100} alt="Podcast thumbnail" />}
+        </div>
         <div className="line-clamp-3 flex w-4/5 flex-col gap-4 truncate text-wrap">
           <div className="text-primary text-lg">{podcast.title}</div>
           {podcast.copyright && <div className="text-muted-foreground text-xs">{podcast.copyright}</div>}

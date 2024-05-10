@@ -20,7 +20,9 @@ export async function Dashboard() {
         <div className="flex flex-row gap-2 items-center">
           <div className="font-mono text-lg">Your podcasts</div>
           <Link href="/dashboard/episodes">
-            <Button variant="outline" className="text-sm font0-ono">View episodes</Button>
+            <Button variant="outline" className="text-sm font0-ono">
+              View episodes
+            </Button>
           </Link>
         </div>
         <NewPodcastDialog />

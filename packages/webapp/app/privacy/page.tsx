@@ -73,9 +73,9 @@ export default function PrivacyPage() {
         and across different services. Cookies are small text files containing a string of alphanumeric characters. We
         may use both session cookies and persistent cookies. A session cookie disappears after you close your browser. A
         persistent cookie remains after you close your browser and may be used by your browser on subsequent visits to
-        our Services. Please review your web browser&apos;s “Help” file to learn how you may modify your cookie settings.
-        Please note that if you delete or choose not to accept cookies from the Service, you may not be able to utilize
-        the features of the Service to their fullest potential.
+        our Services. Please review your web browser&apos;s “Help” file to learn how you may modify your cookie
+        settings. Please note that if you delete or choose not to accept cookies from the Service, you may not be able
+        to utilize the features of the Service to their fullest potential.
       </div>
 
       <div className="font-mono text-primary text-base">C. Information We Receive from Third Parties.</div>
@@ -139,8 +139,8 @@ export default function PrivacyPage() {
         content you post to our Services may be displayed on our Services and viewable by other users. Below in the
         “Your Preferences” section of this Privacy Policy, we describe the controls that you can use, along with other
         relevant settings associated with your account, to limit the sharing of certain information. We are not
-        responsible for the other users&apos; use of available information, so you should carefully consider whether and what
-        to post or how you identify yourself on our Services.
+        responsible for the other users&apos; use of available information, so you should carefully consider whether and
+        what to post or how you identify yourself on our Services.
       </div>
 
       <div>
@@ -158,9 +158,9 @@ export default function PrivacyPage() {
 
       <div>
         <span className="font-bold">Analytics Partners.</span> We use analytics services such as Google Analytics and
-        Datadog to collect and process certain analytics data. You can learn more about Google&apos;s practices by visiting
-        https://www.google.com/policies/privacy/partners/. To help us understand how you use our Services and to help us
-        improve them, we automatically receive information about your interactions with our Services.
+        Datadog to collect and process certain analytics data. You can learn more about Google&apos;s practices by
+        visiting https://www.google.com/policies/privacy/partners/. To help us understand how you use our Services and
+        to help us improve them, we automatically receive information about your interactions with our Services.
       </div>
 
       <div>

@@ -45,24 +45,26 @@ const features = [
 export function FeatureCarousel() {
   return (
     <div className="group relative mx-auto w-8/12 md:max-w-lg lg:max-w-2xl">
-    <Carousel opts={{
-      align: "center",
-      loop: true,
-    }}>
-      <CarouselContent className="-ml-2 w-full md:-ml-8">
-        {features.map((feature, index) => (
-          <CarouselItem className="basis-10/12 pl-2 md:basis-9/12 md:pl-8" key={index}>
-            {feature}
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      <CarouselPrevious variant="secondary" />
-      <CarouselNext variant="secondary" />
-    </Carousel>
-    <div className="absolute w-full inset-0 z-5 flex flex-row gap-0">
-    <div className="w-1/2 bg-gradient-to-r from-background from-0% to-10% to-transparent opacity-100" />
-    <div className="w-1/2 bg-gradient-to-r from-transparent from-90% to-100% to-background opacity-100" />
-    </div>
+      <Carousel
+        opts={{
+          align: 'center',
+          loop: true,
+        }}
+      >
+        <CarouselContent className="-ml-2 w-full md:-ml-8">
+          {features.map((feature, index) => (
+            <CarouselItem className="basis-10/12 pl-2 md:basis-9/12 md:pl-8" key={index}>
+              {feature}
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious variant="secondary" />
+        <CarouselNext variant="secondary" />
+      </Carousel>
+      <div className="absolute w-full inset-0 z-5 flex flex-row gap-0">
+        <div className="w-1/2 bg-gradient-to-r from-background from-0% to-10% to-transparent opacity-100" />
+        <div className="w-1/2 bg-gradient-to-r from-transparent from-90% to-100% to-background opacity-100" />
+      </div>
     </div>
   );
 }

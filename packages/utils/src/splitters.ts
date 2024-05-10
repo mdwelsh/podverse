@@ -87,7 +87,7 @@ export class TextSplitter {
 
     if (chunkOverlap > chunkSize) {
       throw new Error(
-        `Got a larger chunk overlap (${chunkOverlap}) than chunk size (${chunkSize}), should be smaller.`,
+        `Got a larger chunk overlap (${chunkOverlap}) than chunk size (${chunkSize}), should be smaller.`
       );
     }
     this.chunkSize = chunkSize;

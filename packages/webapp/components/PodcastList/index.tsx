@@ -2,7 +2,7 @@ import { PodcastCard } from '../PodcastCard';
 import { GetPodcasts } from 'podverse-utils';
 import { getSupabaseClient } from '@/lib/supabase';
 
-export async function PodcastList({ limit } : { limit?: number }) {
+export async function PodcastList({ limit }: { limit?: number }) {
   const supabase = await getSupabaseClient();
   const podcasts = await GetPodcasts(supabase, limit, false, true);
   return (

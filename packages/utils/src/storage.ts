@@ -39,7 +39,7 @@ export async function GetPodcasts(
   supabase: SupabaseClient,
   limit?: number,
   isPrivate?: boolean,
-  isPublished?: boolean,
+  isPublished?: boolean
 ): Promise<PodcastListEntry[]> {
   const { data, error } = await supabase.rpc('all_podcasts', {
     limit: limit || 100,
@@ -112,7 +112,7 @@ export async function DeletePodcast(supabase: SupabaseClient, slug: string) {
       } else {
         return '';
       }
-    }).filter((x) => x !== ''),
+    }).filter((x) => x !== '')
   );
 
   console.log('Deleting transcript files...');
@@ -124,7 +124,7 @@ export async function DeletePodcast(supabase: SupabaseClient, slug: string) {
       } else {
         return '';
       }
-    }).filter((x) => x !== ''),
+    }).filter((x) => x !== '')
   );
 
   console.log('Deleting raw transcript files...');
@@ -136,7 +136,7 @@ export async function DeletePodcast(supabase: SupabaseClient, slug: string) {
       } else {
         return '';
       }
-    }).filter((x) => x !== ''),
+    }).filter((x) => x !== '')
   );
 
   console.log('Deleting summary files...');
@@ -148,7 +148,7 @@ export async function DeletePodcast(supabase: SupabaseClient, slug: string) {
       } else {
         return '';
       }
-    }).filter((x) => x !== ''),
+    }).filter((x) => x !== '')
   );
 
   // Finally delete the Podcast entry itself. This should lead to a cascading deletion
@@ -186,7 +186,7 @@ export async function GetPodcastWithEpisodes(supabase: SupabaseClient, slug: str
 /** Return podcasts with episodes by podcast ID. */
 export async function GetPodcastWithEpisodesByID(
   supabase: SupabaseClient,
-  podcastId: string,
+  podcastId: string
 ): Promise<PodcastWithEpisodes> {
   const { data, error } = await supabase
     .from('Podcasts')
@@ -211,7 +211,7 @@ export async function GetPodcastWithEpisodesByID(
 /** Return podcasts with episodes by podcast UUID. */
 export async function GetPodcastWithEpisodesByUUID(
   supabase: SupabaseClient,
-  uuid: string,
+  uuid: string
 ): Promise<PodcastWithEpisodes> {
   // Expect a UUIDv4 without dashes.
   if (uuid.length !== 32) {
@@ -304,7 +304,7 @@ export async function GetEpisodeWithPodcast(supabase: SupabaseClient, episodeId:
 export async function GetEpisodeWithPodcastBySlug(
   supabase: SupabaseClient,
   podcastSlug: string,
-  episodeSlug: string,
+  episodeSlug: string
 ): Promise<EpisodeWithPodcast> {
   const { data, error } = await supabase
     .from('Episodes')
@@ -363,7 +363,7 @@ export async function SetEpisodes(supabase: SupabaseClient, episodes: Episode[] 
       const { id, created_at, ...episodeData } = e;
       return episodeData;
     }),
-    { onConflict: 'guid', ignoreDuplicates: false },
+    { onConflict: 'guid', ignoreDuplicates: false }
   );
   if (error) {
     throw error;
@@ -437,7 +437,7 @@ export async function UpdateSpeakerMap(
   episodeId: number,
   speakerId: string,
   speakerName: string,
-  force: boolean = false,
+  force: boolean = false
 ) {
   const entry = { episode: episodeId, speakerId, name: speakerName };
   if (!force) {
@@ -471,7 +471,7 @@ export async function Upload(
   supabase: SupabaseClient,
   data: string | Blob,
   bucket: string,
-  fileName: string,
+  fileName: string
 ): Promise<string> {
   const toUpload = typeof data === 'string' ? Buffer.from(data, 'utf8') : data;
   const { error } = await supabase.storage.from(bucket).upload(fileName, toUpload, { upsert: true });
@@ -490,7 +490,7 @@ export async function UploadLargeFile(
   data: Readable,
   contentType: string,
   bucket: string,
-  fileName: string,
+  fileName: string
 ): Promise<string> {
   const supabaseUrl = process.env.SUPABASE_URL || '';
   if (!supabaseUrl) {

@@ -247,7 +247,7 @@ export function EpisodeTable<TData, TValue>() {
             cell: () => <Skeleton className="h-4 w-full" />,
           }))
         : columns,
-    [loading],
+    [loading]
   );
 
   // The table component itself.

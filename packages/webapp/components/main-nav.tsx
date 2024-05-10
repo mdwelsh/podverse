@@ -30,12 +30,12 @@ export function MainNav({ items }: MainNavProps) {
                     href={item.href}
                     className={cn(
                       'text-muted-foreground flex items-center text-sm font-medium',
-                      item.disabled && 'cursor-not-allowed opacity-80',
+                      item.disabled && 'cursor-not-allowed opacity-80'
                     )}
                   >
                     {item.title}
                   </Link>
-                ),
+                )
             )}
           </nav>
         ) : null}

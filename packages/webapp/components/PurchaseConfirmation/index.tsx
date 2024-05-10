@@ -19,7 +19,9 @@ export function PurchaseConfirmation() {
   if (params.get('success') === 'true') {
     return <div className="w-full mb-12 bg-sky-800 p-4 border-white border font-mono">🎉 Thanks for subscribing!</div>;
   } else if (params.get('canceled') === 'true') {
-    return <div className="w-full mb-12 bg-destructive p-4 border-white border font-mono">Your purchase was canceled.</div>;
+    return (
+      <div className="w-full mb-12 bg-destructive p-4 border-white border font-mono">Your purchase was canceled.</div>
+    );
   } else {
     return null;
   }

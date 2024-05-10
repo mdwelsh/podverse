@@ -17,15 +17,15 @@ export const useScrollAnchor = () => {
     }
   }, []);
 
-//   useEffect(() => {
-//     if (messagesRef.current) {
-//       if (isAtBottom && !isVisible) {
-//         messagesRef.current.scrollIntoView({
-//           block: 'center',
-//         });
-//       }
-//     }
-//   }, [isAtBottom, isVisible]);
+  //   useEffect(() => {
+  //     if (messagesRef.current) {
+  //       if (isAtBottom && !isVisible) {
+  //         messagesRef.current.scrollIntoView({
+  //           block: 'center',
+  //         });
+  //       }
+  //     }
+  //   }, [isAtBottom, isVisible]);
 
   useEffect(() => {
     const { current } = scrollRef;
@@ -62,7 +62,7 @@ export const useScrollAnchor = () => {
         },
         {
           rootMargin: '0px 0px -150px 0px',
-        },
+        }
       );
 
       observer.observe(visibilityRef.current);

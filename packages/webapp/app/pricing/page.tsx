@@ -58,7 +58,9 @@ function PlanCard({
           <>
             Current plan
             {endDate && (
-              <span className="text-muted-foreground text-xs">{` - ${cancelPending ? 'cancels' : 'renews on'} ${endDate.toLocaleDateString()}`}</span>
+              <span className="text-muted-foreground text-xs">{` - ${
+                cancelPending ? 'cancels' : 'renews on'
+              } ${endDate.toLocaleDateString()}`}</span>
             )}
           </>
         ) : null}
