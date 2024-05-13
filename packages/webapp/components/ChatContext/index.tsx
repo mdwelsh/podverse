@@ -40,7 +40,7 @@ export function ChatContextProvider({
 
   useEffect(() => {
     // Fetch podcast and/or episode if needed.
-    if (podcast === null && podcastSlug) {
+    if (podcastSlug) {
       getPodcastWithEpisodes(podcastSlug).then((podcast) => {
         // Bypass private check if correct UUID is provided.
         if (podcast.private && !uuid && podcast.uuid !== uuid) {
@@ -48,7 +48,7 @@ export function ChatContextProvider({
           setCurrentPodcast(undefined);
         } else {
           setCurrentPodcast(podcast);
-          if (episode === null && episodeSlug) {
+          if (episodeSlug) {
             getEpisodeWithPodcast(podcastSlug, episodeSlug).then(setCurrentEpisode);
           }
         }

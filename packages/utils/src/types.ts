@@ -27,6 +27,9 @@ export type PodcastMetadata = Omit<Podcast, 'id' | 'created_at' | 'modified_at' 
   modified_at?: string;
 };
 
+/** Podcast metadata with Owner field. */
+export type PodcastMetadataWithOwner = PodcastMetadata & { owner: string | null };
+
 /** Episode metadata (that is, RSS feed data) only. */
 export type EpisodeMetadata = Omit<
   Episode,

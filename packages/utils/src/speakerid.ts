@@ -53,7 +53,7 @@ export async function SpeakerID({
       { role: 'system', content: systemMessage },
       { role: 'user', content: text },
     ],
-    model: 'gpt-4-turbo-preview',
+    model: 'gpt-4o',
   });
 
   const result = completion.choices[0].message.content || '{}';

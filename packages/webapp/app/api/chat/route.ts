@@ -157,7 +157,7 @@ export async function POST(req: Request) {
   ];
 
   const response = await openai.chat.completions.create({
-    model: 'gpt-4-turbo-preview',
+    model: 'gpt-4o',
     stream: true,
     // Prepend system message to messages.
     messages: [INITIAL_QUERY_PROMPT, ...messages],
@@ -193,7 +193,7 @@ export async function POST(req: Request) {
                 ...messages,
                 ...newMessages,
               ],
-              model: 'gpt-4-turbo-preview',
+              model: 'gpt-4o',
               stream: true,
               tools,
               tool_choice: 'auto',
@@ -212,7 +212,7 @@ export async function POST(req: Request) {
             });
             return openai.chat.completions.create({
               messages: [...messages, ...newMessages],
-              model: 'gpt-4-turbo-preview',
+              model: 'gpt-4o',
               stream: true,
               tools,
               tool_choice: 'none',

@@ -83,9 +83,11 @@ program
   .command('ingest')
   .description('Ingest a podcast into the Podverse app.')
   .argument('<podcastUrl>', 'URL of the podcast RSS feed.')
-  .action(async (podcastUrl: string) => {
+  // This is the mdw@mdw.la user on prod.
+  .option('--owner <owner>', 'Owner ID of the podcast.', 'user_2eEqltdMFHh6eKqOqnWQS8mQqDJ')
+  .action(async (podcastUrl: string, opts) => {
     try {
-      const podcast = await Ingest({ supabase, podcastUrl });
+      const podcast = await Ingest({ supabase, podcastUrl, owner: opts.owner });
       term('Ingested podcast: ').green(podcast.slug)(` (${podcast.Episodes?.length} episodes)\n`);
     } catch (err) {
       term('Error ingesting podcast: ').red(err);

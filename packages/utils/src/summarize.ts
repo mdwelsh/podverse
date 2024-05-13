@@ -125,7 +125,7 @@ async function Summary({
       { role: 'system', content: systemMessage },
       { role: 'user', content: text },
     ],
-    model: 'gpt-4-turbo-preview',
+    model: 'gpt-4o',
   });
   return completion.choices[0].message.content || '';
 }

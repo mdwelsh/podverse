@@ -4,8 +4,10 @@ import {
   EpisodeStatus,
   EpisodeMetadata,
   EpisodeWithPodcast,
+  Podcast,
   PodcastWithEpisodes,
   PodcastWithEpisodesMetadata,
+  PodcastMetadataWithOwner,
 } from './types.js';
 import { SetPodcast, SetEpisodes, GetPodcastWithEpisodes, GetPodcastWithEpisodesByID } from './storage.js';
 import slug from 'slug';
@@ -148,11 +150,13 @@ export async function Ingest({
   supabase,
   podcastUrl,
   refresh,
+  owner,
 }: {
   slug?: string;
   supabase: SupabaseClient;
   podcastUrl: string;
   refresh?: boolean;
+  owner?: string;
 }): Promise<PodcastWithEpisodes> {
   const newPodcast = await ReadPodcastFeed(podcastUrl);
 
@@ -191,7 +195,7 @@ export async function Ingest({
       });
     });
     console.log(
-      `Found ${newEpisodes.length} new episodes, ${updatedEpisodes.length} updated episodes, and ${deletedEpisodes.length} deleted episodes.`
+      `Found ${newEpisodes.length} new episodes, ${updatedEpisodes.length} updated episodes, and ${deletedEpisodes.length} deleted episodes.`,
     );
 
     for (const episode of deletedEpisodes) {
@@ -209,7 +213,7 @@ export async function Ingest({
         supabase,
         newEpisodes.map((episode) => {
           return { ...episode, podcast: oldPodcast!.id };
-        })
+        }),
       );
       console.log(`Inserted ${newEpisodes.length} new episodes`);
     } catch (err) {
@@ -252,14 +256,19 @@ export async function Ingest({
   } else {
     // The easy case is that we're just creating a new podcast.
     const { Episodes, ...podcastMetadata } = newPodcast;
-    const podcast = await SetPodcast(supabase, podcastMetadata);
+    let podcast;
+    if (!owner) {
+      podcast = await SetPodcast(supabase, podcastMetadata);
+    } else {
+      podcast = await SetPodcast(supabase, { ...podcastMetadata, owner });
+    }
     const podcastId = podcast.id;
     console.log('Created podcast:', podcast);
     await SetEpisodes(
       supabase,
       newPodcast.Episodes.map((episode) => {
         return { ...episode, podcast: podcastId };
-      })
+      }),
     );
   }
   console.log(`Ingested podcast ${newPodcast.slug} with ${newPodcast.Episodes.length} episodes`);

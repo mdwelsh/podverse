@@ -10,6 +10,7 @@ import { getEpisodeLimit } from '@/lib/actions';
 import { EpisodeLimit } from '@/lib/limits';
 import Image from 'next/image';
 import { auth } from '@clerk/nextjs/server';
+import { ChatContextProvider } from '../ChatContext';
 
 async function PodcastHeader({ podcast, planLimit }: { podcast: PodcastWithEpisodes; planLimit: EpisodeLimit | null }) {
   return (
@@ -34,11 +35,14 @@ async function PodcastHeader({ podcast, planLimit }: { podcast: PodcastWithEpiso
           </div>
           <div className="font-sans text-sm">{podcast.description}</div>
           {podcast.copyright && <div className="text-muted-foreground font-mono text-sm">{podcast.copyright}</div>}
+          <span className="text-muted-foreground text-sm">
+            {podcast.Episodes.filter(isReady).length > 0 && (
+              <span>{podcast.Episodes.filter(isReady).length} episodes processed / </span>
+            )}
+            {podcast.Episodes.length} total
+          </span>
           <div className="flex flex-col gap-2">
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <div className="text-muted-foreground col-span-3 font-mono text-sm md:col-span-1">
-                <div>{podcast.Episodes.length} episodes</div>
-              </div>
               <PodcastLinks podcast={podcast} />
             </div>
           </div>
@@ -83,13 +87,17 @@ export function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
     );
   }
 
+  console.log('PodcastChat', podcast);
+
   return (
     <div className="mt-8 hidden h-[800px] w-2/5 flex-col gap-2 lg:flex">
       <div>
         <h1>Chat</h1>
       </div>
       <div className="size-full overflow-y-auto border p-4 text-xs">
-        <ContextAwareChat />
+        <ChatContextProvider>
+          <ContextAwareChat />
+        </ChatContextProvider>
       </div>
     </div>
   );
@@ -114,18 +122,17 @@ function PodcastLinkHeader({
           <div className="mx-auto w-3/5">
             <div className="flex flex-col gap-3">
               <div className="font-mono underline underline-offset-8">Thanks for checking out Podverse!</div>
-              <div className="text-base text-pretty">
+              <div className="text-pretty text-base">
                 This page is a <b>private</b> demo of Podverse for <b className="text-primary">{podcast.title}</b>.
                 We&apos;ve imported {numEpisodes} recent episodes to get started. Feel free to click around and try out
                 all the features.
               </div>
-              <div className="text-base text-pretty">
+              <div className="text-pretty text-base">
                 As part of our initial launch, you&apos;re invited to claim a <b>one-year free subscription</b> to
                 Podverse &mdash; no strings attached. Just click below and we&apos;ll set up your free account, after
                 which you can manage your podcast, import more episodes, and share links with your listeners.
               </div>
               <AcceptPodcastDialog podcast={podcast} />
-
             </div>
           </div>
         </div>
@@ -153,11 +160,11 @@ function PodcastLinkHeader({
     }
   }
   return (
-    <div className="flex flex-row bg-muted p-2 text-center text-white">
+    <div className="bg-muted flex flex-row p-2 text-center text-white">
       <div className="mx-auto w-full">
         <div className="flex flex-col gap-3">
           <div className="font-mono text-sm">This podcast is public at the link:</div>
-          <div className="font-mono text-primary">https://podverse.ai/podcast/{podcast.slug}</div>
+          <div className="text-primary font-mono">https://podverse.ai/podcast/{podcast.slug}</div>
         </div>
       </div>
     </div>
