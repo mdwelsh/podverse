@@ -44,7 +44,7 @@ const features = [
 
 export function FeatureCarousel() {
   return (
-    <div className="group relative mx-auto w-8/12 md:max-w-lg lg:max-w-2xl">
+    <div className="group relative mx-auto w-8/12 md:max-w-2xl lg:max-w-2xl">
       <Carousel
         opts={{
           align: 'center',
