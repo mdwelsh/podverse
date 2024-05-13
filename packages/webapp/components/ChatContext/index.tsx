@@ -2,7 +2,7 @@
 
 import React, { createContext, useEffect, useState } from 'react';
 import { PodcastWithEpisodes, EpisodeWithPodcast } from 'podverse-utils';
-import { getPodcastWithEpisodes, getEpisodeWithPodcast } from '@/lib/actions';
+import { getPodcastWithEpisodes, getEpisodeWithPodcast, search } from '@/lib/actions';
 import { useParams, useSearchParams } from 'next/navigation';
 
 interface ChatContextType {
@@ -36,7 +36,7 @@ export function ChatContextProvider({
   const [currentEpisode, setCurrentEpisode] = useState<EpisodeWithPodcast | null | undefined>(null);
   const { podcastSlug, episodeSlug } = useParams<{ podcastSlug: string; episodeSlug: string }>();
   const searchParams = useSearchParams();
-  const uuid = searchParams.get('uuid');
+  const uuid = searchParams.get('uuid') || searchParams.get('activationCode') || undefined;
 
   useEffect(() => {
     // Fetch podcast and/or episode if needed.

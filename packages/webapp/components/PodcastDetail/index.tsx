@@ -87,8 +87,6 @@ export function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
     );
   }
 
-  console.log('PodcastChat', podcast);
-
   return (
     <div className="mt-8 hidden h-[800px] w-2/5 flex-col gap-2 lg:flex">
       <div>
