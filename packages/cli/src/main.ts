@@ -25,6 +25,9 @@ import {
   TextSplitter,
   SuggestQueries,
   Search,
+  Podcast,
+  PodcastWithEpisodes,
+  PodcastMetadata
 } from 'podverse-utils';
 import { dump, load } from 'js-yaml';
 import fs from 'fs';
@@ -41,6 +44,11 @@ interface ConfigFile {
 }
 
 program.name('podverse-cli').version('0.0.1').description('CLI for managing Podverse state.');
+
+function inviteLink(podcast: Podcast | PodcastMetadata | PodcastWithEpisodes) {
+  const activationCode = podcast.uuid?.replace(/-/g, '');
+  return `https://podverse.ai/podcast/${podcast.slug}?activationCode=${activationCode}`;
+}
 
 program
   .command('list')
@@ -60,7 +68,7 @@ program
         .blue(podcast.slug + '\t')
         .yellow(podcast.owner + '\t')
         .green(podcast.title.slice(0, 25) + '\t')
-        .gray(podcast.rssUrl + '\n');
+        .gray(inviteLink(podcast) + '\n');
     }
   });
 

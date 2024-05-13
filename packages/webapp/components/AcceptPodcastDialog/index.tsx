@@ -36,7 +36,7 @@ export function ActivateButton({ text }: { text?: string }) {
 
 export function SignUpOrActivateButton({ text, uuid }: { text?: string; uuid: string }) {
   const redirectUrl =
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000') +
+    (process.env.VERCEL_ENV === 'production' ? 'https://podverse.ai' : 'http://localhost:3000') +
     '/activate?uuid=' +
     uuid.replace(/-/g, '');
   return (
