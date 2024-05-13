@@ -35,7 +35,7 @@ export async function POST(req: Request, { params }: { params: { episodeId: stri
   const retval = await inngest.send({
     name: 'process/transcript',
     data: {
-      episodeId: params.episodeId,
+      episodeId: parseInt(params.episodeId),
     },
   });
 
