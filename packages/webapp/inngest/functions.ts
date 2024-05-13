@@ -180,7 +180,7 @@ export const processEpisode = inngest.createFunction(
       };
       await UpdateEpisode(supabase, episode);
     }
-  }
+  },
 );
 
 /** Scan for unprocessed episodes and fire off events to process them. */
@@ -195,17 +195,28 @@ export const processPodcast = inngest.createFunction(
   },
   { event: 'process/podcast' },
   async ({ event, step, runId }) => {
-    const { podcastId, force, supabaseAccessToken, episodeLimit } = event.data;
+    const { podcastId, force, supabaseAccessToken, episodeLimit, maxEpisodes } = event.data;
     console.log(
-      `process/podcast - event ${runId} received for ${podcastId}, force ${force}, episodeLimit ${episodeLimit}`
+      `process/podcast - event ${runId} received for ${podcastId}, force ${force}, episodeLimit ${episodeLimit}`,
     );
     const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
     const podcast = await GetPodcastWithEpisodesByID(supabase, podcastId);
+    let cap = episodeLimit;
+    if (maxEpisodes && !force) {
+      let processedEpisodes = podcast.Episodes.filter((episode) => isReady(episode)).length;
+      cap = Math.max(0, maxEpisodes - processedEpisodes);
+      console.log(
+        `process/podcast - Podcast ${podcastId} has ${processedEpisodes}, max is ${maxEpisodes}, cap is ${cap}`,
+      );
+    }
     let episodesToProcess = force ? podcast.Episodes : podcast.Episodes.filter((episode) => !isReady(episode));
     if (episodeLimit) {
-      episodesToProcess = episodesToProcess.slice(0, episodeLimit);
+      console.log(
+        `process/podcast - Podcast ${podcastId} has ${episodesToProcess.length} episodes to process, capping to ${cap}`,
+      );
+      episodesToProcess = episodesToProcess.slice(0, cap);
     }
-    console.log(`process/podcast - Processing ${episodesToProcess.length} episodes for podcast ${podcastId}`);
+    console.log(`process/podcast - Podcast ${podcastId}, processing ${episodesToProcess.length} episodes`);
     const results = await Promise.all(
       episodesToProcess.map(async (episode) => {
         const result = step.sendEvent('process-episode', {
@@ -217,14 +228,14 @@ export const processPodcast = inngest.createFunction(
           },
         });
         return result;
-      })
+      }),
     );
 
     console.log(`process/episodes for podcast ${podcastId} - Done.`);
     return {
       message: `Finished processing ${results.length} episodes for podcast ${podcastId}`,
     };
-  }
+  },
 );
 
 /** Import or refresh a podcast RSS feed. */
@@ -254,7 +265,7 @@ export const ingestPodcast = inngest.createFunction(
     } else {
       return { message: `Ingested podcast ${newPodcast.id}` };
     }
-  }
+  },
 );
 
 /** Clear errors and processing state for a podcast. */
@@ -270,7 +281,7 @@ export const clearErrors = inngest.createFunction(
     const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
     await ClearPodcastErrors({ supabase, podcastId });
     return { message: `Cleared errors for podcast ${podcastId}` };
-  }
+  },
 );
 
 /** Refresh all podcast feeds. Runs daily. */
@@ -297,7 +308,7 @@ export const refreshPodcasts = inngest.createFunction(
           },
         });
         return result;
-      })
+      }),
     );
     console.log(`refreshPodcasts - Done clearing errors.`);
 
@@ -313,7 +324,7 @@ export const refreshPodcasts = inngest.createFunction(
           },
         });
         return result;
-      })
+      }),
     );
     console.log(`refreshPodcasts - Done ingesting.`);
 
@@ -336,5 +347,5 @@ export const refreshPodcasts = inngest.createFunction(
     return {
       message: `Finished refreshing ${stats.length} podcasts`,
     };
-  }
+  },
 );

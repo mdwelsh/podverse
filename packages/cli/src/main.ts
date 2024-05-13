@@ -45,12 +45,22 @@ program.name('podverse-cli').version('0.0.1').description('CLI for managing Podv
 program
   .command('list')
   .description('List all podcasts in the Podverse app.')
-  .action(async () => {
-    const podcasts = await GetPodcasts(supabase);
+  .option('--owner <owner>', 'Filter by owner ID.')
+  .action(async (opts) => {
+    const { data, error } = await supabase.from('Podcasts').select('*');
+    if (error) {
+      throw new Error('Error fetching podcasts: ' + JSON.stringify(error));
+    }
+    let podcasts = data;
+    if (opts.owner) {
+      podcasts = podcasts.filter((podcast) => podcast.owner === opts.owner);
+    }
     for (const podcast of podcasts) {
-      term(podcast.slug + ': ')
-        .green(podcast.title + ' ')
-        .blue(podcast.rssUrl + '\n');
+      term
+        .blue(podcast.slug + '\t')
+        .yellow(podcast.owner + '\t')
+        .green(podcast.title.slice(0, 25) + '\t')
+        .gray(podcast.rssUrl + '\n');
     }
   });
 
@@ -127,15 +137,18 @@ program
   .command('dump')
   .description('Save the current podcast list to a YAML file.')
   .argument('<filename>', 'YAML file to save the list to.')
-  .action(async (filename: string) => {
-    const podcasts = await GetPodcasts(supabase);
+  .option('--owner <owner>', 'Filter by owner ID.')
+  .action(async (filename: string, opts) => {
+    const { data, error } = await supabase.from('Podcasts').select('*');
+    if (error) {
+      throw new Error('Error fetching podcasts: ' + JSON.stringify(error));
+    }
+    let podcasts = data;
+    if (opts.owner) {
+      podcasts = podcasts.filter((podcast) => podcast.owner === opts.owner);
+    }
     const config: ConfigFile = {
-      podcasts: podcasts.map((podcast) => {
-        return {
-          slug: podcast.slug,
-          rssUrl: podcast.rssUrl || '',
-        };
-      }),
+      podcasts,
     };
     fs.writeFile(filename, dump(config), (err) => {
       if (err) {
@@ -171,11 +184,18 @@ program
 program
   .command('process')
   .description('Send Inngest event to start processing.')
-  .argument('[podcastSlug]', 'Podcast to process.')
-  .option('--repeat', 'Repeat processing after first batch.')
+  .argument('<podcastSlug>', 'Podcast to process.')
   .option('--dev', 'Use the local development Inngest environment.')
-  .option('--stage <stage>', 'Which stage to initiate for processing.')
+  .option('--force', 'Force reprocessing of existing episodes.')
+  .option('--numEpisodes <numEpisodes>', 'Number of episodes to process.')
+  .option('--maxEpisodes <maxEpisodes>', 'Max number of episodes to process.')
   .action(async (podcastSlug: string, opts) => {
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY === undefined) {
+      throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable.');
+    }
+    if (opts.force && opts.maxEpisodes) {
+      throw new Error('Cannot specify both --force and --maxEpisodes.');
+    }
     try {
       let eventKey: string | undefined = process.env.INNGEST_EVENT_KEY;
       if (opts.dev) {
@@ -184,28 +204,19 @@ program
         throw new Error('Missing INNGEST_EVENT_KEY environment variable.');
       }
       const inngest = new Inngest({ id: 'podverse-app', eventKey });
-
-      let podcastId: number | undefined = undefined;
-      if (podcastSlug) {
-        const { data, error } = await supabase.from('Podcasts').select('id').eq('slug', podcastSlug).limit(1);
-        if (error) {
-          throw new Error('Error fetching podcast: ' + JSON.stringify(error));
-        }
-        if (data === null || data.length === 0) {
-          throw new Error(`Podcast ${podcastSlug} not found.`);
-        }
-        podcastId = data[0].id;
-      }
-
+      const podcast = await GetPodcastWithEpisodes(supabase, podcastSlug);
       await inngest.send({
-        name: 'process/episodes',
+        name: 'process/podcast',
         data: {
-          podcastId: podcastId ? podcastId?.toString() : undefined,
-          repeat: opts.repeat,
-          stage: opts.stage,
+          podcastId: podcast.id,
+          force: opts.force,
+          // Try to avoid processing too many at a time.
+          episodeLimit: opts.numEpisodes || 10,
+          maxEpisodes: opts.maxEpisodes,
+          supabaseAccessToken: process.env.SUPABASE_SERVICE_ROLE_KEY,
         },
       });
-      term.green('Started processing.\n');
+      term('Started processing ').green(podcastSlug)('\n');
     } catch (err) {
       term('Error sending process event: ').red(err);
     }

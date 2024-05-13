@@ -1,19 +1,387 @@
 podcasts:
-  - slug: omnibus
+  - id: 35
+    created_at: '2024-03-15T18:09:00.668969+00:00'
+    slug: omnibus
+    title: Omnibus
+    description: >-
+      Every week, Ken Jennings and John Roderick add a new entry to the OMNIBUS,
+      an encyclopedic reference work of strange-but-true stories that they are
+      compiling as a time capsule for future generations.
+    url: https://audioboom.com/channels/5127257-omnibus
     rssUrl: https://feeds.fireside.fm/omnibus/rss
-  - slug: 99p-invisible
+    imageUrl: https://audioboom.com/i/41457346.jpg
+    owner: user_2eEqltdMFHh6eKqOqnWQS8mQqDJ
+    copyright: © 2024 Omnibus
+    author: Omnibus
+    private: false
+    uuid: c6562b9b-f587-4b22-a233-697a1ac77bd7
+    published: true
+  - id: 38
+    created_at: '2024-03-19T21:04:01.126325+00:00'
+    slug: 99-invisible
+    title: 99% Invisible
+    description: >-
+      Design is everywhere in our lives, perhaps most importantly in the places
+      where we've just stopped noticing. 99% Invisible is a weekly exploration
+      of the process and power of design and architecture. From award winning
+      producer Roman Mars. Learn more at 99percentinvisible.org.
+    url: https://www.99pi.org
     rssUrl: https://feeds.simplecast.com/BqbsxVfO
-  - slug: endless-thread
-    rssUrl: https://rss.wbur.org/endlessthread/podcast
-  - slug: front-end-happy-hour
-    rssUrl: https://feeds.soundcloud.com/users/soundcloud:users:206137365/sounds.rss
-  - slug: full-stack-radio
-    rssUrl: https://feeds.transistor.fm/full-stack-radio
-  - slug: latent-space
-    rssUrl: https://api.substack.com/feed/podcast/1084089.rss
-  - slug: live-on-kexp
-    rssUrl: https://www.omnycontent.com/d/playlist/bad5d079-8dcb-4630-8770-aa090049131d/18f3a48e-1c64-43e8-96e9-aa40002038ee/856f4314-821f-46ca-bc8e-aa40002038f2/podcast.rss
-  - slug: pitchfork-economics-with-nick-hanauer
-    rssUrl: https://feeds.megaphone.fm/pitchforkeconomics
-  - slug: short-wave
+    imageUrl: >-
+      https://image.simplecastcdn.com/images/00c81e60-45f9-4643-9fed-2184b2b6a3d3/5fbdc9d4-22ab-4b3a-a2bd-72777b15c30c/3000x3000/stitcher-cover-99percentinvisible-3000x3000-r2021-final.jpg?aid=rss_feed
+    owner: user_2eEqltdMFHh6eKqOqnWQS8mQqDJ
+    copyright: Copyright © 2024 Roman Mars. All rights reserved.
+    author: Roman Mars
+    private: false
+    uuid: a3a23ac3-9286-4c05-8113-3207f9a5b19e
+    published: true
+  - id: 39
+    created_at: '2024-03-19T21:10:12.546516+00:00'
+    slug: live-on-kexp
+    title: Live on KEXP
+    description: >-
+      <p>Live on KEXP brings you the very best of KEXP’s world-renowned live
+      in-studio and remote performances. Each week, we’ll bring you a new live
+      session, from emerging artists to well-established acts, spanning styles,
+      genres and cultures. Full video of all Live on KEXP performances available
+      at youtube.com/kexp.</p>
+    url: https://www.kexp.org/podcasts/live-on-kexp/
+    rssUrl: ' https://www.omnycontent.com/d/playlist/bad5d079-8dcb-4630-8770-aa090049131d/18f3a48e-1c64-43e8-96e9-aa40002038ee/856f4314-821f-46ca-bc8e-aa40002038f2/podcast.rss '
+    imageUrl: >-
+      https://www.omnycontent.com/d/playlist/bad5d079-8dcb-4630-8770-aa090049131d/18f3a48e-1c64-43e8-96e9-aa40002038ee/856f4314-821f-46ca-bc8e-aa40002038f2/image.jpg?t=1585780431&size=Large
+    owner: user_2eEqltdMFHh6eKqOqnWQS8mQqDJ
+    copyright: 2024 KEXP
+    author: KEXP
+    private: true
+    uuid: b0d79c76-399b-4776-bdb5-2f129c8c113d
+    published: false
+  - id: 49
+    created_at: '2024-04-01T18:47:18.890535+00:00'
+    slug: lexicon-valley-from-books
+    title: Lexicon Valley from Booksmart Studios
+    description: >-
+      A podcast about language, with host John McWhorter. <br/><br/><a
+      href="https://lexiconvalley.substack.com?utm_medium=podcast">lexiconvalley.substack.com</a>
+    url: https://lexiconvalley.substack.com/podcast
+    rssUrl: https://api.substack.com/feed/podcast/791421.rss
+    imageUrl: >-
+      https://substackcdn.com/feed/podcast/791421/82da78c1ce558c9b2c20200642015adb.jpg
+    owner: user_2eEqltdMFHh6eKqOqnWQS8mQqDJ
+    copyright: Lexicon Valley
+    author: Lexicon Valley
+    private: false
+    uuid: f7e2f058-b1fa-41d9-93d7-9fec66cc40a5
+    published: true
+  - id: 47
+    created_at: '2024-03-21T21:37:29.742031+00:00'
+    slug: radiolab
+    title: Radiolab
+    description: >-
+      Radiolab is on a curiosity bender. We ask deep questions and use
+      investigative journalism to get the answers. A given episode might whirl
+      you through science, legal history, and into the home of someone halfway
+      across the world. The show is known for innovative sound design, smashing
+      information into music. It is hosted by Lulu Miller and Latif Nasser.
+    url: https://www.wnycstudios.org/podcasts/radiolab/projects/podcasts
+    rssUrl: http://feeds.wnyc.org/radiolab
+    imageUrl: >-
+      https://image.simplecastcdn.com/images/3b6088d3-ed01-4c8f-b0af-bcbd72035bcf/48797471-8a28-49e4-95aa-80a28ffa6d82/3000x3000/radiolab-branded-logo-1400x1400.jpg?aid=rss_feed
+    owner: user_2cQ3Uw3DLjz7B8AhRs0winNCAad
+    copyright: © WNYC Studios
+    author: WNYC Studios
+    private: true
+    uuid: 5b6b910a-335c-4cd5-a559-95084c1d52e8
+    published: false
+  - id: 52
+    created_at: '2024-04-03T21:30:01.71183+00:00'
+    slug: the-new-stack-podcast
+    title: The New Stack Podcast
+    description: >-
+      The New Stack Podcast is all about the developers, software engineers and
+      operations people who build at-scale architectures that change the way we
+      develop and deploy software.
+
+
+      For more content from The New Stack, subscribe on YouTube at:
+      https://www.youtube.com/c/TheNewStack
+    url: https://thenewstack.simplecast.com
+    rssUrl: https://feeds.simplecast.com/IgzWks06
+    imageUrl: >-
+      https://image.simplecastcdn.com/images/1425ebfd-95bd-4a66-b963-a0b885c75680/bb688835-10e4-4197-b01f-34221ccb5d38/3000x3000/tns-makers-logo-simplecast.jpg?aid=rss_feed
+    owner: user_2eEqltdMFHh6eKqOqnWQS8mQqDJ
+    copyright: All rights reserved
+    author: The New Stack
+    private: true
+    uuid: f65d115b-ac37-467c-95f4-a1924ce55e95
+    published: false
+  - id: 51
+    created_at: '2024-04-03T20:03:48.870131+00:00'
+    slug: lex-fridman-podcast
+    title: Lex Fridman Podcast
+    description: >-
+      Conversations about science, technology, history, philosophy and the
+      nature of intelligence, consciousness, love, and power. Lex is an AI
+      researcher at MIT and beyond.
+    url: https://lexfridman.com/
+    rssUrl: https://lexfridman.com/feed/podcast/
+    imageUrl: >-
+      https://lexfridman.com/wordpress/wp-content/uploads/powerpress/artwork_3000-230.png
+    owner: user_2eEqltdMFHh6eKqOqnWQS8mQqDJ
+    copyright: null
+    author: Lex Fridman
+    private: true
+    uuid: 75e14fa5-3aca-40bc-a6e3-316dc6b65def
+    published: false
+  - id: 50
+    created_at: '2024-04-01T18:54:57.21195+00:00'
+    slug: the-rest-is-history
+    title: The Rest Is History
+    description: >-
+      The world’s most popular history podcast, with Tom Holland and Dominic
+      Sandbrook.
+
+
+      Join The Rest Is History Club (www.restishistorypod.com) for ad-free
+      listening to the full archive, weekly bonus episodes, live streamed shows
+      and access to an exclusive chatroom community.
+
+
+      Here are some of our favourite episodes to get you started:
+
+
+      WATERGATE/NIXON apple.co/3JrVl5h
+
+
+
+      ALEXANDER THE GREAT apple.co/3Q4FaNk
+
+
+
+      HARDCORE HISTORY'S DAN CARLIN apple.co/3vqkGa3
+
+
+
+      PUTIN & RUSSIA apple.co/3zMtLfX
+    url: http://therestishistory.com
+    rssUrl: https://feeds.megaphone.fm/GLT4787413333
+    imageUrl: >-
+      https://megaphone.imgix.net/podcasts/00c0a118-2426-11ee-b258-73d331d0123b/image/show-cover.jpg?ixlib=rails-4.3.1&max-w=3000&max-h=3000&fit=crop&auto=format,compress
+    owner: user_2eEqltdMFHh6eKqOqnWQS8mQqDJ
+    copyright: Goalhanger Podcasts
+    author: Goalhanger Podcasts
+    private: false
+    uuid: de8fe377-f3ee-4e28-9059-0a96da0fd01a
+    published: true
+  - id: 40
+    created_at: '2024-03-19T21:10:56.398741+00:00'
+    slug: short-wave
+    title: Short Wave
+    description: >-
+      New discoveries, everyday mysteries, and the science behind the headlines
+      — in just under 15 minutes. It's science for everyone, using a lot of
+      creativity and a little humor. Join hosts Emily Kwong and Regina Barber
+      for science on a different wavelength.<br><br><em>If you're hooked, try
+      Short Wave Plus. Your subscription supports the show and unlocks a
+      sponsor-free feed. Learn more at
+      </em><em>plus.npr.org/</em><em>shortwave</em>
+    url: https://www.npr.org/podcasts/510351/short-wave
     rssUrl: https://feeds.npr.org/510351/podcast.xml
+    imageUrl: >-
+      https://media.npr.org/assets/img/2022/09/23/short-wave_tile_npr-network-01_sq-517382b4b8fd0ab48ea9c781253f9992eab733dc.jpg?s=1400&c=66&f=jpg
+    owner: user_2eEqltdMFHh6eKqOqnWQS8mQqDJ
+    copyright: Copyright 2019-2021 NPR - For Personal Use Only
+    author: NPR
+    private: false
+    uuid: 2f9c62fe-9b20-499a-8f5e-277187a4bee3
+    published: true
+  - id: 48
+    created_at: '2024-03-21T21:39:58.929858+00:00'
+    slug: mission-implausible
+    title: Mission Implausible
+    description: >-
+      <p>As former high-level CIA operatives, John Sipher and Jerry O'Shea would
+      create fake conspiracies around the world. Now, with the help of experts,
+      they execute their own fun and fearless investigation into conspiracy
+      theories past and present to assess what's real. And how. And why.</p>
+    url: https://www.iheart.com/podcast/1119-mission-implausible-146774875/
+    rssUrl: >-
+      https://www.omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/485bef61-b08e-4849-88be-b0fa0111de37/93e2b79d-acec-404d-abfe-b0fa01125f97/podcast.rss
+    imageUrl: >-
+      https://www.omnycontent.com/d/programs/e73c998e-6e60-432f-8610-ae210140c5b1/485bef61-b08e-4849-88be-b0fa0111de37/image.jpg?t=1705509539&size=Large
+    owner: user_2eEqltdMFHh6eKqOqnWQS8mQqDJ
+    copyright: >-
+      2024 iHeartMedia, Inc. © Any use of this intellectual property for text
+      and data mining or computational analysis including as training material
+      for artificial intelligence systems is strictly prohibited without express
+      written consent from iHeartMedia
+    author: iHeartPodcasts
+    private: true
+    uuid: 03eff6f1-f49f-475e-82f8-b39ac8fb9d88
+    published: false
+  - id: 46
+    created_at: '2024-03-21T21:36:04.387773+00:00'
+    slug: ridiculous-history
+    title: Ridiculous History
+    description: >-
+      History is beautiful, brutal and, often, ridiculous. Join Ben Bowlin and
+      Noel Brown as they dive into some of the weirdest stories from across the
+      span of human civilization in Ridiculous History, a podcast by
+      iHeartRadio.
+    url: https://www.iheart.com/podcast/105-ridiculous-history-28588696/
+    rssUrl: >-
+      https://omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/DCA0D8AD-E0B8-4A52-A2A8-AE300188D1E2/FE9400D8-DD2A-489F-82D9-AE300188D1EB/podcast.rss
+    imageUrl: >-
+      https://www.omnycontent.com/d/programs/e73c998e-6e60-432f-8610-ae210140c5b1/dca0d8ad-e0b8-4a52-a2a8-ae300188d1e2/image.jpg?t=1684786702&size=Large
+    owner: user_2eEqltdMFHh6eKqOqnWQS8mQqDJ
+    copyright: >-
+      2024 iHeartMedia, Inc. © Any use of this intellectual property for text
+      and data mining or computational analysis including as training material
+      for artificial intelligence systems is strictly prohibited without express
+      written consent from iHeartMedia
+    author: iHeartPodcasts
+    private: true
+    uuid: 74cb9496-9a6d-408f-9ab2-892bc19f8ae0
+    published: false
+  - id: 43
+    created_at: '2024-03-21T21:27:32.061431+00:00'
+    slug: throughline
+    title: Throughline
+    description: >-
+      The past is never past. Every headline has a history. Join us every week
+      as we go back in time to understand the present. These are stories you can
+      feel and sounds you can see from the moments that shaped our
+      world.<br><br><em>Subscribe to Throughline+. You'll be supporting the
+      history-reframing, perspective-shifting, time-warping stories you can't
+      get enough of - and you'll unlock access bonus episodes and sponsor-free
+      listening. Learn more at plus.npr.org/throughline</em>
+    url: https://www.npr.org/podcasts/510333/throughline
+    rssUrl: https://feeds.npr.org/510333/podcast.xml
+    imageUrl: >-
+      https://media.npr.org/assets/img/2022/09/23/throughline_tile_npr-network-01_sq-53d2dcb6d4b07be30f1b23f5ae9939c67c3bc62e.jpg?s=1400&c=66&f=jpg
+    owner: user_2eEqltdMFHh6eKqOqnWQS8mQqDJ
+    copyright: Copyright 2019-2021 NPR - For Personal Use Only
+    author: NPR
+    private: true
+    uuid: fece4ffe-71ac-43df-a4f2-49993f93076e
+    published: false
+  - id: 44
+    created_at: '2024-03-21T21:32:39.494164+00:00'
+    slug: stuff-you-should-know
+    title: Stuff You Should Know
+    description: >-
+      If you've ever wanted to know about champagne, satanism, the Stonewall
+      Uprising, chaos theory, LSD, El Nino, true crime and Rosa Parks, then look
+      no further. Josh and Chuck have you covered.
+    url: https://www.iheart.com/podcast/105-stuff-you-should-know-26940277/
+    rssUrl: >-
+      https://omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/A91018A4-EA4F-4130-BF55-AE270180C327/44710ECC-10BB-48D1-93C7-AE270180C33E/podcast.rss
+    imageUrl: >-
+      https://www.omnycontent.com/d/programs/e73c998e-6e60-432f-8610-ae210140c5b1/a91018a4-ea4f-4130-bf55-ae270180c327/image.jpg?t=1684846432&size=Large
+    owner: user_2eEqltdMFHh6eKqOqnWQS8mQqDJ
+    copyright: >-
+      2024 iHeartMedia, Inc. © Any use of this intellectual property for text
+      and data mining or computational analysis including as training material
+      for artificial intelligence systems is strictly prohibited without express
+      written consent from iHeartMedia
+    author: iHeartPodcasts
+    private: true
+    uuid: e7b68668-7eeb-4ae0-b9df-fb16d47c361b
+    published: false
+  - id: 55
+    created_at: '2024-05-07T05:15:17.460635+00:00'
+    slug: criminal
+    title: Criminal
+    description: "Criminal is\_the\_first\_of\_its\_kind.\_A show about people who’ve done wrong, been wronged, or gotten caught somewhere in the middle. Hosted by Phoebe Judge. Named a Best Podcast of 2023 by the New York Times. Part of the Vox Media Podcast Network."
+    url: http://thisiscriminal.com/
+    rssUrl: https://feeds.megaphone.fm/VMP7924981569
+    imageUrl: >-
+      https://megaphone.imgix.net/podcasts/f547b046-5de4-11ec-acc5-733706bb297f/image/CRIMINAL_3000x3000_v2.png?ixlib=rails-4.3.1&max-w=3000&max-h=3000&fit=crop&auto=format,compress
+    owner: user_2eEqltdMFHh6eKqOqnWQS8mQqDJ
+    copyright: 'Copyright 2021, Criminal Productions '
+    author: Vox Media Podcast Network
+    private: true
+    uuid: 944f6d57-f0d2-4a8f-b5ed-9096121e788f
+    published: false
+  - id: 45
+    created_at: '2024-03-21T21:35:06.589434+00:00'
+    slug: behind-the-bastards
+    title: Behind the Bastards
+    description: >-
+      There’s a reason the History Channel has produced hundreds of
+      documentaries about Hitler but only a few about Dwight D. Eisenhower. Bad
+      guys (and gals) are eternally fascinating. Behind the Bastards dives in
+      past the Cliffs Notes of the worst humans in history and exposes the
+      bizarre realities of their lives. Listeners will learn about the young
+      adult novels that helped Hitler form his monstrous ideology, the founder
+      of Blackwater’s insane quest to build his own Air Force, the bizarre lives
+      of the sons and daughters of dictators and Saddam Hussein’s side career as
+      a trashy romance novelist.
+    url: https://www.iheart.com/podcast/105-behind-the-bastards-29236323/
+    rssUrl: >-
+      https://omnycontent.com/d/playlist/e73c998e-6e60-432f-8610-ae210140c5b1/E5F91208-CC7E-4726-A312-AE280140AD11/D64F756D-6D5E-4FAE-B24F-AE280140AD36/podcast.rss
+    imageUrl: >-
+      https://www.omnycontent.com/d/programs/e73c998e-6e60-432f-8610-ae210140c5b1/e5f91208-cc7e-4726-a312-ae280140ad11/image.jpg?t=1684961682&size=Large
+    owner: user_2eEqltdMFHh6eKqOqnWQS8mQqDJ
+    copyright: >-
+      2024 iHeartMedia, Inc. © Any use of this intellectual property for text
+      and data mining or computational analysis including as training material
+      for artificial intelligence systems is strictly prohibited without express
+      written consent from iHeartMedia
+    author: Cool Zone Media and iHeartPodcasts
+    private: true
+    uuid: 8121226b-51c3-490e-b9bd-696f2519c904
+    published: false
+  - id: 36
+    created_at: '2024-03-19T16:04:08.003253+00:00'
+    slug: sean-carrolls-mindscape
+    title: >-
+      Sean Carroll's Mindscape: Science, Society, Philosophy, Culture, Arts, and
+      Ideas
+    description: |2-
+
+            <p>Ever wanted to know how music affects your brain, what quantum mechanics really is, or how black holes work? Do you wonder why you get emotional each time you see a certain movie, or how on earth video games are designed? Then you’ve come to the right place. Each week, Sean Carroll will host conversations with some of the most interesting thinkers in the world. From neuroscientists and engineers to authors and television producers, Sean and his guests talk about the biggest ideas in science, philosophy, culture and much more.</p>
+          
+    url: https://www.preposterousuniverse.com/podcast/
+    rssUrl: https://rss.art19.com/sean-carrolls-mindscape
+    imageUrl: >-
+      https://content.production.cdn.art19.com/images/33/9d/14/7c/339d147c-92a1-4845-b785-1533a47d5929/21d641ef836c48dff270cbede4360d187bdd6c56cb126be7d6f51078db34d4675527fa72e13c86bb573ec42c5d4fc493e18e7d95fec734ec77168fc379baefcf.jpeg
+    owner: user_2eEqltdMFHh6eKqOqnWQS8mQqDJ
+    copyright: © Sean Carroll 2018
+    author: Sean Carroll | Wondery
+    private: true
+    uuid: 80b1af97-3185-4875-b535-3f5d99a95ab9
+    published: false
+  - id: 37
+    created_at: '2024-03-19T21:00:05.800733+00:00'
+    slug: latent-space-the-ai-engi
+    title: >-
+      Latent Space: The AI Engineer Podcast — Practitioners talking LLMs,
+      CodeGen, Agents, Multimodality, AI UX, GPU Infra and all things Software
+      3.0
+    description: >-
+      The podcast by and for AI Engineers! In 2023, over 1 million visitors came
+      to Latent Space to hear about news, papers and interviews in Software 3.0.
+
+
+      We cover Foundation Models changing every domain in Code Generation,
+      Multimodality, AI Agents, GPU Infra and more, directly from the founders,
+      builders, and thinkers involved in pushing the cutting edge. Striving to
+      give you both the definitive take on the Current Thing down to the first
+      introduction to the tech you'll be using in the next 3 months! We break
+      news and exclusive interviews from OpenAI, tiny (George Hotz),
+      Databricks/MosaicML (Jon Frankle), Modular (Chris Lattner), Answer.ai
+      (Jeremy Howard), et al. 
+
+
+      Full show notes always on https://latent.space <br/><br/><a
+      href="https://www.latent.space?utm_medium=podcast">www.latent.space</a>
+    url: https://www.latent.space/podcast
+    rssUrl: https://api.substack.com/feed/podcast/1084089.rss
+    imageUrl: >-
+      https://substackcdn.com/feed/podcast/1084089/92120159a90420fb694c09dfd0a904e8.jpg
+    owner: user_2gHvMhKnzAuQUGygBMeMPCLGAnA
+    copyright: Latent.Space
+    author: Alessio + swyx
+    private: true
+    uuid: 6e5d01e6-0e91-4905-ba80-2ae338dbf228
+    published: false
