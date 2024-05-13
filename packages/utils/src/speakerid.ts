@@ -1,15 +1,17 @@
 import { Podcast, Episode } from './types.js';
 import { OpenAI } from 'openai';
 
-const SPEAKERID_PROMPT = `The following is a transcript of a conversation between
-  multiple individuals, identified as "Speaker 0", "Speaker 1", and so forth. Please
-  identify the speakers in the conversation, based on the contents of the transcript.
-  Your response should be a JSON object, with the keys representing the original
-  speaker identifications (e.g., "Speaker 0", "Speaker 1") and the values representing
-  the identified speaker names (e.g., "John Smith", "Jane Doe"). For example, your response
-  might be:
-  { "Speaker 0": "John Smith", "Speaker 1": "Jane Doe" }\n
-  ONLY return a JSON formatted response. DO NOT return any other information or context. DO NOT prefix your response with backquotes.`;
+const SPEAKERID_PROMPT = `The following is a transcript of a conversation between multiple
+  individuals, identified as "Speaker 0", "Speaker 1", and so forth. Please identify the
+  speakers in the conversation, based on the contents of the transcript. Your response should
+  be a JSON object, with the keys representing the original speaker identifications
+  (e.g., "Speaker 0", "Speaker 1") and the values representing the identified speaker names
+  (e.g., "John Smith", "Jane Doe"). For example, your response might be:
+
+  { "Speaker 0": "John Smith", "Speaker 1": "Jane Doe" }
+
+  ONLY return a JSON formatted response. DO NOT return any other information or context.
+  DO NOT prefix your response with backquotes.`;
 
 // Rough estimate.
 const tokenLen = (text: string) => text.length / 4;
