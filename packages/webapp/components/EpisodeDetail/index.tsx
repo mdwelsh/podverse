@@ -11,6 +11,8 @@ import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { EpisodeClient } from '@/components/EpisodeClient';
 import Image from 'next/image';
+import { ShareButtons } from '@/components/ShareButtons';
+import { Share } from 'next/font/google';
 
 function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
   const episodeWithoutPodcast = { ...episode, podcast: episode.podcast.id };
@@ -50,6 +52,7 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
                 </div>
                 <EpisodeLinks episode={episode} />
               </div>
+              <ShareButtons />
               {episode.podcast.copyright && (
                 <div className="text-muted-foreground font-mono text-sm">{episode.podcast.copyright}</div>
               )}

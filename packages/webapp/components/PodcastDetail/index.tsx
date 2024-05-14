@@ -11,6 +11,7 @@ import { EpisodeLimit } from '@/lib/limits';
 import Image from 'next/image';
 import { auth } from '@clerk/nextjs/server';
 import { ChatContextProvider } from '../ChatContext';
+import { ShareButtons } from '@/components/ShareButtons';
 
 async function PodcastHeader({ podcast, planLimit }: { podcast: PodcastWithEpisodes; planLimit: EpisodeLimit | null }) {
   return (
@@ -44,6 +45,7 @@ async function PodcastHeader({ podcast, planLimit }: { podcast: PodcastWithEpiso
           <div className="flex flex-col gap-2">
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <PodcastLinks podcast={podcast} />
+              <ShareButtons />
             </div>
           </div>
         </div>
