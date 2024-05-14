@@ -64,7 +64,8 @@ export async function PodcastStrip({ slug }: { slug: string }) {
             <div className="text-sm text-primary flex flex-row gap-2 items-center">
               <EyeIcon className="size-5" />
               Public
-              {podcast.published && <span className="text-primary"> and discoverable</span>}
+              {/* For now, public podcasts are also considered published. */}
+              {/* {podcast.published && <span className="text-primary"> and discoverable</span>} */}
             </div>
           )}
           <div className="flex flex-row gap-2">

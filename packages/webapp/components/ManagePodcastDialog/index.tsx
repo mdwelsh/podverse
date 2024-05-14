@@ -280,11 +280,7 @@ export function ManagePodcastDialog({ podcast, planLimit }: { podcast: PodcastWi
   const onPublicChange = (checked: boolean) => {
     setIsPublic(checked);
     podcast.private = !checked;
-    // Un-publish the podcast if it's private.
-    if (!checked) {
-      setIsPublished(false);
-      podcast.published = false;
-    }
+    podcast.published = checked;
     const { Episodes, suggestions, ...rest } = podcast;
     updatePodcast({ ...rest })
       .then(() => {
@@ -346,7 +342,8 @@ export function ManagePodcastDialog({ podcast, planLimit }: { podcast: PodcastWi
           </div>
           <div className="my-4 flex flex-col items-start gap-2">
             <PublicPodcastSwitch podcast={podcast} checked={isPublic} onCheckedChange={onPublicChange} />
-            <PublishPodcastSwitch checked={isPublished} onCheckedChange={onPublishChange} disabled={!isPublic} />
+            {/* For now, we tie the published state to the private state. At some point we might make these different. */}
+            {/* <PublishPodcastSwitch checked={isPublished} onCheckedChange={onPublishChange} disabled={!isPublic} /> */}
           </div>
         </div>
         <DialogFooter>

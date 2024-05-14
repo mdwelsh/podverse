@@ -19,6 +19,8 @@ import { durationString } from '@/lib/time';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
+import { search } from '@/lib/actions';
 
 export function ShowAllSwitch({
   checked,
@@ -40,6 +42,8 @@ export function ShowAllSwitch({
 export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWithEpisodes; episodes: Episode[] }) {
   const [page, setPage] = useState(1);
   const [showAll, setShowAll] = useState(episodes.filter(isReady).length === 0);
+  const searchParams = useSearchParams();
+  const maybeSearchParams = searchParams.toString() ? `?${searchParams.toString()}` : '';
 
   const ENTRIES_PER_PAGE = 10;
 
@@ -114,7 +118,7 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
         {episodesToShow.map((episode, index) => (
           <Link
             key={index}
-            href={`/podcast/${podcast.slug}/episode/${episode.slug}`}
+            href={`/podcast/${podcast.slug}/episode/${episode.slug}${maybeSearchParams}`}
             className="hover:ring-primary hover:ring-4"
           >
             <EpisodeStrip key={index} podcast={podcast} episode={episode} showIndicator={showAll} />
