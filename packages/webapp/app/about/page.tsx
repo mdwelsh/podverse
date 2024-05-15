@@ -98,8 +98,7 @@ export default async function Page() {
           <a href="https://ziggylabs.ai" className="text-primary underline">
             Ziggylabs
           </a>
-          , a new company building AI-powered tools that help people learn and grow.
-          Ziggylabs is founded by{' '}
+          , a new company building AI-powered tools that help people learn and grow. Ziggylabs is founded by{' '}
           <a href="https://www.mdw.la" className="text-primary underline">
             Matt Welsh
           </a>

@@ -10,15 +10,19 @@ export function ZoomableImage({
   width,
   height,
   children,
+  open,
+  onOpenChange,
 }: {
   src: string;
   alt: string;
   width?: number;
   height?: number;
   children?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger>
         <div className="relative size-full">
           <Image className="mx-auto rounded-3xl" src={src} alt={alt} width={width || 400} height={height || 400} />

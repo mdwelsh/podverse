@@ -66,7 +66,7 @@ export async function HomeFeatures() {
         <p className="text-muted-foreground mt-4 max-w-[700px] text-pretty font-mono text-base md:text-lg">
           Automatic episode transcripts, summaries, AI chat, and more. Take your podcast to the next level.
         </p>
-        <div className="mx-auto mt-4 flex w-2/5 flex-col gap-2 px-0 md:mx-0 md:flex-row md:gap-4">
+        <div className="mx-auto mt-4 flex flex-col gap-2 px-0 md:flex-row">
           <CallToActionButtons />
         </div>
 
