@@ -1,15 +1,14 @@
 import { getSupabaseClient } from '@/lib/supabase';
-import { PodcastWithEpisodes, GetPodcastWithEpisodes, GetPodcastWithEpisodesByUUID, isReady } from 'podverse-utils';
+import { PodcastWithEpisodes, GetPodcastWithEpisodes, isReady } from 'podverse-utils';
 import { PodcastEpisodeList } from '@/components/PodcastEpisodeList';
 import Link from 'next/link';
 import { ArrowTopRightOnSquareIcon, RssIcon, GlobeAmericasIcon } from '@heroicons/react/24/outline';
 import { ManagePodcastDialog } from '@/components/ManagePodcastDialog';
-import { AcceptPodcastDialog } from '../AcceptPodcastDialog';
+import { PodcastLinkHeader } from '@/components/PodcastLinkHeader';
 import { ContextAwareChat } from '@/components/Chat';
 import { getEpisodeLimit } from '@/lib/actions';
 import { EpisodeLimit } from '@/lib/limits';
 import Image from 'next/image';
-import { auth } from '@clerk/nextjs/server';
 import { ChatContextProvider } from '../ChatContext';
 import { ShareButtons } from '@/components/ShareButtons';
 
@@ -45,7 +44,7 @@ async function PodcastHeader({ podcast, planLimit }: { podcast: PodcastWithEpiso
           <div className="flex flex-col gap-2">
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <PodcastLinks podcast={podcast} />
-              <ShareButtons disabled={podcast.private} />
+              <ShareButtons disabled={podcast.private || undefined} />
             </div>
           </div>
         </div>
@@ -103,74 +102,6 @@ export function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
   );
 }
 
-function PodcastLinkHeader({
-  podcast,
-  planLimit,
-  activationCode,
-}: {
-  podcast: PodcastWithEpisodes;
-  planLimit: EpisodeLimit | null;
-  activationCode?: string;
-}) {
-  const { userId } = auth();
-  const numEpisodes = podcast.Episodes.filter(isReady).length;
-  const link = `/podcast/${podcast.slug}?uuid=${podcast.uuid?.replace(/-/g, '')}`;
-  if (podcast.private) {
-    if (activationCode && (!userId || userId !== podcast.owner)) {
-      return (
-        <div className="flex flex-row bg-sky-900 p-4 text-center text-white">
-          <div className="mx-auto w-3/5">
-            <div className="flex flex-col gap-3">
-              <div className="font-mono underline underline-offset-8">Thanks for checking out Podverse!</div>
-              <div className="text-pretty text-base">
-                This page is a <b>private</b> demo of Podverse for <b className="text-primary">{podcast.title}</b>.
-                We&apos;ve imported {numEpisodes} recent episodes to get started. Feel free to click around and try out
-                all the features.
-              </div>
-              <div className="text-pretty text-base">
-                As part of our initial launch, you&apos;re invited to claim a <b>one-year free subscription</b> to
-                Podverse &mdash; no strings attached. Just click below and we&apos;ll set up your free account, after
-                which you can manage your podcast, import more episodes, and share links with your listeners.
-              </div>
-              <AcceptPodcastDialog podcast={podcast} />
-            </div>
-          </div>
-        </div>
-      );
-    } else {
-      if (!userId || userId !== podcast.owner) {
-        return null;
-      }
-      return (
-        <div className="flex flex-row bg-red-900 p-2 text-center text-white">
-          <div className="mx-auto w-full">
-            <div className="flex flex-col gap-3">
-              <div className="font-mono">This podcast is not yet published.</div>
-              <div className="text-sm">
-                The content here is only visible through the{' '}
-                <Link href={link} className="text-primary underline">
-                  private link
-                </Link>{' '}
-                and is intended as a preview.
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-  }
-  return (
-    <div className="bg-muted flex flex-row p-2 text-center text-white">
-      <div className="mx-auto w-full">
-        <div className="flex flex-col gap-3">
-          <div className="font-mono text-sm">This podcast is public at the link:</div>
-          <div className="text-primary font-mono">https://podverse.ai/podcast/{podcast.slug}</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export async function PodcastDetail({
   podcastSlug,
   uuid,
@@ -202,7 +133,7 @@ export async function PodcastDetail({
 
     return (
       <>
-        <PodcastLinkHeader podcast={podcast} planLimit={planLimit} activationCode={activationCode} />
+        <PodcastLinkHeader podcast={podcast} activationCode={activationCode} />
         <div className="mx-auto mt-8 w-11/12 md:w-4/5">
           <PodcastHeader podcast={podcast} planLimit={planLimit} />
           <div className="flex flex-row gap-4">

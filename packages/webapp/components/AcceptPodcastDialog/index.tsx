@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { Podcast, PodcastWithEpisodes, isReady } from 'podverse-utils';
+import { Podcast, PodcastWithEpisodes } from 'podverse-utils';
 import {
   Dialog,
   DialogClose,
@@ -12,18 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button, buttonVariants } from '@/components/ui/button';
-import moment from 'moment';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
-import { refreshPodcast, updatePodcast } from '@/lib/actions';
-import { EpisodeLimit } from '@/lib/limits';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { auth } from '@clerk/nextjs/server';
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 
 export function ActivateButton({ text }: { text?: string }) {
@@ -52,7 +40,7 @@ export function SignUpOrActivateButton({ text, uuid }: { text?: string; uuid: st
   );
 }
 
-export function AcceptPodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
+export function AcceptPodcastDialog({ podcast }: { podcast: Podcast | PodcastWithEpisodes }) {
   if (!podcast.uuid) {
     throw new Error('Podcast UUID not found');
   }

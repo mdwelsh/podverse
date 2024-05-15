@@ -65,7 +65,8 @@ function TranscriptView({ transcript, episode }: { transcript: any; episode: Epi
       if (itemRefs.current[index] === undefined) {
         return;
       }
-      itemRefs.current[index].current?.scrollIntoView({ block: 'center' });
+      // Disable scrolling for now.
+      //itemRefs.current[index].current?.scrollIntoView({ block: 'center' });
     };
     scrollToTime(curTime);
   }, [curTime, paragraphs, itemRefs, doUpdate]);

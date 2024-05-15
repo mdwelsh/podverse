@@ -12,16 +12,17 @@ import { cn } from '@/lib/utils';
 import { EpisodeClient } from '@/components/EpisodeClient';
 import Image from 'next/image';
 import { ShareButtons } from '@/components/ShareButtons';
-import { Share } from 'next/font/google';
+import { PodcastLinkHeader } from '@/components/PodcastLinkHeader';
 
-function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
+function EpisodeHeader({ episode, uuid }: { episode: EpisodeWithPodcast; uuid?: string }) {
   const episodeWithoutPodcast = { ...episode, podcast: episode.podcast.id };
+  const maybeUuid = uuid ? `?uuid=${uuid}` : '';
 
   return (
     <div className="mb-4 grid w-full grid-cols-4 gap-4 font-mono">
       <div className="text-muted-foreground col-span-4">
         From{' '}
-        <Link href={`/podcast/${episode.podcast.slug}`}>
+        <Link href={`/podcast/${episode.podcast.slug}${maybeUuid}`}>
           <span className="text-primary">{episode.podcast.title}</span>
         </Link>
       </div>
@@ -52,7 +53,7 @@ function EpisodeHeader({ episode }: { episode: EpisodeWithPodcast }) {
                 </div>
                 <EpisodeLinks episode={episode} />
               </div>
-              <ShareButtons />
+              <ShareButtons disabled={episode.podcast.private || false} />
               {episode.podcast.copyright && (
                 <div className="text-muted-foreground font-mono text-sm">{episode.podcast.copyright}</div>
               )}
@@ -127,9 +128,37 @@ async function EpisodeSummary({ episode }: { episode: EpisodeWithPodcast }) {
   );
 }
 
-export async function EpisodeDetail({ podcastSlug, episodeSlug }: { podcastSlug: string; episodeSlug: string }) {
+export async function EpisodeDetail({
+  podcastSlug,
+  episodeSlug,
+  uuid,
+  activationCode,
+}: {
+  podcastSlug: string;
+  episodeSlug: string;
+  uuid?: string;
+  activationCode?: string;
+}) {
   const supabase = await getSupabaseClient();
   const episode = await GetEpisodeWithPodcastBySlug(supabase, podcastSlug, episodeSlug);
+  try {
+    if (episode.podcast.private && episode.podcast.uuid) {
+      if (uuid) {
+        if (uuid !== episode.podcast.uuid.replace(/-/g, '')) {
+          throw new Error('Podcast is private and UUID does not match');
+        }
+      } else if (activationCode) {
+        if (activationCode !== episode.podcast.uuid.replace(/-/g, '')) {
+          throw new Error('Podcast is private and activation code does not match');
+        }
+      } else {
+        throw new Error('Podcast is private and no UUID or activation code provided');
+      }
+    }
+  } catch (error) {
+    console.error('Error checking private podcast:', error);
+    return <div className="mx-auto mt-8 w-11/12 font-mono md:w-4/5">This podcast is private.</div>;
+  }
 
   // Check if there are any Documents for this episode.
   const { data: documents, error } = await supabase.from('Documents').select('id').eq('episode', episode.id);
@@ -139,16 +168,19 @@ export async function EpisodeDetail({ podcastSlug, episodeSlug }: { podcastSlug:
   const chatAvailable = (documents && documents.length > 0) || false;
 
   return (
-    <div className="mx-auto mt-8 w-11/12 font-mono md:w-4/5">
-      <EpisodeHeader episode={episode} />
-      {isReady(episode) ? (
-        <>
-          <EpisodeSummary episode={episode} />
-          <EpisodeClient episode={episode} chatAvailable={chatAvailable} />
-        </>
-      ) : (
-        <div className="mt-8">This episode has not yet been processed.</div>
-      )}
-    </div>
+    <>
+      <PodcastLinkHeader podcast={episode.podcast} activationCode={activationCode} />
+      <div className="mx-auto mt-8 w-11/12 font-mono md:w-4/5">
+        <EpisodeHeader episode={episode} uuid={uuid} />
+        {isReady(episode) ? (
+          <>
+            <EpisodeSummary episode={episode} />
+            <EpisodeClient episode={episode} chatAvailable={chatAvailable} />
+          </>
+        ) : (
+          <div className="mt-8">This episode has not yet been processed.</div>
+        )}
+      </div>
+    </>
   );
 }
