@@ -32,7 +32,7 @@ export function ShowAllSwitch({
   return (
     <div className="flex items-center space-x-2">
       <Switch id="publish-episode" checked={checked} onCheckedChange={onCheckedChange} />
-      <Label className="font-mono text-sm text-muted-foreground" htmlFor="publish-episode">
+      <Label className="text-muted-foreground font-mono text-sm" htmlFor="publish-episode">
         Include unprocessed
       </Label>
     </div>
@@ -67,12 +67,12 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
   const episodesToShow = showEpisodes.slice((page - 1) * ENTRIES_PER_PAGE, page * ENTRIES_PER_PAGE);
 
   return (
-    <div className="mt-8 flex h-[800px] w-full lg:w-3/5 flex-col gap-2">
-      <div className="flex w-full flex-row items-center gap-2">
+    <div className="mt-8 flex w-full flex-col gap-2 lg:w-3/5">
+      <div className="flex w-full flex-col items-start md:items-center gap-2 md:flex-row">
         <div className="mr-4">Episodes</div>
         <ShowAllSwitch checked={showAll} onCheckedChange={setShowAll} />
         <div className="grow" />
-        <div>
+        <div className="w-fit self-end">
           <Pagination>
             <PaginationContent className="gap-0 text-xs">
               <PaginationItem>

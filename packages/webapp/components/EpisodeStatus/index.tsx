@@ -52,7 +52,7 @@ const columns: ColumnDef<EpisodeWithPodcast>[] = [
       const ep = row.original as EpisodeWithPodcast;
       const imageUrl = getValue() ?? ('' as string);
       return (
-        <Link href={`/podcast/${ep.podcast.slug}/episode/${ep.slug}`}>
+        <Link href={`/podcast/${ep.podcast.slug}/episode/${ep.slug}?uuid=${ep.podcast.uuid?.replace(/-/g, '')}`}>
           <div className="ring-primary flex h-[100px] flex-col overflow-y-clip border hover:ring-2">
             <div className="m-auto flex w-[100px]">
               {imageUrl && <Image src={getValue() as string} width={100} height={100} alt="Episode thumbnail" />}
@@ -247,7 +247,7 @@ export function EpisodeTable<TData, TValue>() {
             cell: () => <Skeleton className="h-4 w-full" />,
           }))
         : columns,
-    [loading]
+    [loading],
   );
 
   // The table component itself.

@@ -12,12 +12,12 @@ export default async function Page() {
   }
 
   return (
-    <div className="mx-auto mt-8 flex w-4/5 flex-col gap-4">
+    <div className="mx-auto mt-8 flex w-full px-2 sm:w-4/5 flex-col gap-4">
       <div className="flex w-full flex-row justify-between">
-        <div className="flex flex-row gap-2 items-center">
+        <div className="flex flex-col sm:flex-row gap-2 items-center">
           <div className="font-mono text-lg">Your episodes</div>
           <Link href="/dashboard">
-            <Button variant="outline" className="text-sm font0-ono">
+            <Button variant="outline" className="text-sm">
               View podcasts
             </Button>
           </Link>

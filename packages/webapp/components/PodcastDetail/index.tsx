@@ -34,21 +34,21 @@ async function PodcastHeader({ podcast, planLimit }: { podcast: PodcastWithEpiso
             </Link>
           </div>
           <div className="font-sans text-sm">{podcast.description}</div>
-          {podcast.copyright && <div className="text-muted-foreground font-mono text-sm">{podcast.copyright}</div>}
-          <span className="text-muted-foreground text-sm">
-            {podcast.Episodes.filter(isReady).length > 0 && (
-              <span>{podcast.Episodes.filter(isReady).length} episodes processed / </span>
-            )}
-            {podcast.Episodes.length} total
-          </span>
-          <div className="flex flex-col gap-2">
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <PodcastLinks podcast={podcast} />
-              <ShareButtons disabled={podcast.private || undefined} />
-            </div>
-          </div>
         </div>
       </div>
+      <div className="flex w-full flex-col sm:flex-row gap-4">
+        <span className="text-muted-foreground text-sm">
+          {podcast.Episodes.filter(isReady).length > 0 && (
+            <span>{podcast.Episodes.filter(isReady).length} episodes processed / </span>
+          )}
+          {podcast.Episodes.length} total
+        </span>
+        <div className="flex flex-row gap-2">
+          <PodcastLinks podcast={podcast} />
+        </div>
+      </div>
+      {podcast.copyright && <div className="text-muted-foreground font-mono text-sm">{podcast.copyright}</div>}
+      <ShareButtons disabled={podcast.private || undefined} />
     </div>
   );
 }
@@ -79,7 +79,7 @@ function PodcastLinks({ podcast }: { podcast: PodcastWithEpisodes }) {
 export function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
   if (!podcast.suggestions || podcast.suggestions.length === 0) {
     return (
-      <div className="mt-8 flex h-[800px] w-2/5 flex-col gap-2">
+      <div className="mt-8 flex h-[1000px] w-2/5 flex-col gap-2">
         <div>
           <h1>Chat</h1>
         </div>
@@ -89,7 +89,7 @@ export function PodcastChat({ podcast }: { podcast: PodcastWithEpisodes }) {
   }
 
   return (
-    <div className="mt-8 hidden h-[800px] w-2/5 flex-col gap-2 lg:flex">
+    <div className="mt-8 hidden h-[1000px] w-2/5 flex-col gap-2 lg:flex">
       <div>
         <h1>Chat</h1>
       </div>
@@ -134,9 +134,9 @@ export async function PodcastDetail({
     return (
       <>
         <PodcastLinkHeader podcast={podcast} activationCode={activationCode} />
-        <div className="mx-auto mt-8 w-11/12 md:w-4/5">
+        <div className="mx-auto mt-8 w-full px-2 md:w-4/5">
           <PodcastHeader podcast={podcast} planLimit={planLimit} />
-          <div className="flex flex-row gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row">
             <PodcastEpisodeList podcast={podcast} episodes={podcast.Episodes} />
             {podcast.Episodes.filter(isReady).length > 0 && <PodcastChat podcast={podcast} />}
           </div>
@@ -146,7 +146,7 @@ export async function PodcastDetail({
   } catch (error) {
     console.error('Error looking up podcast:', error);
     return (
-      <div className="mx-auto mt-8 flex w-full flex-col gap-4 font-mono md:w-4/5">
+      <div className="mx-auto mt-8 flex w-full flex-col gap-4 px-2 font-mono md:w-4/5">
         <div>
           Failed to load podcast <span className="text-primary">{podcastSlug}</span>
         </div>

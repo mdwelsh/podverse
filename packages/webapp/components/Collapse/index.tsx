@@ -9,7 +9,7 @@ export function Collapse({ children, open = false, ...props }: { children: React
       className={
         open
           ? 'line-clamp-none transition-all duration-300 ease-in-out'
-          : 'line-clamp-4 transition-all duration-300 ease-in-out'
+          : 'line-clamp-4 transition-all duration-300 ease-in-out sm:line-clamp-6'
       }
       {...props}
     >
@@ -30,14 +30,13 @@ export function CollapseWithToggle({ children, extra }: { children: React.ReactN
   }, [children]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-0">
       <div ref={contentRef}>
         <Collapse open={open}>{children}</Collapse>
       </div>
       <div className="flex flex-row gap-2">
-        <>{extra}</>
         {contentHeight > 60 && (
-          <Button className="text-primary ml-auto text-sm" variant="outline" onClick={() => setOpen(!open)}>
+          <Button className="text-primary ml-auto text-sm" variant="ghost" onClick={() => setOpen(!open)}>
             {open ? 'Hide' : 'Show more'}
           </Button>
         )}

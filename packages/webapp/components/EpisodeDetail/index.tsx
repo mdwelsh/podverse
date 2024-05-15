@@ -19,61 +19,62 @@ function EpisodeHeader({ episode, uuid }: { episode: EpisodeWithPodcast; uuid?: 
   const maybeUuid = uuid ? `?uuid=${uuid}` : '';
 
   return (
-    <div className="mb-4 grid w-full grid-cols-4 gap-4 font-mono">
+    <div className="mb-4 flex w-full flex-col gap-2 font-mono">
       <div className="text-muted-foreground col-span-4">
         From{' '}
         <Link href={`/podcast/${episode.podcast.slug}${maybeUuid}`}>
           <span className="text-primary">{episode.podcast.title}</span>
         </Link>
       </div>
-      <div className="block md:block">
-        {episode.imageUrl ? (
-          <Image src={episode.imageUrl} width={400} height={400} alt="Episode thumbnail image" />
-        ) : (
-          episode.podcast.imageUrl && (
-            <Image src={episode.podcast.imageUrl} width={400} height={400} alt="Episode thumbnail image" />
-          )
-        )}
-      </div>
-      <div className="col-span-3">
-        <div className="text-primary text-xl font-bold">
-          <Link href={episode.url || `/podcast/${episode.podcast.slug}/episode/${episode.slug}`}>
-            <span className="text-primary">
-              {episode.title}
-              {episode.url && <ArrowTopRightOnSquareIcon className="text-primary ml-1 inline size-4 align-super" />}
-            </span>
-          </Link>
-        </div>
-        <CollapseWithToggle
-          extra={
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-col gap-2 lg:flex-row">
-                <div className="text-muted-foreground font-mono text-sm">
-                  Published <span className="text-primary">{moment(episode.pubDate).format('MMMM Do YYYY')}</span>
+      <div className="flex flex-row gap-2 sm:gap-4 mb-2">
+        <div className="mt-2 w-full max-w-32 sm:max-w-64 flex flex-col gap-1">
+          {episode.imageUrl ? (
+            <Image src={episode.imageUrl} width={400} height={400} alt="Episode thumbnail image" />
+          ) : (
+            episode.podcast.imageUrl && (
+              <Image src={episode.podcast.imageUrl} width={400} height={400} alt="Episode thumbnail image" />
+            )
+          )}
+          <div className="w-fit">
+            <Owner owner={episode.podcast.owner}>
+              <ManageEpisodeDialog episode={episodeWithoutPodcast}>
+                <div className={cn(buttonVariants({ variant: 'outline' }))}>
+                  <div className="flex flex-row items-center gap-2">
+                    <EpisodeIndicator episode={episodeWithoutPodcast} />
+                    Manage episode
+                  </div>
                 </div>
-                <EpisodeLinks episode={episode} />
-              </div>
-              <ShareButtons disabled={episode.podcast.private || false} />
-              {episode.podcast.copyright && (
-                <div className="text-muted-foreground font-mono text-sm">{episode.podcast.copyright}</div>
-              )}
-              <div className="w-fit">
-                <Owner owner={episode.podcast.owner}>
-                  <ManageEpisodeDialog episode={episodeWithoutPodcast}>
-                    <div className={cn(buttonVariants({ variant: 'outline' }))}>
-                      <div className="flex flex-row items-center gap-2">
-                        <EpisodeIndicator episode={episodeWithoutPodcast} />
-                        Manage episode
-                      </div>
-                    </div>
-                  </ManageEpisodeDialog>
-                </Owner>
-              </div>
-            </div>
-          }
-        >
-          <div className="font-sans text-sm">{episode.description}</div>
-        </CollapseWithToggle>
+              </ManageEpisodeDialog>
+            </Owner>
+          </div>
+        </div>
+        <div className="w-full">
+          <div className="text-primary text-xl font-bold">
+            <Link href={episode.url || `/podcast/${episode.podcast.slug}/episode/${episode.slug}`}>
+              <span className="text-primary">
+                {episode.title}
+                {episode.url && <ArrowTopRightOnSquareIcon className="text-primary ml-1 inline size-4 align-super" />}
+              </span>
+            </Link>
+          </div>
+          <CollapseWithToggle>
+            <div className="font-sans text-sm">{episode.description}</div>
+          </CollapseWithToggle>
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row gap-1 sm:flex-row sm:items-center">
+          <div className="text-muted-foreground font-mono text-sm">
+            Published <span className="text-primary">{moment(episode.pubDate).format('MMMM Do YYYY')}</span>
+          </div>
+          <EpisodeLinks episode={episode} />
+        </div>
+        {episode.podcast.copyright && (
+          <div className="text-muted-foreground font-mono text-sm">{episode.podcast.copyright}</div>
+        )}
+        <div className="flex flex-col justify-between gap-2 sm:flex-row">
+          <ShareButtons disabled={episode.podcast.private || false} />
+        </div>
       </div>
     </div>
   );
@@ -170,7 +171,7 @@ export async function EpisodeDetail({
   return (
     <>
       <PodcastLinkHeader podcast={episode.podcast} activationCode={activationCode} />
-      <div className="mx-auto mt-8 w-11/12 font-mono md:w-4/5">
+      <div className="mx-auto mt-8 w-full px-2 font-mono md:w-4/5">
         <EpisodeHeader episode={episode} uuid={uuid} />
         {isReady(episode) ? (
           <>

@@ -15,7 +15,9 @@ function NewPodcastHeader({ podcast }: { podcast: PodcastStat }) {
           <div className="font-mono text-primary underline underline-offset-4">
             <Link href={`/podcasts/${podcast.slug}`}>{podcast.title}</Link>
           </div>
-          <div className="text-sm">Click the <b>Manage podcast</b> button below to manage it.</div>
+          <div className="text-sm">
+            Click the <b>Manage podcast</b> button below to manage it.
+          </div>
         </div>
       </div>
     </div>
@@ -38,12 +40,12 @@ export async function Dashboard({ assignedPodcast }: { assignedPodcast?: string 
   return (
     <>
       {newPodcast && <NewPodcastHeader podcast={newPodcast} />}
-      <div className="mx-auto mt-8 flex w-3/5 flex-col gap-4">
+      <div className="mx-auto mt-8 flex w-full px-2 md:w-3/5 flex-col gap-4">
         <div className="flex w-full flex-row justify-between">
-          <div className="flex flex-row gap-2 items-center">
+          <div className="flex flex-col sm:flex-row gap-2 items-center">
             <div className="font-mono text-lg">Your podcasts</div>
             <Link href="/dashboard/episodes">
-              <Button variant="outline" className="text-sm font0-ono">
+              <Button variant="outline" className="text-sm">
                 View episodes
               </Button>
             </Link>

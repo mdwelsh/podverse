@@ -314,7 +314,7 @@ export function ManagePodcastDialog({ podcast, planLimit }: { podcast: PodcastWi
   return (
     <Dialog>
       <DialogTrigger>
-        <div className={cn(buttonVariants({ variant: 'secondary' }))}>Manage podcast</div>
+        <div className={cn(buttonVariants({ variant: 'outline' }))}>Manage podcast</div>
       </DialogTrigger>
       <DialogContent className="max-w-md md:max-w-3xl">
         <DialogHeader>
