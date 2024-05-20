@@ -13,7 +13,7 @@ import {
   PlayCircleIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
-import { FC, memo } from 'react';
+import { FC, memo, useMemo } from 'react';
 import ReactMarkdown, { Options } from 'react-markdown';
 import { useAudioPlayer } from '@/components/AudioPlayer';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ import { useChatContext } from '@/components/ChatContext';
 
 export const MemoizedReactMarkdown: FC<Options> = memo(
   ReactMarkdown,
-  (prevProps, nextProps) => prevProps.children === nextProps.children && prevProps.className === nextProps.className
+  (prevProps, nextProps) => prevProps.children === nextProps.children && prevProps.className === nextProps.className,
 );
 
 export function useEnterSubmit(): {
@@ -57,11 +57,11 @@ export function PromptForm({
 }) {
   const { formRef, onKeyDown } = useEnterSubmit();
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (inputRef.current) {
+  //     inputRef.current.focus();
+  //   }
+  // }, []);
 
   return (
     <form
@@ -287,34 +287,37 @@ export function Chat({
   episodeId?: number;
   podcastId?: number;
 }) {
-  // We keep the randomized suggestions in state so it does not change on every render.
-  const [randomSuggestions, setRandomSuggestions] = useState<string[]>([]);
-  useEffect(() => {
-    setRandomSuggestions(suggestions ? suggestions.sort(() => 0.5 - Math.random()).slice(0, 3) : []);
-  }, [suggestions]);
-
-  const initialMessages: CreateMessage[] = [
-    {
+  const initialMessages = useMemo(() => {
+    const retval: CreateMessage[] = [];
+    retval.push({
       content:
         greeting ||
         "Hi there! I'm the Podverse AI Bot. You can ask me questions about any of the podcasts on this site.",
       role: 'assistant',
-    },
-  ];
-
-  if (randomSuggestions.length) {
-    initialMessages.push({
-      content:
-        'Here are some suggestions to get you started:\n' + randomSuggestions.map((s) => `[${s}](/?suggest)`).join(' '),
-      role: 'assistant',
     });
-  }
+    const randomSuggestions = suggestions ? suggestions.sort(() => 0.5 - Math.random()).slice(0, 3) : [];
+    if (randomSuggestions.length) {
+      retval.push({
+        content:
+          'Here are some suggestions to get you started:\n' +
+          randomSuggestions.map((s) => `[${s}](/?suggest)`).join(' '),
+        role: 'assistant',
+      });
+    }
+    return retval;
+  }, [suggestions, greeting]);
 
   const { messages, append, reload, stop, isLoading, input, setInput } = useChat({
     initialMessages: initialMessages.map((m, i) => ({ ...m, id: i.toString() })),
     body: { episodeId, podcastId },
   });
   const { messagesRef, scrollRef, visibilityRef, isAtBottom, scrollToBottom } = useScrollAnchor();
+
+  useEffect(() => {
+    if (isAtBottom) {
+      scrollToBottom();
+    }
+  }, [messages, isAtBottom, scrollToBottom]);
 
   return (
     <div className="relative flex h-full flex-col" ref={scrollRef}>
@@ -345,6 +348,10 @@ export function Chat({
 
 export function ContextAwareChat() {
   const { podcast, episode } = useChatContext();
+  if (podcast === null || episode === null) {
+    // We're still loading the context.
+    return null;
+  }
   const greeting =
     "Hi there! I'm the Podverse AI Bot. You can ask me questions about any of the podcasts on this site.";
   const suggestions = ['What are some good science podcasts?', 'Are there any episodes about music?', 'Report a bug'];

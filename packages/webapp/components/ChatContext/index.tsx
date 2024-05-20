@@ -6,8 +6,8 @@ import { getPodcastWithEpisodes, getEpisodeWithPodcast, search } from '@/lib/act
 import { useParams, useSearchParams } from 'next/navigation';
 
 interface ChatContextType {
-  podcast?: PodcastWithEpisodes;
-  episode?: EpisodeWithPodcast;
+  podcast?: PodcastWithEpisodes | null;
+  episode?: EpisodeWithPodcast | null;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -57,8 +57,8 @@ export function ChatContextProvider({
   }, [podcast, episode, podcastSlug, episodeSlug, uuid]);
 
   const value: ChatContextType = {
-    podcast: currentPodcast || undefined,
-    episode: currentEpisode || undefined,
+    podcast: currentPodcast,
+    episode: currentEpisode,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
