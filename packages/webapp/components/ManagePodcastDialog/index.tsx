@@ -261,9 +261,39 @@ export function PublishPodcastSwitch({
   );
 }
 
+export function ProcessPodcastSwitch({
+  podcast,
+  checked,
+  onCheckedChange,
+}: {
+  podcast: Podcast;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center space-x-2">
+      <Switch id="publish-episode" checked={checked} onCheckedChange={onCheckedChange} />
+      <Label className="text-muted-foreground font-mono text-sm" htmlFor="publish-episode">
+        Automatically process new episodes
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <QuestionMarkCircleIcon className="text-primary size-5 ml-1" />
+            </TooltipTrigger>
+            <TooltipContent className="text-muted-foreground w-[400px] font-sans text-sm">
+              When this option is enabled, new episodes will be automatically processed, up to your plan limit.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </Label>
+    </div>
+  );
+}
+
 export function ManagePodcastDialog({ podcast, planLimit }: { podcast: PodcastWithEpisodes; planLimit: EpisodeLimit }) {
   const [isPublic, setIsPublic] = useState(!podcast.private);
-  const [isPublished, setIsPublished] = useState(podcast.published || false);
+  //const [isPublished, setIsPublished] = useState(podcast.published || false);
+  const [processEnabled, setProcessEnabled] = useState(podcast.process);
 
   const doRefresh = () => {
     if (podcast) {
@@ -291,18 +321,31 @@ export function ManagePodcastDialog({ podcast, planLimit }: { podcast: PodcastWi
       });
   };
 
-  const onPublishChange = (checked: boolean) => {
-    setIsPublished(checked);
-    podcast.published = checked;
+  const onProcessChange = (checked: boolean) => {
+    setProcessEnabled(checked);
+    podcast.process = checked;
     const { Episodes, suggestions, ...rest } = podcast;
     updatePodcast({ ...rest })
       .then(() => {
-        toast.success(`Set published status to ${checked}`);
+        toast.success(`Set auto-process status to ${checked}`);
       })
       .catch((e) => {
         toast.error('Failed to update podcast: ' + e.message);
       });
   };
+
+  // const onPublishChange = (checked: boolean) => {
+  //   setIsPublished(checked);
+  //   podcast.published = checked;
+  //   const { Episodes, suggestions, ...rest } = podcast;
+  //   updatePodcast({ ...rest })
+  //     .then(() => {
+  //       toast.success(`Set published status to ${checked}`);
+  //     })
+  //     .catch((e) => {
+  //       toast.error('Failed to update podcast: ' + e.message);
+  //     });
+  // };
 
   if (!podcast) {
     return null;
@@ -344,6 +387,7 @@ export function ManagePodcastDialog({ podcast, planLimit }: { podcast: PodcastWi
             <PublicPodcastSwitch podcast={podcast} checked={isPublic} onCheckedChange={onPublicChange} />
             {/* For now, we tie the published state to the private state. At some point we might make these different. */}
             {/* <PublishPodcastSwitch checked={isPublished} onCheckedChange={onPublishChange} disabled={!isPublic} /> */}
+            <ProcessPodcastSwitch podcast={podcast} checked={processEnabled} onCheckedChange={onProcessChange} />
           </div>
         </div>
         <DialogFooter>

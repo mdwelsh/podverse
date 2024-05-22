@@ -55,6 +55,12 @@ export async function PodcastStrip({ slug }: { slug: string }) {
               <ExclamationTriangleIcon className="text-primary size-5" />
             </div>
           )}
+          <div className="flex flex-row gap-2 text-sm">
+            <div>
+              Auto-processing is <span className="text-primary">{podcast.process ? 'enabled' : 'disabled'}</span>
+            </div>
+          </div>
+
           {podcast.private ? (
             <div className="text-sm text-muted-foreground flex flex-row gap-2 items-center">
               <EyeSlashIcon className="size-5" />

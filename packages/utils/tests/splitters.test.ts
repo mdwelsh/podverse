@@ -40,20 +40,20 @@ describe('splitText tests', () => {
     const text = generate(2000) + '.';
     const splitter = new TextSplitter({ splitLongSentences: true });
     const chunks = splitter.splitText(text);
-    expect(chunks.length).toBe(7);
+    expect(chunks.length).toBe(14);
     expect(chunks[0].meta?.charOffset).toBe(0);
-    expect(chunks[0].numTokens).toBe(1024);
+    expect(chunks[0].numTokens).toBe(512);
     expect(chunks[1].meta?.charOffset).toBe(chunks[0].text.length);
-    expect(chunks[1].numTokens).toBe(1024);
+    expect(chunks[1].numTokens).toBe(512);
     expect(chunks[2].meta?.charOffset).toBe(chunks[1].meta!.charOffset! + chunks[1].text.length);
-    expect(chunks[2].numTokens).toBe(1024);
-    expect(chunks[6].numTokens).toBeLessThan(1024);
+    expect(chunks[2].numTokens).toBe(512);
+    expect(chunks[13].numTokens).toBeLessThan(512);
   });
 
   it('Works with multiple paragraphs', () => {
     // Each of these paragraphs should fit into a single chunk, with overlap from the next one.
     const text = Array.from({ length: 4 }, (_, i) => i)
-      .map((i) => `This is paragraph ${i}. ${generate(200)}.`)
+      .map((i) => `This is paragraph ${i}. ${generate(100)}.`)
       .join('\n\n');
     const splitter = new TextSplitter({ splitLongSentences: true });
     const chunks = splitter.splitText(text);
@@ -80,15 +80,15 @@ describe('splitTranscript tests', () => {
     const splitter = new TextSplitter({ splitLongSentences: true });
     const chunks = splitter.splitTranscript(transcript);
 
-    expect(chunks.length).toBe(17);
+    expect(chunks.length).toBe(34);
     expect(chunks[0].text.indexOf('And Receiving this message.')).toBe(0);
-    expect(chunks[0].numTokens).toBe(1020);
+    expect(chunks[0].numTokens).toBe(505);
     expect(chunks[0].meta?.startTime).toBe(5.92);
-    expect(chunks[0].meta?.endTime).toBe(308.965);
+    expect(chunks[0].meta?.endTime).toBe(181.04001);
 
-    expect(chunks[16].text.indexOf("So by Diddy's corollary,")).toBe(0);
-    expect(chunks[16].numTokens).toBe(317);
-    expect(chunks[16].meta?.startTime).toBe(4438.695);
-    expect(chunks[16].meta?.endTime).toBe(4525.815);
+    expect(chunks[32].text.indexOf("So by Diddy's corollary,")).toBe(1558);
+    expect(chunks[33].numTokens).toBe(220);
+    expect(chunks[33].meta?.startTime).toBe(4464.98);
+    expect(chunks[33].meta?.endTime).toBe(4525.815);
   });
 });

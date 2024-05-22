@@ -22,6 +22,9 @@ import {
 } from 'podverse-utils';
 import { TranscribeEpisode, SummarizeEpisode, SpeakerIDEpisode, EmbedEpisode, SuggestEpisode } from '@/lib/process';
 
+// Used when running locally - use `tailscale serve`.
+const DEVELOPMENT_SERVER_HOSTNAME = 'deepdocks.tailf7e81.ts.net';
+
 /** Return false if the user's plan does not permit processing of this Episode. */
 async function checkUserPlanLimit(supabase: SupabaseClient, episode: EpisodeWithPodcast): Promise<boolean> {
   const podcastStats = await GetPodcastStats(supabase);
@@ -86,7 +89,7 @@ export const processEpisode = inngest.createFunction(
     episode.error = null;
     await UpdateEpisode(supabase, episode);
 
-    const currentHostname = process.env.VERCEL_URL ?? 'deepdocks.tailf7e81.ts.net';
+    const currentHostname = process.env.VERCEL_URL ?? DEVELOPMENT_SERVER_HOSTNAME;
 
     try {
       // Start transcription.
@@ -195,9 +198,9 @@ export const processPodcast = inngest.createFunction(
   },
   { event: 'process/podcast' },
   async ({ event, step, runId }) => {
-    const { podcastId, force, supabaseAccessToken, episodeLimit, maxEpisodes } = event.data;
+    const { podcastId, force, supabaseAccessToken, episodes, episodeLimit, maxEpisodes } = event.data;
     console.log(
-      `process/podcast - event ${runId} received for ${podcastId}, force ${force}, episodeLimit ${episodeLimit}`,
+      `process/podcast - event ${runId} received for ${podcastId}, force ${force}, episodeLimit ${episodeLimit}, provided ${episodes.length || 0} episodes`,
     );
     const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
     const podcast = await GetPodcastWithEpisodesByID(supabase, podcastId);
@@ -209,7 +212,9 @@ export const processPodcast = inngest.createFunction(
         `process/podcast - Podcast ${podcastId} has ${processedEpisodes}, max is ${maxEpisodes}, cap is ${cap}`,
       );
     }
-    let episodesToProcess = force ? podcast.Episodes : podcast.Episodes.filter((episode) => !isReady(episode));
+    let episodesToProcess = force
+      ? podcast.Episodes
+      : podcast.Episodes.filter((episode) => (episodes ? episodes.includes(episode.id) : !isReady(episode)));
     if (episodeLimit) {
       console.log(
         `process/podcast - Podcast ${podcastId} has ${episodesToProcess.length} episodes to process, capping to ${cap}`,
@@ -250,6 +255,7 @@ export const ingestPodcast = inngest.createFunction(
     console.log(`ingest/podcast - event ${runId}, podcastId ${podcastId}, rssUrl ${rssUrl}`);
     const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
     let rssFeed = rssUrl;
+    let originalEpisodes: Episode[] = [];
     if (podcastId) {
       // We are refreshing an existing podcast.
       console.log(`ingest/podcast - Refreshing existing podcast ${podcastId}`);
@@ -257,9 +263,23 @@ export const ingestPodcast = inngest.createFunction(
       if (!podcast.rssUrl) {
         throw new Error('Podcast has no RSS feed URL');
       }
+      originalEpisodes = podcast.Episodes;
       rssFeed = podcast.rssUrl;
     }
     const newPodcast = await Ingest({ supabase, podcastUrl: rssFeed, refresh: !!podcastId });
+    if (newPodcast.process) {
+      const newEpisodes = newPodcast.Episodes.filter((episode) => !originalEpisodes.find((e) => e.id === episode.id));
+      console.log(`ingest/podcast - Processing podcast ${newPodcast.id} with ${newEpisodes.length} new episodes`);
+      const result = step.sendEvent('process-podcast', {
+        name: 'process/podcast',
+        data: {
+          podcastId: newPodcast.id,
+          supabaseAccessToken,
+          episodes: newEpisodes.map((episode) => episode.id),
+        },
+      });
+      return result;
+    }
     if (!!podcastId) {
       return { message: `Refreshed podcast ${podcastId}` };
     } else {

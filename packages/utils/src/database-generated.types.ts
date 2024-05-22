@@ -170,6 +170,7 @@ export type Database = {
           imageUrl: string | null
           owner: string | null
           private: boolean | null
+          process: boolean
           published: boolean | null
           rssUrl: string | null
           slug: string
@@ -186,6 +187,7 @@ export type Database = {
           imageUrl?: string | null
           owner?: string | null
           private?: boolean | null
+          process?: boolean
           published?: boolean | null
           rssUrl?: string | null
           slug: string
@@ -202,6 +204,7 @@ export type Database = {
           imageUrl?: string | null
           owner?: string | null
           private?: boolean | null
+          process?: boolean
           published?: boolean | null
           rssUrl?: string | null
           slug?: string
@@ -446,6 +449,8 @@ export type Database = {
       all_podcasts: {
         Args: {
           limit: number
+          isPrivate: boolean
+          isPublished: boolean
         }
         Returns: {
           id: number
@@ -453,9 +458,18 @@ export type Database = {
           description: string
           slug: string
           private: boolean
+          published: boolean
           imageUrl: string
           newestEpisode: string
         }[]
+      }
+      assign_podcast_owner: {
+        Args: {
+          id: number
+          owner: string
+          activation_code: string
+        }
+        Returns: undefined
       }
       chunk_vector_search: {
         Args: {

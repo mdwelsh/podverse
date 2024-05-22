@@ -139,12 +139,17 @@ export async function ReadPodcastFeed(podcastUrl: string, podcastSlug?: string):
     Episodes: episodes,
     private: true,
     published: false,
+    process: true,
     uuid: uuidv4(),
   };
   return newPodcast;
 }
 
-/** Ingest a single podcast. If 'refresh' is set, any new episodes will be added. */
+/**
+ * Ingest a single podcast. If 'refresh' is set, any new episodes will be added.
+ * Returns the PodcastWithEpisodes object for the podcast, and the list of newly-imported
+ * episodes.
+ */
 export async function Ingest({
   slug,
   supabase,
@@ -240,9 +245,10 @@ export async function Ingest({
     // Update podcast metadata.
     const newPodcastMetadata = {
       ...newPodcast,
-      // Keep original private, published, and uuid fields.
+      // Keep original private, published, process, and uuid fields.
       private: oldPodcast.private,
       published: oldPodcast.published,
+      process: oldPodcast.process,
       uuid: oldPodcast.uuid,
     };
     // Don't want to update the episodes right here.
@@ -272,7 +278,7 @@ export async function Ingest({
     );
   }
   console.log(`Ingested podcast ${newPodcast.slug} with ${newPodcast.Episodes.length} episodes`);
-  return await GetPodcastWithEpisodes(supabase, slug || newPodcast.slug);
+  return await GetPodcastWithEpisodes(supabase, newPodcast.slug);
 }
 
 /** Clear errors and stale processing states from the given podcast. */
