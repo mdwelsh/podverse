@@ -50,6 +50,8 @@ export function ChatContextProvider({
           setCurrentPodcast(podcast);
           if (episodeSlug) {
             getEpisodeWithPodcast(podcastSlug, episodeSlug).then(setCurrentEpisode);
+          } else {
+            setCurrentEpisode(undefined);
           }
         }
       });
