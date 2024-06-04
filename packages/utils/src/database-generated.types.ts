@@ -160,6 +160,44 @@ export type Database = {
           },
         ]
       }
+      Invitations: {
+        Row: {
+          created_at: string
+          email: string
+          id: number
+          modified_at: string | null
+          name: string | null
+          podcast: number
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: number
+          modified_at?: string | null
+          name?: string | null
+          podcast: number
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: number
+          modified_at?: string | null
+          name?: string | null
+          podcast?: number
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Invitations_podcast_fkey"
+            columns: ["podcast"]
+            isOneToOne: false
+            referencedRelation: "Podcasts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       Podcasts: {
         Row: {
           author: string | null

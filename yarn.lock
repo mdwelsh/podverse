@@ -3357,6 +3357,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axios@npm:^1.6.0":
+  version: 1.7.2
+  resolution: "axios@npm:1.7.2"
+  dependencies:
+    follow-redirects: ^1.15.6
+    form-data: ^4.0.0
+    proxy-from-env: ^1.1.0
+  checksum: e457e2b0ab748504621f6fa6609074ac08c824bf0881592209dfa15098ece7e88495300e02cd22ba50b3468fd712fe687e629dcb03d6a3f6a51989727405aedf
+  languageName: node
+  linkType: hard
+
 "axobject-query@npm:^3.2.1":
   version: 3.2.1
   resolution: "axobject-query@npm:3.2.1"
@@ -3453,6 +3464,13 @@ __metadata:
   version: 1.0.2
   resolution: "balanced-match@npm:1.0.2"
   checksum: 9706c088a283058a8a99e0bf91b0a2f75497f185980d9ffa8b304de1d9e58ebda7c72c07ebf01dadedaac5b2907b2c6f566f660d62bd336c3468e960403b9d65
+  languageName: node
+  linkType: hard
+
+"base-64@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "base-64@npm:1.0.0"
+  checksum: d10b64a1fc9b2c5a5f39f1ce1e6c9d1c5b249222bbfa3a0604c592d90623caf74419983feadd8a170f27dc0c3389704f72faafa3e645aeb56bfc030c93ff074a
   languageName: node
   linkType: hard
 
@@ -4077,6 +4095,39 @@ __metadata:
   version: 3.1.3
   resolution: "csstype@npm:3.1.3"
   checksum: 8db785cc92d259102725b3c694ec0c823f5619a84741b5c7991b8ad135dfaa66093038a1cc63e03361a6cd28d122be48f2106ae72334e067dd619a51f49eddf7
+  languageName: node
+  linkType: hard
+
+"csv-generate@npm:^4.4.1":
+  version: 4.4.1
+  resolution: "csv-generate@npm:4.4.1"
+  checksum: 9a0ddd963836f7a6c011a57ba188753ed5cf57083f3d9a2c811392b5a3b6be21e265f653365cbb66641567cda5f37bdb3618117de8db51fbc6f574c7a693e334
+  languageName: node
+  linkType: hard
+
+"csv-parse@npm:^5.5.6":
+  version: 5.5.6
+  resolution: "csv-parse@npm:5.5.6"
+  checksum: ee06f97f674487dc1d001b360de8ea510a41b9d971abf43bcf9c3be22c83a3634df0d3ebfbe52fd49d145077066be7ff9f25de3fc6b71aefb973099b04147a25
+  languageName: node
+  linkType: hard
+
+"csv-stringify@npm:^6.5.0":
+  version: 6.5.0
+  resolution: "csv-stringify@npm:6.5.0"
+  checksum: c4009bc691b30314ff17cb2918d2f43dd42de5a1d3cd7889fd523f131d0e37d2a3c3c2601de93e8b71e2d8f3f52a9e4fb2a5f2ede9991e2895c1daa268694d78
+  languageName: node
+  linkType: hard
+
+"csv@npm:^6.3.9":
+  version: 6.3.9
+  resolution: "csv@npm:6.3.9"
+  dependencies:
+    csv-generate: ^4.4.1
+    csv-parse: ^5.5.6
+    csv-stringify: ^6.5.0
+    stream-transform: ^3.3.2
+  checksum: 9a3932a38412dda0d7c3e862d9333c1b314d0f2d7dde7e1c4cb16a32daae30ea7ac211e549ace90469e053622dc965e8fc35c4d3a221c544370f1e3cdfec2cb6
   languageName: node
   linkType: hard
 
@@ -5411,6 +5462,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"follow-redirects@npm:^1.15.6":
+  version: 1.15.6
+  resolution: "follow-redirects@npm:1.15.6"
+  peerDependenciesMeta:
+    debug:
+      optional: true
+  checksum: a62c378dfc8c00f60b9c80cab158ba54e99ba0239a5dd7c81245e5a5b39d10f0c35e249c3379eae719ff0285fff88c365dd446fab19dee771f1d76252df1bbf5
+  languageName: node
+  linkType: hard
+
 "for-each@npm:^0.3.3":
   version: 0.3.3
   resolution: "for-each@npm:0.3.3"
@@ -5466,6 +5527,13 @@ __metadata:
     node-domexception: 1.0.0
     web-streams-polyfill: 4.0.0-beta.3
   checksum: d91d4f667cfed74827fc281594102c0dabddd03c9f8b426fc97123eedbf73f5060ee43205d89284d6854e2fc5827e030cd352ef68b93beda8decc2d72128c576
+  languageName: node
+  linkType: hard
+
+"formdata-node@npm:^6.0.3":
+  version: 6.0.3
+  resolution: "formdata-node@npm:6.0.3"
+  checksum: 0c404dad51aac1e570bef1c20b702da9f4facac9db889398d333ca92a7ae4ab8c005ad249e2df184870fe388aedfe28fc81e8a0aabda7295a19316c1fbaf7407
   languageName: node
   linkType: hard
 
@@ -7564,6 +7632,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mailgun.js@npm:^10.2.1":
+  version: 10.2.1
+  resolution: "mailgun.js@npm:10.2.1"
+  dependencies:
+    axios: ^1.6.0
+    base-64: ^1.0.0
+    url-join: ^4.0.1
+  checksum: ca6306fc6f46447715cfe3f01418be8efded06d390a38910650af96c677b99b441db688850f11ae5beeb52e590147d51a92f5974fd746ccbb3ed7cc265233b44
+  languageName: node
+  linkType: hard
+
 "make-dir@npm:^4.0.0":
   version: 4.0.0
   resolution: "make-dir@npm:4.0.0"
@@ -8905,10 +8984,13 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^6.0.0
     "@typescript-eslint/parser": ^6.0.0
     commander: ^11.0.0
+    csv: ^6.3.9
     dotenv: ^16.3.1
     eslint: ^8.44.0
+    formdata-node: ^6.0.3
     inngest: ^3.13.0
     js-yaml: ^4.1.0
+    mailgun.js: ^10.2.1
     podverse-utils: "*"
     prettier: ^3.0.0
     rss-parser: ^3.13.0
@@ -9238,6 +9320,13 @@ __metadata:
   version: 1.2.4
   resolution: "proto-list@npm:1.2.4"
   checksum: 4d4826e1713cbfa0f15124ab0ae494c91b597a3c458670c9714c36e8baddf5a6aad22842776f2f5b137f259c8533e741771445eb8df82e861eea37a6eaba03f7
+  languageName: node
+  linkType: hard
+
+"proxy-from-env@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "proxy-from-env@npm:1.1.0"
+  checksum: ed7fcc2ba0a33404958e34d95d18638249a68c430e30fcb6c478497d72739ba64ce9810a24f53a7d921d0c065e5b78e3822759800698167256b04659366ca4d4
   languageName: node
   linkType: hard
 
@@ -10135,6 +10224,13 @@ __metadata:
   version: 1.0.3
   resolution: "stream-shift@npm:1.0.3"
   checksum: a24c0a3f66a8f9024bd1d579a533a53be283b4475d4e6b4b3211b964031447bdf6532dd1f3c2b0ad66752554391b7c62bd7ca4559193381f766534e723d50242
+  languageName: node
+  linkType: hard
+
+"stream-transform@npm:^3.3.2":
+  version: 3.3.2
+  resolution: "stream-transform@npm:3.3.2"
+  checksum: 5aa088f8ed92de8c396cb6f942a1ae01321c6675ba4a103a5025bb397364161475bc50e90cbf858625ecf2bb694078ea79cd1282e5e2f87164c19fa4aaeeefd0
   languageName: node
   linkType: hard
 
@@ -11218,6 +11314,13 @@ __metadata:
   dependencies:
     punycode: ^2.1.0
   checksum: 7167432de6817fe8e9e0c9684f1d2de2bb688c94388f7569f7dbdb1587c9f4ca2a77962f134ec90be0cc4d004c939ff0d05acc9f34a0db39a3c797dada262633
+  languageName: node
+  linkType: hard
+
+"url-join@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "url-join@npm:4.0.1"
+  checksum: f74e868bf25dbc8be6a8d7237d4c36bb5b6c62c72e594d5ab1347fe91d6af7ccd9eb5d621e30152e4da45c2e9a26bec21390e911ab54a62d4d82e76028374ee5
   languageName: node
   linkType: hard
 

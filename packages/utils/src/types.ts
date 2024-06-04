@@ -6,6 +6,7 @@ export type Podcast = Tables<'Podcasts'>;
 export type Episode = Tables<'Episodes'>;
 export type User = Tables<'Users'>;
 export type Subscription = Tables<'Subscriptions'>;
+export type Invitation = Tables<'Invitations'>;
 
 /** Mapping from speaker ID to name. */
 export type Speakers = Record<string, string>;

@@ -27,11 +27,13 @@ import {
   Search,
   Podcast,
   PodcastWithEpisodes,
-  PodcastMetadata
+  PodcastMetadata,
 } from 'podverse-utils';
 import { dump, load } from 'js-yaml';
 import fs from 'fs';
 import { Inngest } from 'inngest';
+import { parse } from 'csv-parse/sync';
+import { sendEmail, createInvitation, stepInvitations } from './invites.js';
 
 /** Describes the configuration file YAML format. */
 interface PodcastConfig {
@@ -49,6 +51,9 @@ function inviteLink(podcast: Podcast | PodcastMetadata | PodcastWithEpisodes) {
   const activationCode = podcast.uuid?.replace(/-/g, '');
   return `https://podverse.ai/podcast/${podcast.slug}?activationCode=${activationCode}`;
 }
+
+// This is the mdw@mdw.la user in prod.
+const DEFAULT_OWNER = 'user_2eEqltdMFHh6eKqOqnWQS8mQqDJ';
 
 program
   .command('list')
@@ -91,8 +96,7 @@ program
   .command('ingest')
   .description('Ingest a podcast into the Podverse app.')
   .argument('<podcastUrl>', 'URL of the podcast RSS feed.')
-  // This is the mdw@mdw.la user on prod.
-  .option('--owner <owner>', 'Owner ID of the podcast.', 'user_2eEqltdMFHh6eKqOqnWQS8mQqDJ')
+  .option('--owner <owner>', 'Owner ID of the podcast.', DEFAULT_OWNER)
   .action(async (podcastUrl: string, opts) => {
     try {
       const podcast = await Ingest({ supabase, podcastUrl, owner: opts.owner });
@@ -284,6 +288,70 @@ program
     });
     const data = await res.json();
     term.green(JSON.stringify(data));
+  });
+
+program
+  .command('import')
+  .description('Import Podcasts from a CSV file, creating new invitations for them.')
+  .argument('<csvFile>', 'Filename of the CSV file.')
+  .option('--priority <priority>', 'Only process CSV file entries with this Priority value.', 'Great')
+  .action(async (csvFile: string, opts) => {
+    try {
+      const csvRaw = fs.readFileSync(csvFile, 'utf8');
+      let csvData = parse(csvRaw, { columns: true });
+      // Filter out rows with priority != opts.priority.
+      csvData = csvData.filter((row: { priority: string }) => row.priority === opts.priority);
+      for (const record of csvData) {
+        const invitation = await createInvitation(supabase, record);
+        console.log(invitation);
+      }
+    } catch (err) {
+      term('Error importing: ').red(JSON.stringify(err));
+    }
+  });
+
+program
+  .command('list-invites')
+  .description('List pending invitations.')
+  .action(async () => {
+    try {
+      const { data: invites, error } = await supabase.from('Invitations').select('*');
+      if (error) {
+        throw error;
+      }
+      for (const invite of invites) {
+        console.log(invite);
+      }
+    } catch (err) {
+      term('Error fetching invites: ').red(JSON.stringify(err));
+    }
+  });
+
+program
+  .command('step-invites')
+  .description('Step all pending invitations.')
+  .option('--stage <stage>', 'Only process invitations at the current stage.')
+  .option('--force', 'Force each invite to next stage.')
+  .action(async (opts) => {
+    try {
+      stepInvitations(supabase, opts.stage, opts.force || false);
+    } catch (err) {
+      term('Error stepping: ').red(JSON.stringify(err));
+    }
+  });
+
+program
+  .command('send-email')
+  .description('Send email message via Mailgun.')
+  .argument('<to>', 'Email address to send to.')
+  .argument('<body>', 'Message body.')
+  .option('--subject <subject>', 'Message subject.', 'Message from Podverse.ai')
+  .action(async (to, body, opts) => {
+    try {
+      sendEmail({ to, subject: opts.subject, text: body });
+    } catch (err) {
+      term('Error sending email: ').red(JSON.stringify(err));
+    }
   });
 
 program
