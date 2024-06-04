@@ -21,8 +21,8 @@ export function PodcastLinkHeader({
             <div className="flex flex-col gap-3">
               <div className="font-mono underline underline-offset-8">Thanks for checking out Podverse!</div>
               <div className="text-pretty text-base">
-                This page is a <b>private</b> demo of Podverse for <b className="text-primary">{podcast.title}</b>.
-                {numEpisodes ? `We&apos;ve imported ${numEpisodes} recent episodes to get started.` : ' '}
+                This page is a <b>private</b> demo of Podverse for <b className="text-primary">{podcast.title}</b>.{' '}
+                {numEpisodes ? `We've imported ${numEpisodes} recent episodes to get started. ` : ' '}
                 Feel free to click around and try out all the features.
               </div>
               <div className="text-pretty text-base">
@@ -31,6 +31,13 @@ export function PodcastLinkHeader({
                 which you can manage your podcast, import more episodes, and share links with your listeners.
               </div>
               <AcceptPodcastDialog podcast={podcast} />
+              <div className="text-pretty text-base">
+                Any questions? Drop me a line at{' '}
+                <a className="underline font-mono" href="mailto:matt@ziggylabs.ai">
+                  matt@ziggylabs.ai
+                </a>
+                . Thanks!
+              </div>
             </div>
           </div>
         </div>
