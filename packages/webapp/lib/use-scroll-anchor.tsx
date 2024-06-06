@@ -9,13 +9,10 @@ export const useScrollAnchor = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   const scrollToBottom = useCallback(() => {
-    if (messagesRef.current) {
-      messagesRef.current.scrollIntoView({
-        block: 'center',
-        behavior: 'smooth',
-      });
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, []);
+  }, [scrollRef]);
 
   //   useEffect(() => {
   //     if (messagesRef.current) {
@@ -34,7 +31,6 @@ export const useScrollAnchor = () => {
         const target = event.target as HTMLDivElement;
         const offset = 25;
         const isAtBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - offset;
-
         setIsAtBottom(isAtBottom);
       };
 
@@ -46,7 +42,7 @@ export const useScrollAnchor = () => {
         current.removeEventListener('scroll', handleScroll);
       };
     }
-  }, []);
+  }, [scrollRef]);
 
   useEffect(() => {
     if (visibilityRef.current) {
@@ -62,7 +58,7 @@ export const useScrollAnchor = () => {
         },
         {
           rootMargin: '0px 0px -150px 0px',
-        }
+        },
       );
 
       observer.observe(visibilityRef.current);

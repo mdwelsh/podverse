@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { CreateMessage, Message } from 'ai';
 import { useChat } from 'ai/react';
 import { cn } from '@/lib/utils';
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useEffect, useRef, useState, type RefObject, useCallback } from 'react';
 import Textarea from 'react-textarea-autosize';
 import {
   ArrowDownIcon,
@@ -287,6 +287,7 @@ export function Chat({
   episodeId?: number;
   podcastId?: number;
 }) {
+  const [canScroll, setCanScroll] = useState(false);
   const initialMessages = useMemo(() => {
     const retval: CreateMessage[] = [];
     retval.push({
@@ -307,24 +308,49 @@ export function Chat({
     return retval;
   }, [suggestions, greeting]);
 
+  const { messagesRef, scrollRef, visibilityRef, isAtBottom, scrollToBottom } = useScrollAnchor();
+
+  const onResponse = useCallback(
+    (response: Response) => {
+      scrollToBottom();
+    },
+    [scrollToBottom],
+  );
+
+  const onFinish = useCallback(
+    (message: Message) => {
+      scrollToBottom();
+    },
+    [scrollToBottom],
+  );
+
   const { messages, append, reload, stop, isLoading, input, setInput } = useChat({
     initialMessages: initialMessages.map((m, i) => ({ ...m, id: i.toString() })),
     body: { episodeId, podcastId },
+    onResponse,
+    onFinish,
   });
-  const { messagesRef, scrollRef, visibilityRef, isAtBottom, scrollToBottom } = useScrollAnchor();
+
+  const doAppend = useCallback(
+    (m: CreateMessage) => {
+      append(m);
+      scrollToBottom();
+    },
+    [append, scrollToBottom],
+  );
 
   useEffect(() => {
-    if (isAtBottom) {
+    if (isAtBottom && canScroll) {
       scrollToBottom();
     }
-  }, [messages, isAtBottom, scrollToBottom]);
+  }, [messages, isAtBottom, scrollToBottom, canScroll]);
 
   return (
-    <div className="relative flex h-full flex-col" ref={scrollRef}>
-      <div className="overflow-y-auto pb-[100px]">
+    <div className="relative flex h-full flex-col">
+      <div className="overflow-y-auto pb-[100px]" ref={scrollRef}>
         {messages.length ? (
           <>
-            <ChatList messages={messages} append={append} endRef={messagesRef} />
+            <ChatList messages={messages} append={doAppend} endRef={messagesRef} />
           </>
         ) : (
           <EmptyChat />
@@ -332,7 +358,7 @@ export function Chat({
         <div className="h-px w-full" ref={visibilityRef} />
       </div>
       <ChatPanel
-        append={append}
+        append={doAppend}
         isLoading={isLoading}
         stop={stop}
         reload={reload}
