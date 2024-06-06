@@ -362,16 +362,23 @@ export async function UpdateEpisode(supabase: SupabaseClient, episode: Episode |
 
 /** Set metadata for a set of Episodes. */
 export async function SetEpisodes(supabase: SupabaseClient, episodes: Episode[] | EpisodeMetadata[]) {
-  const { error } = await supabase.from('Episodes').upsert(
-    episodes.map((e) => {
-      const { id, created_at, ...episodeData } = e;
-      return episodeData;
-    }),
-    { onConflict: 'guid', ignoreDuplicates: false },
-  );
-  if (error) {
-    throw error;
+  console.log(`Setting ${episodes.length} episodes...`);
+  // Insert up to MAX_INSERT_SIZE episodes at a time, to avoid server timeouts.
+  const MAX_INSERT_SIZE = 20;
+  for (let i = 0; i < episodes.length; i += MAX_INSERT_SIZE) {
+    const segment = episodes.slice(i, i + MAX_INSERT_SIZE);
+    const { error } = await supabase.from('Episodes').upsert(
+      segment.map((e) => {
+        const { id, created_at, ...episodeData } = e;
+        return episodeData;
+      }),
+      { onConflict: 'guid', ignoreDuplicates: false },
+    );
+    if (error) {
+      throw error;
+    }
   }
+  console.log(`Done setting ${episodes.length} episodes.`);
 }
 
 /** Suggestions ***************************************************************************/

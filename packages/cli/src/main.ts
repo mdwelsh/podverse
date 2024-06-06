@@ -307,6 +307,8 @@ program
       }
     } catch (err) {
       term('Error importing: ').red(JSON.stringify(err));
+      // @ts-ignore
+      console.error(err.stack);
     }
   });
 

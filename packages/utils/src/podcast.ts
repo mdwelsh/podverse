@@ -270,6 +270,7 @@ export async function Ingest({
     }
     const podcastId = podcast.id;
     console.log('Created podcast:', podcast);
+    console.log(`Inserting ${newPodcast.Episodes.length} episodes`);
     await SetEpisodes(
       supabase,
       newPodcast.Episodes.map((episode) => {
