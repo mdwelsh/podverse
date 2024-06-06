@@ -7,7 +7,6 @@ import {
   refreshPodcasts,
   clearErrors,
 } from '../../../inngest/functions';
-import { clear } from 'console';
 
 // Allow max duration (can be increased on enterprise plan).
 export const maxDuration = 300;

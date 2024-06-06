@@ -200,7 +200,7 @@ export const processPodcast = inngest.createFunction(
   async ({ event, step, runId }) => {
     const { podcastId, force, supabaseAccessToken, episodes, episodeLimit, maxEpisodes } = event.data;
     console.log(
-      `process/podcast - event ${runId} received for ${podcastId}, force ${force}, episodeLimit ${episodeLimit}, provided ${episodes.length || 0} episodes`,
+      `process/podcast - event ${runId} received for ${podcastId}, force ${force}, episodeLimit ${episodeLimit}`,
     );
     const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
     const podcast = await GetPodcastWithEpisodesByID(supabase, podcastId);
@@ -236,7 +236,7 @@ export const processPodcast = inngest.createFunction(
       }),
     );
 
-    console.log(`process/episodes for podcast ${podcastId} - Done.`);
+    console.log(`process/podcast for podcast ${podcastId} - Done.`);
     return {
       message: `Finished processing ${results.length} episodes for podcast ${podcastId}`,
     };

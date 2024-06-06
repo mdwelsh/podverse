@@ -28,6 +28,7 @@ import {
   Podcast,
   PodcastWithEpisodes,
   PodcastMetadata,
+  GetPodcastByID,
 } from 'podverse-utils';
 import { dump, load } from 'js-yaml';
 import fs from 'fs';
@@ -322,10 +323,16 @@ program
         throw error;
       }
       for (const invite of invites) {
+        const podcastId = invite.podcast.toString();
+        const podcast = await GetPodcastByID(supabase, podcastId);
+        invite.link = `https://podverse.ai/podcast/${podcast.slug}?activationCode=${podcast.uuid?.replace(/-/g, '')}`;
         console.log(invite);
       }
     } catch (err) {
-      term('Error fetching invites: ').red(JSON.stringify(err));
+      term('Error fetching invites');
+      console.error(err);
+      // @ts-ignore
+      console.error(err.stack);
     }
   });
 
