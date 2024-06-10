@@ -11,7 +11,11 @@ const cors = Cors({
 const ADMIN_EMAIL = 'matt@podverse.ai';
 
 function userPrimaryEmailAddress(user: any): string {
-  return user.email_addresses.find((e: any) => e.id === user.primary_email_address_id)?.email_address || 'unknown';
+  let retval = user.email_addresses.find((e: any) => e.id === user.primary_email_address_id)?.email_address;
+  if (!retval) {
+    retval = user.emailAddresses.find((e: any) => e.id === user.primaryEmailAddressId)?.emailAddress;
+  }
+  return retval || 'unknown';
 }
 
 /** Receives webhooks from Clerk when events of interest occur. */
