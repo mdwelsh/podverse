@@ -25,22 +25,27 @@ export async function sendEmail({
   text?: string;
 }): Promise<void> {
   console.log(`Sending email to ${to} with subject ${subject}`);
-  const mailgun = new Mailgun(FormData);
-  const apiKey = process.env.MAILGUN_API_KEY;
-  if (!apiKey) {
-    throw new Error('MAILGUN_API_KEY not set');
+  try {
+    const mailgun = new Mailgun(FormData);
+    const apiKey = process.env.MAILGUN_API_KEY;
+    if (!apiKey) {
+      throw new Error('MAILGUN_API_KEY not set');
+    }
+    const mg = mailgun.client({ username: 'api', key: apiKey });
+    const domain = process.env.MAILGUN_DOMAIN || DEFAULT_EMAIL_DOMAIN;
+    // @ts-ignore
+    const response = await mg.messages.create(domain, {
+      from,
+      to,
+      subject,
+      bcc,
+      text,
+      template,
+      'h:X-Mailgun-Variables': templateVars ? JSON.stringify(templateVars) : undefined,
+    });
+    console.log(`Sent email: ${JSON.stringify(response)}`);
+  } catch (error) {
+    console.error(`Error sending email: ${JSON.stringify(error)}`);
+    console.trace(error);
   }
-  const mg = mailgun.client({ username: 'api', key: apiKey });
-  const domain = process.env.MAILGUN_DOMAIN || DEFAULT_EMAIL_DOMAIN;
-  // @ts-ignore
-  const response = await mg.messages.create(domain, {
-    from,
-    to,
-    subject,
-    bcc,
-    text,
-    template,
-    'h:X-Mailgun-Variables': templateVars ? JSON.stringify(templateVars) : undefined,
-  });
-  console.log(`Sent email: ${JSON.stringify(response)}`);
 }
