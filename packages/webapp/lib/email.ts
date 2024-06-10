@@ -9,9 +9,9 @@ const DEFAULT_BCC_ADDRESS = 'matt@podverse.ai';
 /** Send an email via Mailgun. */
 export async function sendEmail({
   subject,
-  to,
-  from,
-  bcc,
+  to = DEFAULT_TO_ADDRESS,
+  from = DEFAULT_FROM_ADDRESS,
+  bcc = DEFAULT_BCC_ADDRESS,
   template,
   templateVars,
   text,
@@ -24,7 +24,7 @@ export async function sendEmail({
   templateVars?: Record<string, string>;
   text?: string;
 }): Promise<void> {
-  console.log(`Sending email to ${to} with subject: ${subject}`);
+  console.log(`Sending email to ${to} with subject ${subject}`);
   const mailgun = new Mailgun(FormData);
   const apiKey = process.env.MAILGUN_API_KEY;
   if (!apiKey) {
@@ -34,10 +34,10 @@ export async function sendEmail({
   const domain = process.env.MAILGUN_DOMAIN || DEFAULT_EMAIL_DOMAIN;
   // @ts-ignore
   const response = await mg.messages.create(domain, {
-    from: from || DEFAULT_FROM_ADDRESS,
-    to: to || DEFAULT_TO_ADDRESS,
+    from,
+    to,
     subject,
-    bcc: bcc || DEFAULT_BCC_ADDRESS,
+    bcc,
     text,
     template,
     'h:X-Mailgun-Variables': templateVars ? JSON.stringify(templateVars) : undefined,
