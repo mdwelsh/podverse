@@ -37,11 +37,17 @@ export async function POST(req: Request) {
     const userId = payload.data.user_id;
     const user = await clerkClient.users.getUser(userId);
     console.log(`User logged in: ${JSON.stringify(user, null, 2)}`);
-    const userEmailAddress = userPrimaryEmailAddress(user);
-    sendEmail({
-      subject: 'User login',
-      text: `User logged in: ${userEmailAddress}`,
-    });
+    try {
+      const userEmailAddress = userPrimaryEmailAddress(user);
+      console.log(`User ${userEmailAddress} logged in`);
+      sendEmail({
+        subject: 'User login',
+        text: `User logged in: ${userEmailAddress}`,
+      });
+    } catch (error) {
+      console.error(`Got error sending email: ${error}`);
+      console.error(error);
+    }
   }
   return NextResponse.json({ ok: true });
 }

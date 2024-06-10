@@ -3,7 +3,7 @@ import { FormData } from 'formdata-node';
 
 const DEFAULT_TO_ADDRESS = 'matt@ziggylabs.ai';
 const DEFAULT_FROM_ADDRESS = 'Podverse <noreply@podverse.ai>';
-const DEFAULT_EMAIL_DOMAIN = 'mail1.ziggylabs.ai';
+const DEFAULT_EMAIL_DOMAIN = 'mail1.podverse.ai';
 const DEFAULT_BCC_ADDRESS = 'matt@podverse.ai';
 
 /** Send an email via Mailgun. */
@@ -24,6 +24,7 @@ export async function sendEmail({
   templateVars?: Record<string, string>;
   text?: string;
 }): Promise<void> {
+  console.log(`Sending email to ${to} with subject: ${subject}`);
   const mailgun = new Mailgun(FormData);
   const apiKey = process.env.MAILGUN_API_KEY;
   if (!apiKey) {
@@ -39,7 +40,7 @@ export async function sendEmail({
     bcc: bcc || DEFAULT_BCC_ADDRESS,
     text,
     template,
-    'h:X-Mailgun-Variables': JSON.stringify(templateVars),
+    'h:X-Mailgun-Variables': templateVars ? JSON.stringify(templateVars) : undefined,
   });
-  console.log(response);
+  console.log(`Sent email: ${JSON.stringify(response)}`);
 }
