@@ -155,6 +155,8 @@ export async function stepInvitation({
       console.log(`  Starting processing`);
       const eventKey = process.env.INNGEST_EVENT_KEY;
       const inngest = new Inngest({ id: 'podverse-app', eventKey });
+      const token = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+      console.log(`  Using token ${token.slice(0, 12)}...`);
       await inngest.send({
         name: 'process/podcast',
         data: {

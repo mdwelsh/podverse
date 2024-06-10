@@ -11,7 +11,7 @@ const SPEAKERID_PROMPT = `The following is a transcript of a conversation betwee
   { "Speaker 0": "John Smith", "Speaker 1": "Jane Doe" }
 
   ONLY return a JSON formatted response. DO NOT return any other information or context.
-  DO NOT prefix your response with backquotes.`;
+  DO NOT use backquotes in your reply.`;
 
 // Rough estimate.
 const tokenLen = (text: string) => text.length / 4;
@@ -50,19 +50,34 @@ export async function SpeakerID({
     text = text.substring(0, maxTokenLen * 4);
   }
 
-  const completion = await openai.chat.completions.create({
-    messages: [
-      { role: 'system', content: systemMessage },
-      { role: 'user', content: text },
-    ],
-    model: 'gpt-4o',
-  });
-
-  const result = completion.choices[0].message.content || '{}';
-  // Parse.
-  const parsed = JSON.parse(result);
-  if (typeof parsed !== 'object') {
-    throw new Error(`Expected JSON object as response, got: ${result}`);
+  // We sometimes get a bad result from the LLM, so we try multiple times before
+  // giving up.
+  let parsed = null;
+  let tries = 0;
+  const MAX_TRIES = 3;
+  while (tries < MAX_TRIES) {
+    tries += 1;
+    const completion = await openai.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemMessage },
+        { role: 'user', content: text },
+      ],
+      model: 'gpt-4o',
+    });
+    const result = completion.choices[0].message.content || '{}';
+    console.log(`[Attempt ${tries}/${MAX_TRIES}] SpeakerID result: ${result}`);
+    try {
+      parsed = JSON.parse(result);
+      if (typeof parsed !== 'object') {
+        throw new Error(`Expected JSON object as response, got: ${result}`);
+      }
+      break;
+    } catch (e) {
+      console.error(`[Attempt ${tries}/${MAX_TRIES}] Failed to parse SpeakerID result: ${e}`);
+    }
+  }
+  if (tries >= MAX_TRIES) {
+    throw new Error(`Failed to get a valid response from the LLM after ${MAX_TRIES} attempts.`);
   }
 
   // For each of the keys, replace "Speaker X" with "X".
