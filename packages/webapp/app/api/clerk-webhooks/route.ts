@@ -11,7 +11,7 @@ const cors = Cors({
 const ADMIN_EMAIL = 'matt@podverse.ai';
 
 function userPrimaryEmailAddress(user: any): string {
-  return user.email_addresses.find((e: any) => e.id === user.primary_email_addressId)?.email_address || 'unknown';
+  return user.email_addresses.find((e: any) => e.id === user.primary_email_address_id)?.email_address || 'unknown';
 }
 
 /** Receives webhooks from Clerk when events of interest occur. */
@@ -42,6 +42,7 @@ export async function POST(req: Request) {
   } else if (payload.type === 'session.created') {
     const userId = payload.data.user_id;
     const user = await clerkClient.users.getUser(userId);
+    console.log(`User logged in: ${JSON.stringify(user, null, 2)}`);
     const userEmailAddress = userPrimaryEmailAddress(user);
     sendEmail({
       to: ADMIN_EMAIL,
