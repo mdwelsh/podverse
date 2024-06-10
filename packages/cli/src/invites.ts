@@ -2,7 +2,6 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Ingest, isReady, Invitation, GetPodcastWithEpisodesByID, PodcastWithEpisodes } from 'podverse-utils';
 import { Inngest } from 'inngest';
 import Mailgun from 'mailgun.js';
-//import * as FormData from 'form-data';
 import { FormData } from 'formdata-node';
 
 /** This is the type of the data held in the CSV file which we generate invitations from. */
@@ -219,7 +218,6 @@ export async function sendEmail({
 }): Promise<void> {
   const mailgun = new Mailgun(FormData);
   const apiKey = process.env.MAILGUN_API_KEY;
-  console.log(`Using mailgun API key ${apiKey}`);
   if (!apiKey) {
     throw new Error('MAILGUN_API_KEY not set');
   }
