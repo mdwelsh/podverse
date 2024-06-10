@@ -11624,6 +11624,7 @@ __metadata:
     eslint-plugin-import: ^2.27.5
     eslint-plugin-react: ^7.32.2
     eslint-plugin-tailwindcss: ^3.13.0
+    formdata-node: ^6.0.3
     inngest: ^3.13.0
     lucide-react: ^0.331.0
     micro-cors: ^0.1.1
