@@ -37,6 +37,8 @@ import { inngest } from '@/inngest/client';
 import { ReportIssueTemplate } from '@/components/EmailTemplates';
 import { Resend } from 'resend';
 import { EpisodeLimit } from '@/lib/limits';
+import { sendEmail } from '@/lib/email';
+import { getUser, userPrimaryEmailAddress } from '@/lib/users';
 
 /** Get the given podcast. */
 export async function getPodcast(podcastId: string): Promise<Podcast> {
@@ -354,7 +356,7 @@ export async function getEpisodes({
   searchTerm?: string;
 }): Promise<[EpisodeWithPodcast[], number]> {
   console.log(
-    `Getting episodes for owner=${owner}, podcastId=${podcastId}, sortBy=${sortBy}, ascending=${ascending}, limit=${limit}, offset=${offset}, searchTerm=${searchTerm}, pending=${pending}, processing=${processing}, error=${error}, ready=${ready}`
+    `Getting episodes for owner=${owner}, podcastId=${podcastId}, sortBy=${sortBy}, ascending=${ascending}, limit=${limit}, offset=${offset}, searchTerm=${searchTerm}, pending=${pending}, processing=${processing}, error=${error}, ready=${ready}`,
   );
 
   const supabase = await getSupabaseClient();
@@ -413,9 +415,11 @@ export async function getEpisodes({
 
 export async function assignPodcastToUser(podcastId: number, userId: string, activationCode: string): Promise<void> {
   console.log(`Assigning podcast ${podcastId} to user ${userId}`);
+
   // This function needs to run as the service role, since it's reassigning the owner
   // field on the Podcast, which overrides RLS.
   const supabase = await getSupabaseClientWithToken(process.env.SUPABASE_SERVICE_ROLE_KEY as string);
+
   const { error } = await supabase.rpc('assign_podcast_owner', {
     id: podcastId,
     owner: userId,
@@ -425,4 +429,12 @@ export async function assignPodcastToUser(podcastId: number, userId: string, act
     console.error('error', error);
     throw error;
   }
+
+  const podcast = await getPodcast(podcastId.toString());
+  const user = await getUser(userId);
+  const userEmail = userPrimaryEmailAddress(user);
+  sendEmail({
+    subject: 'Podcast ownership transfer',
+    text: `Podcast ${podcast.slug} ownership transferred to user ${userEmail}`,
+  });
 }

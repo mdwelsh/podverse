@@ -1,22 +1,23 @@
 import Mailgun from 'mailgun.js';
 import { FormData } from 'formdata-node';
 
+const DEFAULT_TO_ADDRESS = 'matt@ziggylabs.ai';
 const DEFAULT_FROM_ADDRESS = 'Podverse <noreply@podverse.ai>';
 const DEFAULT_EMAIL_DOMAIN = 'mail1.ziggylabs.ai';
 const DEFAULT_BCC_ADDRESS = 'matt@podverse.ai';
 
 /** Send an email via Mailgun. */
 export async function sendEmail({
-  to,
   subject,
+  to,
   from,
   bcc,
   template,
   templateVars,
   text,
 }: {
-  to: string;
   subject: string;
+  to?: string;
   from?: string;
   bcc?: string;
   template?: string;
@@ -33,7 +34,7 @@ export async function sendEmail({
   // @ts-ignore
   const response = await mg.messages.create(domain, {
     from: from || DEFAULT_FROM_ADDRESS,
-    to,
+    to: to || DEFAULT_TO_ADDRESS,
     subject,
     bcc: bcc || DEFAULT_BCC_ADDRESS,
     text,

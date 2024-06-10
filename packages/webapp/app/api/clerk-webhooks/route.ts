@@ -3,20 +3,11 @@ import { NextResponse } from 'next/server';
 import { Webhook } from 'svix';
 import { sendEmail } from '@/lib/email';
 import { clerkClient } from '@clerk/nextjs/server';
+import { getUser, userPrimaryEmailAddress } from '@/lib/users';
 
 const cors = Cors({
   allowMethods: ['POST', 'HEAD'],
 });
-
-const ADMIN_EMAIL = 'matt@podverse.ai';
-
-function userPrimaryEmailAddress(user: any): string {
-  let retval = user.email_addresses?.find((e: any) => e.id === user.primary_email_address_id)?.email_address;
-  if (!retval) {
-    retval = user.emailAddresses?.find((e: any) => e.id === user.primaryEmailAddressId)?.emailAddress;
-  }
-  return retval || 'unknown';
-}
 
 /** Receives webhooks from Clerk when events of interest occur. */
 export async function POST(req: Request) {
@@ -39,7 +30,6 @@ export async function POST(req: Request) {
   if (payload.type === 'user.created') {
     const userEmailAddress = userPrimaryEmailAddress(payload.data);
     sendEmail({
-      to: ADMIN_EMAIL,
       subject: 'New user created',
       text: `A new user was created: ${userEmailAddress}`,
     });
@@ -49,7 +39,6 @@ export async function POST(req: Request) {
     console.log(`User logged in: ${JSON.stringify(user, null, 2)}`);
     const userEmailAddress = userPrimaryEmailAddress(user);
     sendEmail({
-      to: ADMIN_EMAIL,
       subject: 'User login',
       text: `User logged in: ${userEmailAddress}`,
     });
