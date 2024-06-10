@@ -22,6 +22,6 @@ export async function POST(req: Request) {
     'svix-timestamp': svix_timestamp,
     'svix-signature': svix_signature,
   });
-  console.log(`Received Clerk webhook: ${payload}`);
+  console.log(`Received Clerk webhook: ${JSON.stringify(payload, null, 2)}`);
   return NextResponse.json({ ok: true });
 }
