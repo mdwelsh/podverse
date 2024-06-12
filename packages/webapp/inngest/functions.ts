@@ -89,7 +89,7 @@ export const processEpisode = inngest.createFunction(
     episode.error = null;
     await UpdateEpisode(supabase, episode);
 
-    const currentHostname = process.env.VERCEL_URL ?? DEVELOPMENT_SERVER_HOSTNAME;
+    const currentHostname = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? DEVELOPMENT_SERVER_HOSTNAME;
 
     try {
       // Start transcription.
