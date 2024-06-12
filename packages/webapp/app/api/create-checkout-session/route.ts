@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
 
   try {
     console.log(`Creating checkout session for ${userId} with price ${priceId}`);
+    console.log(`Redirect URL: ${redirectUrl}`);
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
