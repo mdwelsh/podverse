@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
       },
       success_url: redirectUrl + '?success=true',
       cancel_url: redirectUrl + '?canceled=true',
+      allow_promotion_codes: true,
     });
     if (!session || !session.url) {
       throw new Error('Error creating checkout session');
