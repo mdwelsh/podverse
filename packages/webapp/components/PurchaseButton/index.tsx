@@ -70,7 +70,7 @@ export function PurchaseButton({
         },
         body: JSON.stringify({ subscriptionId: existingSubscription.billingProviderId, redirectUrl }),
       });
-      const portalSession = await portalResponse.json();
+      const { portalSession } = await portalResponse.json();
       console.log(`Got portal session: ${JSON.stringify(portalSession, null, 2)}`);
       window.location.replace(portalSession.url);
     } catch (error) {
