@@ -35,14 +35,14 @@ export const PLANS: Record<string, Plan> = {
     price: 15.0,
     maxPodcasts: 3,
     maxEpisodesPerPodcast: 50,
-    priceId: 'price_1OyzZQ1vQbZgOhBPFifGWxmL',
+    priceId: 'price_1PQuwG1vQbZgOhBPTQxhsuha',
   },
   professional: {
     id: 'professional',
     displayName: 'Professional',
     description: 'Unlimited power',
     price: 50.0,
-    priceId: 'price_1OyzZw1vQbZgOhBPeqVlY4a0',
+    priceId: 'price_1PQuwD1vQbZgOhBPdrBO0xOm',
   },
   unlimited: {
     id: 'unlimited',
