@@ -21,6 +21,7 @@ import {
   isReady,
 } from 'podverse-utils';
 import { TranscribeEpisode, SummarizeEpisode, SpeakerIDEpisode, EmbedEpisode, SuggestEpisode } from '@/lib/process';
+import { sendEmail } from '@/lib/email';
 
 // Used when running locally - use `tailscale serve`.
 const DEVELOPMENT_SERVER_HOSTNAME = 'deepdocks.tailf7e81.ts.net';
@@ -65,6 +66,10 @@ export const processEpisode = inngest.createFunction(
     // Check plan limit and bail out if we've hit it.
     if (!checkUserPlanLimit(supabase, episodeWithPodcast)) {
       console.log(`process/episode - Plan limit reached for episode ${episodeId}`);
+      sendEmail({
+        subject: `Plan limit reached for podcast ${episodeWithPodcast.podcast.title}`,
+        text: `We were unable to process an episode of ${episodeWithPodcast.podcast.title}, since your account has reached its plan limit. Please upgrade your plan to continue processing episodes.\n`,
+      });
       episode.error = { message: 'Plan limit reached' };
       episode.status = {
         ...(episode.status as EpisodeStatus),
@@ -163,6 +168,16 @@ export const processEpisode = inngest.createFunction(
         completedAt: new Date().toISOString(),
       };
       await UpdateEpisode(supabase, episode);
+      let email = `Finished processing episode: ${episode.title}\n\n`;
+      email += JSON.stringify(transcribeResult, null, 2) + '\n\n';
+      email += JSON.stringify(summarizeResult, null, 2) + '\n\n';
+      email += JSON.stringify(speakerIdResult, null, 2) + '\n\n';
+      email += JSON.stringify(suggestionResult, null, 2) + '\n\n';
+      email += JSON.stringify(embedResult, null, 2) + '\n\n';
+      await sendEmail({
+        subject: `Finished processing ${episode.title}`,
+        text: email,
+      });
       return {
         event,
         body: {
@@ -174,6 +189,10 @@ export const processEpisode = inngest.createFunction(
         },
       };
     } catch (error) {
+      await sendEmail({
+        subject: `Error processing episode: ${episode.title}`,
+        text: JSON.stringify(error, null, 2),
+      });
       console.error(`Error processing episode ${episodeId}`, error);
       episode.error = error as Json;
       episode.status = {
@@ -235,6 +254,11 @@ export const processPodcast = inngest.createFunction(
         return result;
       }),
     );
+    const email = `Finished processing ${episodesToProcess.length} episodes from ${podcast.title}.\n\n${JSON.stringify(results, null, 2)}\n`;
+    await sendEmail({
+      subject: `Finished processing ${podcast.title}`,
+      text: email,
+    });
 
     console.log(`process/podcast for podcast ${podcastId} - Done.`);
     return {
@@ -333,7 +357,7 @@ export const refreshPodcasts = inngest.createFunction(
     console.log(`refreshPodcasts - Done clearing errors.`);
 
     console.log(`refreshPodcasts - Refreshing ${stats.length} podcasts`);
-    await Promise.all(
+    const results = await Promise.all(
       stats.map(async (stat) => {
         console.log(`refreshPodcasts - Refreshing podcast ${stat.id}`);
         const result = step.sendEvent('ingest-podcast', {
@@ -364,6 +388,10 @@ export const refreshPodcasts = inngest.createFunction(
     // );
     // console.log(`refreshPodcasts - Done processing.`);
 
+    await sendEmail({
+      subject: 'Daily podcast refresh job completed',
+      text: `Finished refreshing ${stats.length} podcasts:\n\n${JSON.stringify(results, null, 2)}\n`,
+    });
     return {
       message: `Finished refreshing ${stats.length} podcasts`,
     };
