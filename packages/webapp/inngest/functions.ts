@@ -22,6 +22,7 @@ import {
 } from 'podverse-utils';
 import { TranscribeEpisode, SummarizeEpisode, SpeakerIDEpisode, EmbedEpisode, SuggestEpisode } from '@/lib/process';
 import { sendEmail } from '@/lib/email';
+import { userPrimaryEmailAddress } from '@/lib/users';
 
 // Used when running locally - use `tailscale serve`.
 const DEVELOPMENT_SERVER_HOSTNAME = 'deepdocks.tailf7e81.ts.net';
@@ -67,6 +68,7 @@ export const processEpisode = inngest.createFunction(
     if (!checkUserPlanLimit(supabase, episodeWithPodcast)) {
       console.log(`process/episode - Plan limit reached for episode ${episodeId}`);
       sendEmail({
+        to: userPrimaryEmailAddress(episodeWithPodcast.podcast.owner) || undefined,
         subject: `Plan limit reached for podcast ${episodeWithPodcast.podcast.title}`,
         text: `We were unable to process an episode of ${episodeWithPodcast.podcast.title}, since your account has reached its plan limit. Please upgrade your plan to continue processing episodes.\n`,
       });
@@ -175,6 +177,7 @@ export const processEpisode = inngest.createFunction(
       email += JSON.stringify(suggestionResult, null, 2) + '\n\n';
       email += JSON.stringify(embedResult, null, 2) + '\n\n';
       await sendEmail({
+        to: userPrimaryEmailAddress(episodeWithPodcast.podcast.owner) || undefined,
         subject: `Finished processing ${episode.title}`,
         text: email,
       });
@@ -190,6 +193,7 @@ export const processEpisode = inngest.createFunction(
       };
     } catch (error) {
       await sendEmail({
+        to: userPrimaryEmailAddress(episodeWithPodcast.podcast.owner) || undefined,
         subject: `Error processing episode: ${episode.title}`,
         text: JSON.stringify(error, null, 2),
       });
@@ -256,6 +260,7 @@ export const processPodcast = inngest.createFunction(
     );
     const email = `Finished processing ${episodesToProcess.length} episodes from ${podcast.title}.\n\n${JSON.stringify(results, null, 2)}\n`;
     await sendEmail({
+      to: userPrimaryEmailAddress(podcast.owner) || undefined,
       subject: `Finished processing ${podcast.title}`,
       text: email,
     });

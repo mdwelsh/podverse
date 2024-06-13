@@ -5,7 +5,7 @@ import { getUser, userPrimaryEmailAddress } from '@/lib/users';
 const DEFAULT_TO_ADDRESS = 'matt@ziggylabs.ai';
 const DEFAULT_FROM_ADDRESS = 'Podverse <noreply@podverse.ai>';
 const DEFAULT_EMAIL_DOMAIN = 'mail1.podverse.ai';
-const DEFAULT_BCC_ADDRESS = 'matt@podverse.ai';
+const DEFAULT_BCC_ADDRESS = 'matt@ziggylabs.ai';
 
 /** Send an email via Mailgun. */
 export async function sendEmail({
