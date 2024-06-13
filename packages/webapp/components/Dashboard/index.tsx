@@ -1,8 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { NewPodcastDialog } from '@/components/NewPodcastDialog';
 import { PodcastStrip } from '@/components/PodcastStrip';
-import { getPodcastStats } from '@/lib/actions';
-import { PodcastStat } from 'podverse-utils';
+import { getCurrentSubscription, getPodcastStats } from '@/lib/actions';
+import { Plan, PLANS, PodcastStat } from 'podverse-utils';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -12,7 +12,7 @@ function NewPodcastHeader({ podcast }: { podcast: PodcastStat }) {
       <div className="mx-auto w-full">
         <div className="flex flex-col gap-3">
           <div className="text-sm">You are now the owner of the podcast:</div>
-          <div className="font-mono text-primary underline underline-offset-4">
+          <div className="text-primary font-mono underline underline-offset-4">
             <Link href={`/podcasts/${podcast.slug}`}>{podcast.title}</Link>
           </div>
           <div className="text-sm">
@@ -20,6 +20,34 @@ function NewPodcastHeader({ podcast }: { podcast: PodcastStat }) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+async function CurrentPlanHeader() {
+  const { userId } = auth();
+  if (!userId) {
+    return null;
+  }
+  let existingSubscription = null;
+  try {
+    existingSubscription = await getCurrentSubscription();
+  } catch (e) {
+    console.error('Error getting current subscription:', e);
+  }
+  let existingPlan: Plan | undefined = undefined;
+  if (existingSubscription) {
+    existingPlan = Object.values(PLANS).find((p) => p.id === existingSubscription?.plan) ?? PLANS.free;
+  } else if (userId && existingSubscription === null) {
+    existingPlan = PLANS.free;
+  }
+  return (
+    <div className="bg-secondary border-primary mb-12 rounded-xl border p-4 text-white">
+      You are on the <span className="font-bold">{existingPlan!.displayName}</span> plan. Visit the{' '}
+      <Link href="/pricing" className="text-primary underline">
+        pricing page
+      </Link>{' '}
+      to change or cancel your plan.
     </div>
   );
 }
@@ -40,9 +68,10 @@ export async function Dashboard({ assignedPodcast }: { assignedPodcast?: string 
   return (
     <>
       {newPodcast && <NewPodcastHeader podcast={newPodcast} />}
-      <div className="mx-auto mt-8 flex w-full px-2 md:w-3/5 flex-col gap-4">
+      <div className="mx-auto mt-8 flex w-full flex-col gap-4 px-2 md:w-3/5">
+        <CurrentPlanHeader />
         <div className="flex w-full flex-row justify-between">
-          <div className="flex flex-col sm:flex-row gap-2 items-center">
+          <div className="flex flex-col items-center gap-2 sm:flex-row">
             <div className="font-mono text-lg">Your podcasts</div>
             <Link href="/dashboard/episodes">
               <Button variant="outline" className="text-sm">
