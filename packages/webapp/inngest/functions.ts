@@ -122,7 +122,7 @@ export const processEpisode = inngest.createFunction(
         await step.waitForEvent('transcript-received', {
           event: 'process/transcript',
           timeout: '1h',
-          match: 'data.episodeId',
+          if: `async.data.episodeId === ${episodeId}`,
         });
         console.log(`process/episode [${episodeId}] - Got transcript-received event, continuing`);
       } else {
