@@ -142,7 +142,8 @@ export async function stepInvitation({
   }
 
   switch (invite.status) {
-    case 'new': {
+    case 'new':
+    case 'processing': {
       // Check if podcast has been processed.
       const numReady = podcast.Episodes.filter(isReady).length;
       if (numReady >= MIN_PROCESSED || force) {
