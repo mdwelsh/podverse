@@ -13,7 +13,7 @@ function Feature({ heading, image, children }: { heading: string; image?: string
       <div className="text-muted-foreground text-base">{children}</div>
       {image && (
         <div className="mx-auto">
-          <ZoomableImage src={image} alt={heading}>
+          <ZoomableImage src={image} alt={heading} width={600} height={600}>
             <div className="text-primary font-mono text-lg">{heading}</div>
             {children}
           </ZoomableImage>

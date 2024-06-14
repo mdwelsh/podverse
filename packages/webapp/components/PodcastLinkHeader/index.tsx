@@ -64,6 +64,9 @@ export function PodcastLinkHeader({
       );
     }
   }
+  if (!userId || userId !== podcast.owner) {
+    return null;
+  }
   return (
     <div className="bg-muted flex flex-row p-2 text-center text-white">
       <div className="mx-auto w-full">
