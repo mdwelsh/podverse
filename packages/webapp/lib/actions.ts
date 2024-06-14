@@ -271,7 +271,7 @@ export async function updateSpeaker(episodeId: number, speaker: string, name: st
 /** Perform a full-text search. */
 export async function search(query: string, podcastSlug?: string): Promise<SearchResult[]> {
   const supabase = await getSupabaseClient();
-  return Search({ supabase, input: query, includeVector: false });
+  return Search({ supabase, input: query, podcastSlug, includeVector: true });
 }
 
 /** Send a report issue email. */

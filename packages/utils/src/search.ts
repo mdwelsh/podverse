@@ -1,5 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { VectorSearch } from './embed.js';
+import { GetPodcast } from './storage.js';
 
 export interface SearchResultPodcast {
   id: number;
@@ -43,10 +44,21 @@ export async function Search({
   includeVector?: boolean;
 }): Promise<SearchResult[]> {
   const results: SearchResult[] = [];
-  const episodeQuery = supabase.rpc('episode_search', { query: input, match_count: 10 });
-  const podcastQuery = supabase.rpc('podcast_search', { query: input, match_count: 10 });
-  const vectorQuery = includeVector ? VectorSearch({ supabase, input }) : Promise.resolve([]);
-  const [episodeResults, podcastResults, vectorResults] = await Promise.all([episodeQuery, podcastQuery, vectorQuery]);
+  console.log(`Searching for "${input}" in podcast ${podcastSlug}`);
+  const podcast = podcastSlug ? await GetPodcast(supabase, podcastSlug) : null;
+
+  const episodeQuery = supabase.rpc('episode_search', {
+    query: input,
+    podcast_slug: podcastSlug || null,
+    match_count: 10,
+  });
+  // For now, we are not searching for podcasts, only within a single podcast.
+  //const podcastQuery = supabase.rpc('podcast_search', { query: input, match_count: 10 });
+  const vectorQuery = includeVector
+    ? VectorSearch({ supabase, input, podcastId: podcast ? podcast.id : undefined })
+    : Promise.resolve([]);
+  const [episodeResults, vectorResults] = await Promise.all([episodeQuery, vectorQuery]);
+  console.log(`Got back ${episodeResults.data.length} episodes and ${vectorResults.length} vectors`);
 
   // Get the set of podcasts and episodes that we need metadata for.
   // We first fetch the podcasts and documents in parallel.
@@ -58,24 +70,27 @@ export async function Search({
   const documentIds = new Set();
   const episodeIds = new Set();
 
-  console.log(JSON.stringify(episodeResults, null, 2));
-
-  console.log(`${episodeResults.data.length} episode results`);
-  for (const episodeData of episodeResults.data || []) {
-    console.log('EPISODE RESULT');
-    console.log(episodeData);
-    podcastIds.add(episodeData.podcast);
+  let podcastMetadataQueries = null;
+  if (!podcastSlug) {
+    for (const episodeData of episodeResults.data || []) {
+      podcastIds.add(episodeData.podcast);
+    }
+    console.log(`Found ${podcastIds.size} unique podcasts in episode results`);
+    podcastMetadataQueries = [...podcastIds].map((podcastId) =>
+      supabase.from('Podcasts').select('*').eq('id', podcastId).limit(1),
+    );
+  } else {
+    podcastMetadataQueries = Promise.resolve([]);
   }
+
   for (const result of vectorResults) {
     documentIds.add(result.documentId);
   }
-
-  const podcastMetadataQueries = [...podcastIds].map((podcastId) =>
-    supabase.from('Podcasts').select('*').eq('id', podcastId).limit(1)
-  );
+  console.log(`Found ${documentIds.size} unique documents in vector results`);
   const documentMetadataQueries = [...documentIds].map((documentId) =>
-    supabase.from('Documents').select('*').eq('id', documentId).limit(1)
+    supabase.from('Documents').select('*').eq('id', documentId).limit(1),
   );
+
   const [podcastMetadata, documentMetadata] = await Promise.all([podcastMetadataQueries, documentMetadataQueries]);
   for (const podcastResult of podcastMetadata) {
     const { data, error } = await podcastResult;
@@ -99,8 +114,9 @@ export async function Search({
     const episodeId = document.episode as string;
     episodeIds.add(episodeId);
   }
+  console.log(`Vector results have ${episodeIds.size} episodes`);
   const episodeMetadataqueries = [...episodeIds].map((episodeId) =>
-    supabase.from('Episodes').select('*').eq('id', episodeId).limit(1)
+    supabase.from('Episodes').select('*').eq('id', episodeId).limit(1),
   );
   const episodeMetadata = await Promise.all(episodeMetadataqueries);
   for (const episodeResult of episodeMetadata) {
@@ -114,37 +130,47 @@ export async function Search({
   }
 
   // Now build the results.
-  for (const podcastData of podcastResults.data || []) {
-    results.push({
-      kind: 'podcast',
-      sourceUrl: `/podcast/${podcastData.slug}`,
-      content: podcastData.description,
-      podcast: {
-        id: podcastData.id,
-        slug: podcastData.slug,
-        title: podcastData.title,
-        description: podcastData.description,
-        imageUrl: podcastData.imageUrl,
-      },
-    });
-  }
 
+  // For now, we're not including podcast results since searches are limited to a single podcast.
+  // for (const podcastData of podcastResults.data || []) {
+  //   results.push({
+  //     kind: 'podcast',
+  //     sourceUrl: `/podcast/${podcastData.slug}`,
+  //     content: podcastData.description,
+  //     podcast: {
+  //       id: podcastData.id,
+  //       slug: podcastData.slug,
+  //       title: podcastData.title,
+  //       description: podcastData.description,
+  //       imageUrl: podcastData.imageUrl,
+  //     },
+  //   });
+  // }
+
+  // When building the results, we want to retain the original ordering of the results,
+  // but deduplicate based on episodeId.
+  const episodeResultSet = new Set<string>();
   for (const episodeData of episodeResults.data || []) {
-    const podcast = podcasts.get(episodeData.podcast) || undefined;
-    if (!podcast) {
+    if (episodeResultSet.has(episodeData.id.toString())) {
+      continue;
+    }
+    episodeResultSet.add(episodeData.id.toString());
+
+    const episodePodcast = podcast || podcasts.get(episodeData.podcast) || undefined;
+    if (!episodePodcast) {
       console.warn(`No podcast found for episode ${episodeData.id}`);
       continue;
     }
     results.push({
       kind: 'episode',
-      sourceUrl: `/podcast/${podcast.slug}/episode/${episodeData.slug}`,
+      sourceUrl: `/podcast/${episodePodcast.slug}/episode/${episodeData.slug}`,
       content: episodeData.description,
       podcast: {
-        id: podcast.id,
-        slug: podcast.slug,
-        title: podcast.title,
-        description: podcast.description,
-        imageUrl: podcast.imageUrl,
+        id: episodePodcast.id,
+        slug: episodePodcast.slug,
+        title: episodePodcast.title,
+        description: episodePodcast.description,
+        imageUrl: episodePodcast.imageUrl,
       },
       episode: {
         id: episodeData.id,
@@ -156,35 +182,37 @@ export async function Search({
     });
   }
 
-  for (const result of vectorResults) {
-    const document = documents.get(result.documentId) || undefined;
+  for (const vectorData of vectorResults) {
+    const document = documents.get(vectorData.documentId) || undefined;
     if (!document) {
-      console.warn(`No document found for document ID ${result.documentId}`);
+      console.warn(`No document found for document ID ${vectorData.documentId}`);
       continue;
     }
+    if (episodeResultSet.has(document.episode.toString())) {
+      continue;
+    }
+    episodeResultSet.add(document.episode.toString());
+
     const episode = episodes.get(document.episode) || undefined;
     if (!episode) {
       console.warn(`No episode found for episode ID ${document.episode}`);
       continue;
     }
-    const podcast = podcasts.get(episode.podcast) || undefined;
-    if (!podcast) {
-      console.warn(`No podcast found for episode ${episode.podcast}`);
+    const docPodcast = podcast || podcasts.get(episode.podcast) || undefined;
+    if (!docPodcast) {
+      console.warn(`No podcast found for podcast ID ${episode.podcast}`);
       continue;
     }
-
-    const meta: { startTime?: number } = result.meta || ({} as { startTime?: number });
     results.push({
-      kind: 'vector',
-      content: result.content,
-      sourceUrl: `/podcast/${podcast.slug}/episode/${episode.slug}`,
-      startTime: meta.startTime,
+      kind: 'episode',
+      sourceUrl: `/podcast/${docPodcast.slug}/episode/${episode.slug}`,
+      content: episode.description,
       podcast: {
-        id: podcast.id,
-        slug: podcast.slug,
-        title: podcast.title,
-        description: podcast.description,
-        imageUrl: podcast.imageUrl,
+        id: docPodcast.id,
+        slug: docPodcast.slug,
+        title: docPodcast.title,
+        description: docPodcast.description,
+        imageUrl: docPodcast.imageUrl,
       },
       episode: {
         id: episode.id,
@@ -195,5 +223,6 @@ export async function Search({
       },
     });
   }
+  console.log(`Returning ${results.length} search results`);
   return results;
 }

@@ -5,12 +5,13 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { search, getPodcast } from '@/lib/actions';
+import { search } from '@/lib/actions';
 import { SearchResult } from 'podverse-utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useChatContext } from '@/components/ChatContext';
+import { useSearchParams } from 'next/navigation';
 
 export function SearchPanel() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -32,7 +33,9 @@ export function SearchPanel() {
 
   const onSubmit = () => {
     setBusy(true);
-    search(query.trim())
+    // For now, we always pass through podcast context to restrict search to the current podcast.
+    // Removing this will allow for global search.
+    search(query.trim(), podcast.slug)
       .then((results) => {
         setResults(results);
         setBusy(false);
@@ -66,7 +69,7 @@ export function SearchPanel() {
                 onChange={onChange}
                 ref={inputRef}
                 type="text"
-                placeholder="Search for podcasts and episodes"
+                placeholder={`Search ${podcast.title} episodes`}
                 className="w-full"
               />
               <Button type="submit" disabled={query.trim() === ''} variant="default">
@@ -127,8 +130,11 @@ function BusyState() {
 }
 
 function PodcastResultCard({ result, onLinkClicked }: { result: SearchResult; onLinkClicked: () => void }) {
+  const searchParams = useSearchParams();
+  const maybeSearchParams = searchParams.toString() ? `?${searchParams.toString()}` : '';
+
   return (
-    <Link onClick={onLinkClicked} className="w-full" href={result.sourceUrl}>
+    <Link onClick={onLinkClicked} className="w-full" href={result.sourceUrl + maybeSearchParams}>
       <div className="hover hover:border-primary flex h-[120px] w-full flex-row gap-2 overflow-y-hidden text-ellipsis border border-slate-500 p-4">
         <div className="w-[100px]">
           {result.podcast!.imageUrl && (
@@ -145,9 +151,12 @@ function PodcastResultCard({ result, onLinkClicked }: { result: SearchResult; on
 }
 
 function EpisodeResultCard({ result, onLinkClicked }: { result: SearchResult; onLinkClicked: () => void }) {
+  const searchParams = useSearchParams();
+  const maybeSearchParams = searchParams.toString() ? `?${searchParams.toString()}` : '';
+
   const imageUrl = result.episode?.imageUrl || result.podcast?.imageUrl;
   return (
-    <Link onClick={onLinkClicked} className="w-full" href={result.sourceUrl}>
+    <Link onClick={onLinkClicked} className="w-full" href={result.sourceUrl + maybeSearchParams}>
       <div className="hover hover:border-primary flex h-[150px] w-full flex-row gap-2 overflow-y-hidden text-ellipsis border border-slate-500 p-4">
         <div className="w-[100px]">
           {imageUrl && <Image src={imageUrl} alt="Episode image" width={100} height={100} />}

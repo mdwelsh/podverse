@@ -258,13 +258,6 @@ export const processPodcast = inngest.createFunction(
         return result;
       }),
     );
-    const email = `Finished processing ${episodesToProcess.length} episodes from ${podcast.title}.\n\n${JSON.stringify(results, null, 2)}\n`;
-    await sendEmail({
-      to: userPrimaryEmailAddress(podcast.owner) || undefined,
-      subject: `Finished processing ${podcast.title}`,
-      text: email,
-    });
-
     console.log(`process/podcast for podcast ${podcastId} - Done.`);
     return {
       message: `Finished processing ${results.length} episodes for podcast ${podcastId}`,
