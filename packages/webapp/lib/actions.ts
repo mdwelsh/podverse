@@ -2,9 +2,6 @@
 
 'use server';
 
-// I'm not sure if this actually does anything.
-export const maxDuration = 120;
-
 import {
   Episode,
   EpisodeWithPodcast,
