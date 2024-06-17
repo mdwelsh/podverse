@@ -224,7 +224,7 @@ export async function sendEmail({
   }
   const mg = mailgun.client({ username: 'api', key: apiKey });
   const domain = process.env.MAILGUN_DOMAIN || DEFAULT_DOMAIN;
-  console.log(`Using mailgun domain ${domain}`);
+  console.log(`Sending email to ${to} using mailgun domain ${domain}`);
   // @ts-ignore
   const response = await mg.messages.create(domain, {
     from: 'Matt Welsh <matt@ziggylabs.ai>',

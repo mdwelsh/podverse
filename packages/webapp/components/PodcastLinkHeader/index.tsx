@@ -32,7 +32,7 @@ export function PodcastLinkHeader({
               </div>
               <AcceptPodcastDialog podcast={podcast} />
               <div className="text-pretty text-base">
-                Any questions? Drop me a line at{' '}
+                I&apos;d love to get your feedback! Please drop me a line at{' '}
                 <a className="underline font-mono" href="mailto:matt@ziggylabs.ai">
                   matt@ziggylabs.ai
                 </a>
