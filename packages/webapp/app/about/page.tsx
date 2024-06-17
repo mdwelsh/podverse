@@ -3,6 +3,14 @@ import Link from 'next/link';
 import { ZoomableImage } from '@/components/ZoomableImage';
 import { FeatureCarousel } from '@/components/FeatureCarousel';
 
+import { Metadata, ResolvingMetadata } from 'next';
+
+export async function generateMetadata(props: any, parent: ResolvingMetadata): Promise<Metadata> {
+  return {
+    title: 'Features',
+  };
+}
+
 function Feature({ heading, image, children }: { heading: string; image?: string; children: React.ReactNode }) {
   return (
     <div className="mb-6 flex flex-col gap-4">

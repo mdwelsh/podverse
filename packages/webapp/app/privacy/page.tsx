@@ -1,3 +1,11 @@
+import { Metadata, ResolvingMetadata } from 'next';
+
+export async function generateMetadata(props: any, parent: ResolvingMetadata): Promise<Metadata> {
+  return {
+    title: 'Privacy Policy',
+  };
+}
+
 export default function PrivacyPage() {
   return (
     <div className="font-[Inter] text-sm w-3/5 mx-auto mt-6 flex flex-col gap-4">

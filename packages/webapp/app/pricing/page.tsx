@@ -4,6 +4,13 @@ import { Subscription, Plan, PLANS, SubscriptionState } from 'podverse-utils';
 import { SignupOrLogin } from '@/components/SignupOrLogin';
 import { auth } from '@clerk/nextjs/server';
 import { getCurrentSubscription } from '@/lib/actions';
+import { Metadata, ResolvingMetadata } from 'next';
+
+export async function generateMetadata(props: any, parent: ResolvingMetadata): Promise<Metadata> {
+  return {
+    title: 'Pricing',
+  };
+}
 
 export default async function Page() {
   const { userId } = auth();

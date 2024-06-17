@@ -3,6 +3,9 @@ import Link from 'next/link';
 import { AcceptPodcastDialog } from '../AcceptPodcastDialog';
 import { auth } from '@clerk/nextjs/server';
 
+// This user is allowed to see invite links.
+const ADMIN_USER_ID = 'user_2eEqltdMFHh6eKqOqnWQS8mQqDJ';
+
 export function PodcastLinkHeader({
   podcast,
   activationCode,
