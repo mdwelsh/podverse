@@ -25,7 +25,11 @@ const FOLLOW_UP_DELAY = 1000 * 60 * 60 * 24 * 7;
 // It is the mdw@mdw.la user in prod.
 const DEFAULT_OWNER = 'user_2eEqltdMFHh6eKqOqnWQS8mQqDJ';
 
+// This is the Mailgun domain to use.
 const DEFAULT_DOMAIN = 'mail1.ziggylabs.ai';
+
+// Address to BCC all emails to.
+const DEFAULT_BCC_ADDRESS = 'matt@ziggylabs.ai';
 
 // The invitation state machine looks like this:
 // (no invitation) -> podcast imported -> podcast processed -> initial email sent -> follow up emails sent
@@ -210,12 +214,14 @@ export async function sendEmail({
   template,
   templateVars,
   text,
+  bcc,
 }: {
   to: string;
   subject: string;
   template?: string;
   templateVars?: Record<string, string>;
   text?: string;
+  bcc?: string;
 }): Promise<void> {
   const mailgun = new Mailgun(FormData);
   const apiKey = process.env.MAILGUN_API_KEY;
@@ -230,6 +236,7 @@ export async function sendEmail({
     from: 'Matt Welsh <matt@ziggylabs.ai>',
     to,
     subject,
+    bcc: bcc || DEFAULT_BCC_ADDRESS,
     text,
     template,
     'h:X-Mailgun-Variables': JSON.stringify(templateVars),
@@ -239,7 +246,7 @@ export async function sendEmail({
 
 async function sendFirstEmail(invite: Invitation, podcast: PodcastWithEpisodes): Promise<void> {
   await sendEmail({
-    to: 'mdw@mdw.la',
+    to: invite.email,
     subject: 'Your feedback wanted - AI for your podcast?',
     template: 'first-invite-email',
     templateVars: {
@@ -252,7 +259,7 @@ async function sendFirstEmail(invite: Invitation, podcast: PodcastWithEpisodes):
 
 async function sendSecondEmail(invite: Invitation, podcast: PodcastWithEpisodes): Promise<void> {
   await sendEmail({
-    to: 'mdw@mdw.la',
+    to: invite.email,
     subject: 'Following up - AI for your podcast?',
     template: 'second-invite-email',
     templateVars: {
@@ -265,7 +272,7 @@ async function sendSecondEmail(invite: Invitation, podcast: PodcastWithEpisodes)
 
 async function sendThirdEmail(invite: Invitation, podcast: PodcastWithEpisodes): Promise<void> {
   await sendEmail({
-    to: 'mdw@mdw.la',
+    to: invite.email,
     subject: 'One last follow up - AI for your podcast?',
     template: 'third-invite-email',
     templateVars: {
