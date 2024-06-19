@@ -22,6 +22,7 @@ import { useScrollAnchor } from '@/lib/use-scroll-anchor';
 import { Icons } from '@/components/icons';
 import { EpisodeWithPodcast, PodcastWithEpisodes } from 'podverse-utils';
 import { useChatContext } from '@/components/ChatContext';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const MemoizedReactMarkdown: FC<Options> = memo(
   ReactMarkdown,
@@ -181,6 +182,20 @@ function ChatPlay({ time, onClick }: { time: number; onClick: () => void }) {
   );
 }
 
+function BusyMessage() {
+  return (
+    <div className={cn('group relative mb-4 flex items-start font-sans text-base')}>
+      <div className="bg-background flex size-8 shrink-0 select-none items-center justify-center rounded-full">
+        <PodverseIcon />
+      </div>
+      <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">
+        <Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-4 w-[250px]" />
+      </div>
+    </div>
+  );
+}
+
 function ChatMessage({ message, append, ...props }: { message: Message; append: (m: CreateMessage) => void }) {
   const color = message.role === 'user' ? 'text-sky-200' : 'text-foreground-muted';
   const audioPlayer = useAudioPlayer();
@@ -256,11 +271,14 @@ function ChatMessage({ message, append, ...props }: { message: Message; append: 
 }
 
 function ChatList({ messages, append, endRef }: { messages: any[]; append: (m: CreateMessage) => void; endRef: any }) {
+  const lastMessage = messages[messages.length - 1];
+
   return (
     <div className="flex flex-col gap-2 p-4">
       {messages.map((m) => (
         <ChatMessage key={m.id} message={m} append={append} />
       ))}
+      {lastMessage.role === 'user' && <BusyMessage />}
       <div className="h-px w-full" ref={endRef} />
     </div>
   );
