@@ -13,6 +13,7 @@ import { EpisodeClient } from '@/components/EpisodeClient';
 import Image from 'next/image';
 import { ShareButtons } from '@/components/ShareButtons';
 import { PodcastLinkHeader } from '@/components/PodcastLinkHeader';
+import { EmbedPodcastDialog } from '@/components/EmbedPodcastDialog';
 
 function EpisodeHeader({ episode, uuid }: { episode: EpisodeWithPodcast; uuid?: string }) {
   const episodeWithoutPodcast = { ...episode, podcast: episode.podcast.id };
@@ -35,18 +36,6 @@ function EpisodeHeader({ episode, uuid }: { episode: EpisodeWithPodcast; uuid?: 
               <Image src={episode.podcast.imageUrl} width={400} height={400} alt="Episode thumbnail image" />
             )
           )}
-          <div className="w-fit">
-            <Owner owner={episode.podcast.owner}>
-              <ManageEpisodeDialog episode={episodeWithoutPodcast}>
-                <div className={cn(buttonVariants({ variant: 'outline' }))}>
-                  <div className="flex flex-row items-center gap-2">
-                    <EpisodeIndicator episode={episodeWithoutPodcast} />
-                    Manage episode
-                  </div>
-                </div>
-              </ManageEpisodeDialog>
-            </Owner>
-          </div>
         </div>
         <div className="w-full">
           <div className="text-primary text-xl font-bold">
@@ -63,6 +52,19 @@ function EpisodeHeader({ episode, uuid }: { episode: EpisodeWithPodcast; uuid?: 
         </div>
       </div>
       <div className="flex flex-col gap-2">
+        <Owner owner={episode.podcast.owner}>
+          <div className="flex flex-row gap-2 items-center">
+            <ManageEpisodeDialog episode={episodeWithoutPodcast}>
+              <div className={cn(buttonVariants({ variant: 'outline' }))}>
+                <div className="flex flex-row items-center gap-2">
+                  <EpisodeIndicator episode={episodeWithoutPodcast} />
+                  Manage episode
+                </div>
+              </div>
+            </ManageEpisodeDialog>
+            <EmbedPodcastDialog podcastSlug={episode.podcast.slug} episodeSlug={episode.slug} />
+          </div>
+        </Owner>
         <div className="flex flex-row gap-1 sm:flex-row sm:items-center">
           <div className="text-muted-foreground font-mono text-sm">
             Published <span className="text-primary">{moment(episode.pubDate).format('MMMM Do YYYY')}</span>

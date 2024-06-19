@@ -4,6 +4,7 @@ import { PodcastEpisodeList } from '@/components/PodcastEpisodeList';
 import Link from 'next/link';
 import { ArrowTopRightOnSquareIcon, RssIcon, GlobeAmericasIcon } from '@heroicons/react/24/outline';
 import { ManagePodcastDialog } from '@/components/ManagePodcastDialog';
+import { EmbedPodcastDialog } from '@/components/EmbedPodcastDialog';
 import { PodcastLinkHeader } from '@/components/PodcastLinkHeader';
 import { ContextAwareChat } from '@/components/Chat';
 import { getEpisodeLimit } from '@/lib/actions';
@@ -11,8 +12,10 @@ import { EpisodeLimit } from '@/lib/limits';
 import Image from 'next/image';
 import { ChatContextProvider } from '../ChatContext';
 import { ShareButtons } from '@/components/ShareButtons';
+import { auth } from '@clerk/nextjs/server';
 
 async function PodcastHeader({ podcast, planLimit }: { podcast: PodcastWithEpisodes; planLimit: EpisodeLimit | null }) {
+  const { userId } = auth();
   return (
     <div className="flex w-full flex-col gap-4 font-mono">
       <div className="flex w-full flex-row gap-4">
@@ -20,11 +23,6 @@ async function PodcastHeader({ podcast, planLimit }: { podcast: PodcastWithEpiso
           <div>
             {podcast.imageUrl && <Image src={podcast.imageUrl} alt="Podcast thumbnail" width={400} height={400} />}
           </div>
-          {planLimit && (
-            <div className="mt-2 w-fit">
-              {planLimit && <ManagePodcastDialog podcast={podcast} planLimit={planLimit} />}
-            </div>
-          )}
         </div>
         <div className="flex w-full flex-col gap-4">
           <div className="text-primary text-2xl font-bold">
@@ -36,6 +34,12 @@ async function PodcastHeader({ podcast, planLimit }: { podcast: PodcastWithEpiso
           <div className="font-sans text-sm">{podcast.description}</div>
         </div>
       </div>
+      {userId && userId === podcast.owner && (
+        <div className="flex flex-row gap-2 items-center">
+          {planLimit && <ManagePodcastDialog podcast={podcast} planLimit={planLimit} />}
+          <EmbedPodcastDialog podcastSlug={podcast.slug} />
+        </div>
+      )}
       <div className="flex w-full flex-col sm:flex-row gap-4">
         <span className="text-muted-foreground text-sm">
           {podcast.Episodes.filter(isReady).length > 0 && (
