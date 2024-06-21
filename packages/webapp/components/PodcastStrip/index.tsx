@@ -1,24 +1,23 @@
 import Link from 'next/link';
 import { ManagePodcastDialog } from '@/components/ManagePodcastDialog';
 import { buttonVariants } from '@/components/ui/button';
-import { isError, isProcessing, isReady } from 'podverse-utils';
+import { PodcastStat, isError, isProcessing, isReady } from 'podverse-utils';
 import { Icons } from '@/components/icons';
 import { ExclamationTriangleIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { getPodcastWithEpisodes, getEpisodeLimit } from '@/lib/actions';
 import Image from 'next/image';
 
-export async function PodcastStrip({ slug }: { slug: string }) {
-  const podcast = await getPodcastWithEpisodes(slug);
+export async function PodcastStrip({ podcast }: { podcast: PodcastStat }) {
   const podcastUuid = podcast.uuid?.replace(/-/g, '');
-  const podcastLink = `${slug}?uuid=${podcastUuid}`;
+  const podcastLink = `${podcast.slug}?uuid=${podcastUuid}`;
   const planLimit = await getEpisodeLimit(podcast.id);
   if (!planLimit) {
     throw new Error('Plan limit not found');
   }
-  const numEpisodes = podcast.Episodes?.length;
-  const numReadyEpisodes = podcast.Episodes?.filter(isReady).length;
-  const numProcessing = podcast.Episodes?.filter(isProcessing).length;
-  const numError = podcast.Episodes?.filter(isError).length;
+  const numEpisodes = podcast.allepisodes;
+  const numReadyEpisodes = podcast.processed;
+  const numProcessing = podcast.inprogress;
+  const numError = podcast.errors;
 
   return (
     <div className="flex w-full flex-row gap-4 overflow-hidden rounded-lg border bg-gray-700 p-4 font-mono text-white dark:bg-gray-700 dark:text-white">
@@ -70,15 +69,13 @@ export async function PodcastStrip({ slug }: { slug: string }) {
             <div className="text-sm text-primary flex flex-row gap-2 items-center">
               <EyeIcon className="size-5" />
               Public
-              {/* For now, public podcasts are also considered published. */}
-              {/* {podcast.published && <span className="text-primary"> and discoverable</span>} */}
             </div>
           )}
           <div className="flex flex-row gap-2">
             <Link className={buttonVariants({ variant: 'default' })} href={`/podcast/${podcastLink}`}>
               View
             </Link>
-            <ManagePodcastDialog podcast={podcast} planLimit={planLimit} />
+            <ManagePodcastDialog podcastSlug={podcast.slug} planLimit={planLimit} />
           </div>
         </div>
       </div>

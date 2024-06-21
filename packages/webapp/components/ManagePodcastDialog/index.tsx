@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Podcast, PodcastWithEpisodes, isReady } from 'podverse-utils';
 import {
   Dialog,
@@ -30,6 +30,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { getPodcastWithEpisodes } from '@/lib/actions';
 
 function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const router = useRouter();
@@ -290,24 +291,41 @@ export function ProcessPodcastSwitch({
   );
 }
 
-export function ManagePodcastDialog({ podcast, planLimit }: { podcast: PodcastWithEpisodes; planLimit: EpisodeLimit }) {
-  const [isPublic, setIsPublic] = useState(!podcast.private);
+export function ManagePodcastDialog({ podcastSlug, planLimit }: { podcastSlug: string; planLimit: EpisodeLimit }) {
+  const [podcast, setPodcast] = useState<PodcastWithEpisodes | null>(null);
+  const [isPublic, setIsPublic] = useState(false);
   //const [isPublished, setIsPublished] = useState(podcast.published || false);
-  const [processEnabled, setProcessEnabled] = useState(podcast.process);
+  const [processEnabled, setProcessEnabled] = useState(false);
+
+  useEffect(() => {
+    getPodcastWithEpisodes(podcastSlug)
+      .then((podcast) => {
+        setPodcast(podcast);
+        setIsPublic(!podcast.private);
+        setProcessEnabled(podcast.process);
+      })
+      .catch((e) => {
+        toast.error('Failed to fetch podcast: ' + e.message);
+      });
+  }, [podcastSlug]);
 
   const doRefresh = () => {
-    if (podcast) {
-      refreshPodcast(podcast.id.toString())
-        .then(() => {
-          toast.success(`Started refreshing podcast ${podcast.title}`);
-        })
-        .catch((e) => {
-          toast.error('Failed to start refreshing: ' + e.message);
-        });
+    if (!podcast) {
+      return;
     }
+    refreshPodcast(podcast.id.toString())
+      .then(() => {
+        toast.success(`Started refreshing podcast ${podcast.title}`);
+      })
+      .catch((e) => {
+        toast.error('Failed to start refreshing: ' + e.message);
+      });
   };
 
   const onPublicChange = (checked: boolean) => {
+    if (!podcast) {
+      return;
+    }
     setIsPublic(checked);
     podcast.private = !checked;
     podcast.published = checked;
@@ -322,6 +340,9 @@ export function ManagePodcastDialog({ podcast, planLimit }: { podcast: PodcastWi
   };
 
   const onProcessChange = (checked: boolean) => {
+    if (!podcast) {
+      return;
+    }
     setProcessEnabled(checked);
     podcast.process = checked;
     const { Episodes, suggestions, ...rest } = podcast;
@@ -347,12 +368,10 @@ export function ManagePodcastDialog({ podcast, planLimit }: { podcast: PodcastWi
   //     });
   // };
 
-  if (!podcast) {
-    return null;
-  }
-  const mostRecentlyPublished = podcast.Episodes
-    ? podcast.Episodes.reduce((a, b) => ((a.pubDate || 0) > (b.pubDate || 0) ? a : b))
-    : null;
+  const mostRecentlyPublished =
+    podcast && podcast.Episodes
+      ? podcast.Episodes.reduce((a, b) => ((a.pubDate || 0) > (b.pubDate || 0) ? a : b))
+      : null;
 
   return (
     <Dialog>
@@ -360,50 +379,58 @@ export function ManagePodcastDialog({ podcast, planLimit }: { podcast: PodcastWi
         <div className={cn(buttonVariants({ variant: 'outline' }))}>Manage podcast</div>
       </DialogTrigger>
       <DialogContent className="max-w-md md:max-w-3xl">
-        <DialogHeader>
-          <DialogTitle className="font-mono">
-            Manage Podcast <span className="text-primary">{podcast.title}</span>
-          </DialogTitle>
-        </DialogHeader>
-        <div>
-          <div className="text-muted-foreground flex flex-col gap-4 font-mono text-sm">
-            {mostRecentlyPublished && (
-              <div className="flex flex-col gap-2">
+        {!podcast ? (
+          <div>Loading...</div>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle className="font-mono">
+                Manage Podcast <span className="text-primary">{podcast.title}</span>
+              </DialogTitle>
+            </DialogHeader>
+            <div>
+              <div className="text-muted-foreground flex flex-col gap-4 font-mono text-sm">
+                {mostRecentlyPublished && (
+                  <div className="flex flex-col gap-2">
+                    <div>
+                      Most recent episode: <span className="text-primary">{mostRecentlyPublished.title}</span>
+                    </div>
+                    <div>
+                      published{' '}
+                      <span className="text-primary">
+                        {moment(mostRecentlyPublished.pubDate).format('MMMM Do YYYY')}
+                      </span>
+                    </div>
+                  </div>
+                )}
                 <div>
-                  Most recent episode: <span className="text-primary">{mostRecentlyPublished.title}</span>
-                </div>
-                <div>
-                  published{' '}
-                  <span className="text-primary">{moment(mostRecentlyPublished.pubDate).format('MMMM Do YYYY')}</span>
+                  <span className="text-primary">{podcast.Episodes.filter((episode) => isReady(episode)).length}</span>{' '}
+                  episodes processed out of <span className="text-primary">{podcast.Episodes.length}</span> total
                 </div>
               </div>
-            )}
-            <div>
-              <span className="text-primary">{podcast.Episodes.filter((episode) => isReady(episode)).length}</span>{' '}
-              episodes processed out of <span className="text-primary">{podcast.Episodes.length}</span> total
+              <div className="my-4 flex flex-col items-start gap-2">
+                <PublicPodcastSwitch podcast={podcast} checked={isPublic} onCheckedChange={onPublicChange} />
+                {/* For now, we tie the published state to the private state. At some point we might make these different. */}
+                {/* <PublishPodcastSwitch checked={isPublished} onCheckedChange={onPublishChange} disabled={!isPublic} /> */}
+                <ProcessPodcastSwitch podcast={podcast} checked={processEnabled} onCheckedChange={onProcessChange} />
+              </div>
             </div>
-          </div>
-          <div className="my-4 flex flex-col items-start gap-2">
-            <PublicPodcastSwitch podcast={podcast} checked={isPublic} onCheckedChange={onPublicChange} />
-            {/* For now, we tie the published state to the private state. At some point we might make these different. */}
-            {/* <PublishPodcastSwitch checked={isPublished} onCheckedChange={onPublishChange} disabled={!isPublic} /> */}
-            <ProcessPodcastSwitch podcast={podcast} checked={processEnabled} onCheckedChange={onProcessChange} />
-          </div>
-        </div>
-        <DialogFooter>
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-row gap-2">
-              <DialogClose>
-                <Button className="font-mono" variant="secondary" onClick={doRefresh}>
-                  <ArrowPathIcon className="mr-2 inline size-5" />
-                  Fetch new episodes
-                </Button>
-              </DialogClose>
-              <ProcessPodcastDialog podcast={podcast} planLimit={planLimit} />
-              <DeletePodcastDialog podcast={podcast} />
-            </div>
-          </div>
-        </DialogFooter>
+            <DialogFooter>
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-row gap-2">
+                  <DialogClose>
+                    <Button className="font-mono" variant="secondary" onClick={doRefresh}>
+                      <ArrowPathIcon className="mr-2 inline size-5" />
+                      Fetch new episodes
+                    </Button>
+                  </DialogClose>
+                  <ProcessPodcastDialog podcast={podcast} planLimit={planLimit} />
+                  <DeletePodcastDialog podcast={podcast} />
+                </div>
+              </div>
+            </DialogFooter>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -66,4 +66,7 @@ export type PodcastStat = {
   processed: number;
   inprogress: number;
   errors: number;
+  process: boolean;
+  private: boolean;
+  uuid: string;
 };

@@ -36,7 +36,7 @@ async function PodcastHeader({ podcast, planLimit }: { podcast: PodcastWithEpiso
       </div>
       {userId && userId === podcast.owner && (
         <div className="flex flex-row gap-2 items-center">
-          {planLimit && <ManagePodcastDialog podcast={podcast} planLimit={planLimit} />}
+          {planLimit && <ManagePodcastDialog podcastSlug={podcast.slug} planLimit={planLimit} />}
           <EmbedPodcastDialog podcastSlug={podcast.slug} />
         </div>
       )}
