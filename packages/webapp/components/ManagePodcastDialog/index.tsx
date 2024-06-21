@@ -292,12 +292,19 @@ export function ProcessPodcastSwitch({
 }
 
 export function ManagePodcastDialog({ podcastSlug, planLimit }: { podcastSlug: string; planLimit: EpisodeLimit }) {
+  const [open, setOpen] = useState(false);
   const [podcast, setPodcast] = useState<PodcastWithEpisodes | null>(null);
   const [isPublic, setIsPublic] = useState(false);
   //const [isPublished, setIsPublished] = useState(podcast.published || false);
   const [processEnabled, setProcessEnabled] = useState(false);
 
   useEffect(() => {
+    if (podcast) {
+      return;
+    }
+    if (!open) {
+      return;
+    }
     getPodcastWithEpisodes(podcastSlug)
       .then((podcast) => {
         setPodcast(podcast);
@@ -307,7 +314,7 @@ export function ManagePodcastDialog({ podcastSlug, planLimit }: { podcastSlug: s
       .catch((e) => {
         toast.error('Failed to fetch podcast: ' + e.message);
       });
-  }, [podcastSlug]);
+  }, [podcastSlug, open, podcast]);
 
   const doRefresh = () => {
     if (!podcast) {
@@ -374,12 +381,12 @@ export function ManagePodcastDialog({ podcastSlug, planLimit }: { podcastSlug: s
       : null;
 
   return (
-    <Dialog>
+    <Dialog onOpenChange={setOpen}>
       <DialogTrigger>
         <div className={cn(buttonVariants({ variant: 'outline' }))}>Manage podcast</div>
       </DialogTrigger>
       <DialogContent className="max-w-md md:max-w-3xl">
-        {!podcast ? (
+        {!open || !podcast ? (
           <div>Loading...</div>
         ) : (
           <>
