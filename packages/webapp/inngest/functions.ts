@@ -97,10 +97,11 @@ export const processEpisode = inngest.createFunction(
     await UpdateEpisode(supabase, episode);
 
     const currentHostname = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? DEVELOPMENT_SERVER_HOSTNAME;
+    const episodeLink = `https://${currentHostname}/podcast/${episodeWithPodcast.podcast.slug}/episode/${episode.slug}`;
 
     try {
       // Start transcription.
-      const transcribeResult = await step.run('transcribe', async () => {
+      let transcribeResult = await step.run('transcribe', async () => {
         console.log(`process/episode [${episodeId}] - Transcribing`);
         const callbackUrl = `https://${currentHostname}/api/episode/${episode.id}/transcript`;
         console.log(`process/episode [${episodeId}] - Callback URL: ${callbackUrl}`);
@@ -127,6 +128,7 @@ export const processEpisode = inngest.createFunction(
           if: `async.data.episodeId == ${episodeId} || async.data.episodeId == '${episodeId}'`,
         });
         console.log(`process/episode [${episodeId}] - Got transcript-received event, continuing`);
+        transcribeResult = 'Transcription complete';
       } else {
         console.log(`process/episode [${episodeId}] - Transcription already complete, continuing`);
       }
@@ -170,12 +172,13 @@ export const processEpisode = inngest.createFunction(
         completedAt: new Date().toISOString(),
       };
       await UpdateEpisode(supabase, episode);
-      let email = `Finished processing episode: ${episode.title}\n\n`;
-      email += JSON.stringify(transcribeResult, null, 2) + '\n\n';
-      email += JSON.stringify(summarizeResult, null, 2) + '\n\n';
-      email += JSON.stringify(speakerIdResult, null, 2) + '\n\n';
-      email += JSON.stringify(suggestionResult, null, 2) + '\n\n';
-      email += JSON.stringify(embedResult, null, 2) + '\n\n';
+      let email = `Finished processing episode: ${episode.title}\n`;
+      email += episodeLink + '\n\n';
+      email += JSON.stringify(transcribeResult, null, 2) + '\n';
+      email += JSON.stringify(summarizeResult, null, 2) + '\n';
+      email += JSON.stringify(speakerIdResult, null, 2) + '\n';
+      email += JSON.stringify(suggestionResult, null, 2) + '\n';
+      email += JSON.stringify(embedResult, null, 2) + '\n';
       await sendEmail({
         to: userPrimaryEmailAddress(episodeWithPodcast.podcast.owner) || undefined,
         subject: `Finished processing ${episode.title}`,
@@ -195,13 +198,13 @@ export const processEpisode = inngest.createFunction(
       await sendEmail({
         to: userPrimaryEmailAddress(episodeWithPodcast.podcast.owner) || undefined,
         subject: `Error processing episode: ${episode.title}`,
-        text: JSON.stringify(error, null, 2),
+        text: JSON.stringify(error, null, 2) + '\n\n' + episodeLink + '\n',
       });
       console.error(`Error processing episode ${episodeId}`, error);
       episode.error = error as Json;
       episode.status = {
         ...(episode.status as EpisodeStatus),
-        message: `Error: ${JSON.stringify(error)}`,
+        message: `Error: ${JSON.stringify(error)}\n\n${episodeLink}\n`,
         completedAt: new Date().toISOString(),
       };
       await UpdateEpisode(supabase, episode);
