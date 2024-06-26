@@ -335,7 +335,7 @@ export function ManagePodcastDialog({ podcastSlug, planLimit }: { podcastSlug: s
     }
     setIsPublic(checked);
     podcast.private = !checked;
-    podcast.published = checked;
+    //podcast.published = checked;
     const { Episodes, suggestions, ...rest } = podcast;
     updatePodcast({ ...rest })
       .then(() => {

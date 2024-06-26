@@ -6,6 +6,7 @@ export async function ExplorePodcasts() {
       <div className="flex w-full flex-row justify-between">
         <div className="text-primary font-mono text-lg">Featured podcasts</div>
       </div>
+      <div className="font-mono text-base">Below are just a few of the hundreds of podcasts using Podverse.</div>
       <PodcastList />
     </div>
   );
