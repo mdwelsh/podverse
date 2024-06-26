@@ -14,14 +14,14 @@ export function usePodcastLimit(): PodcastLimit | null {
   const { userId } = useAuth();
 
   useEffect(() => {
-    if (!stats) {
+    if (stats === null) {
       getPodcastStats()
         .then((newStats) => {
           setStats(newStats.filter((p) => p.owner === userId));
         })
         .catch((e) => console.error(e));
     }
-    if (!plan) {
+    if (plan === null) {
       getCurrentSubscription()
         .then((newSub) => {
           if (!newSub) {
@@ -39,7 +39,7 @@ export function usePodcastLimit(): PodcastLimit | null {
   }
 
   const total = stats.length;
-  const leftOnPlan = plan.maxPodcasts ? Math.max(0, plan.maxPodcasts - total) : Infinity;
+  const leftOnPlan = plan.maxPodcasts !== undefined ? Math.max(0, plan.maxPodcasts - total) : Infinity;
 
   return {
     totalPodcasts: total,

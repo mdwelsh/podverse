@@ -68,7 +68,7 @@ const columns: ColumnDef<EpisodeWithPodcast>[] = [
     cell: ({ row, getValue }) => {
       const ep = row.original as EpisodeWithPodcast;
       return (
-        <Link href={`/podcast/${ep.podcast.slug}/episode/${ep.slug}`}>
+        <Link href={`/podcast/${ep.podcast.slug}/episode/${ep.slug}?uuid=${ep.podcast.uuid?.replace(/-/g, '')}`}>
           <span className="line-clamp-2 font-mono text-sm hover:underline">{getValue() as string}</span>
         </Link>
       );
@@ -81,7 +81,7 @@ const columns: ColumnDef<EpisodeWithPodcast>[] = [
     cell: ({ row, getValue }) => {
       const ep = row.original as EpisodeWithPodcast;
       return (
-        <Link href={`/podcast/${ep.podcast.slug}`}>
+        <Link href={`/podcast/${ep.podcast.slug}?uuid=${ep.podcast.uuid?.replace(/-/g, '')}`}>
           <span className="text-primary line-clamp-2 font-mono text-sm hover:underline">{getValue() as string}</span>
         </Link>
       );

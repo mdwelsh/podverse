@@ -23,6 +23,7 @@ import { Icons } from '@/components/icons';
 import { EpisodeWithPodcast, PodcastWithEpisodes } from 'podverse-utils';
 import { useChatContext } from '@/components/ChatContext';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@clerk/nextjs';
 
 export const MemoizedReactMarkdown: FC<Options> = memo(
   ReactMarkdown,
@@ -196,7 +197,16 @@ function BusyMessage() {
   );
 }
 
-function ChatMessage({ message, append, ...props }: { message: Message; append: (m: CreateMessage) => void }) {
+function ChatMessage({
+  message,
+  uuid,
+  append,
+  ...props
+}: {
+  message: Message;
+  uuid?: string;
+  append: (m: CreateMessage) => void;
+}) {
   const color = message.role === 'user' ? 'text-sky-200' : 'text-foreground-muted';
   const audioPlayer = useAudioPlayer();
   let play: (() => void) | undefined = undefined;
@@ -253,6 +263,14 @@ function ChatMessage({ message, append, ...props }: { message: Message; append: 
               } else if (href?.startsWith('/?seek=')) {
                 const time = parseFloat(href.split('=')[1]);
                 return <ChatPlay time={time} onClick={() => doPlay(time)} />;
+              } else if (href?.startsWith('/podcast') && uuid) {
+                // Add the UUID to the link, if it's been provided by the parent component.
+                const link = href + (href.includes('?') ? '&' : '?') + 'uuid=' + uuid;
+                return (
+                  <span className="text-primary underline">
+                    <a href={link}>{children}</a>
+                  </span>
+                );
               } else {
                 return (
                   <span className="text-primary underline">
@@ -270,13 +288,23 @@ function ChatMessage({ message, append, ...props }: { message: Message; append: 
   );
 }
 
-function ChatList({ messages, append, endRef }: { messages: any[]; append: (m: CreateMessage) => void; endRef: any }) {
+function ChatList({
+  messages,
+  uuid,
+  append,
+  endRef,
+}: {
+  messages: any[];
+  uuid?: string;
+  append: (m: CreateMessage) => void;
+  endRef: any;
+}) {
   const lastMessage = messages[messages.length - 1];
 
   return (
     <div className="flex flex-col gap-2 p-4">
       {messages.map((m) => (
-        <ChatMessage key={m.id} message={m} append={append} />
+        <ChatMessage key={m.id} message={m} append={append} uuid={uuid} />
       ))}
       {lastMessage.role === 'user' && <BusyMessage />}
       <div className="h-px w-full" ref={endRef} />
@@ -299,11 +327,13 @@ export function Chat({
   suggestions,
   episodeId,
   podcastId,
+  uuid,
 }: {
   greeting?: string;
   suggestions?: string[];
   episodeId?: number;
   podcastId?: number;
+  uuid?: string;
 }) {
   const [canScroll, setCanScroll] = useState(false);
   const initialMessages = useMemo(() => {
@@ -368,7 +398,7 @@ export function Chat({
       <div className="overflow-y-auto pb-[100px]" ref={scrollRef}>
         {messages.length ? (
           <>
-            <ChatList messages={messages} append={doAppend} endRef={messagesRef} />
+            <ChatList messages={messages} append={doAppend} endRef={messagesRef} uuid={uuid} />
           </>
         ) : (
           <EmptyChat />
@@ -410,11 +440,20 @@ export function ContextAwareChat() {
 }
 
 export function PodcastContextChat({ podcast }: { podcast: PodcastWithEpisodes }) {
+  // Ensure the chat widget can add UUIDs to outgoing links if we are the owner.
+  const { userId } = useAuth();
+  const uuid = userId && podcast.owner === userId && podcast.uuid ? podcast.uuid.replace(/-/g, '') : undefined;
   const greeting = `Hi there! I\'m the Podverse AI Bot. You can ask me questions about the **${podcast.title}** podcast.`;
-  return <Chat podcastId={podcast.id} greeting={greeting} suggestions={podcast.suggestions} />;
+  return <Chat podcastId={podcast.id} greeting={greeting} suggestions={podcast.suggestions} uuid={uuid} />;
 }
 
 export function EpisodeContextChat({ episode }: { episode: EpisodeWithPodcast }) {
+  // Ensure the chat widget can add UUIDs to outgoing links if we are the owner.
+  const { userId } = useAuth();
+  const uuid =
+    userId && episode.podcast.owner === userId && episode.podcast.uuid
+      ? episode.podcast.uuid.replace(/-/g, '')
+      : undefined;
   const greeting = `Hi there! I\'m the Podverse AI Bot. You can ask me questions about **${episode.title}** or the **${episode.podcast.title}** podcast.`;
-  return <Chat episodeId={episode.id} greeting={greeting} suggestions={episode.suggestions} />;
+  return <Chat episodeId={episode.id} greeting={greeting} suggestions={episode.suggestions} uuid={uuid} />;
 }

@@ -44,7 +44,7 @@ export function EmbedPodcastDialog({ podcastSlug, episodeSlug }: { podcastSlug: 
           Embed {episodeSlug ? 'episode' : 'podcast'} chat
         </div>
       </DialogTrigger>
-      <DialogContent className="max-w-md md:max-w-3xl">
+      <DialogContent className="w-full max-w-xl overflow-x-auto md:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="font-mono">Embed {episodeSlug ? 'Episode' : 'Podcast'} chat</DialogTitle>
         </DialogHeader>
@@ -54,25 +54,25 @@ export function EmbedPodcastDialog({ podcastSlug, episodeSlug }: { podcastSlug: 
             website.
           </div>
           <div>
-            First, add the following code to the <span className="font-mono text-primary">&lt;head&gt;</span> of your
+            First, add the following code to the <span className="text-primary font-mono">&lt;head&gt;</span> of your
             page:
           </div>
-          <div className="border border-primary rounded-lg p-4 mx-8">
+          <div className="border-primary mx-8 rounded-lg border p-4">
             <SyntaxHighlighter language="xml" style={codeStyle}>
               {headCode}
             </SyntaxHighlighter>
           </div>
           <div>
-            Next, add a <span className="font-mono text-primary">&lt;div&gt;</span> to your page where you would like
+            Next, add a <span className="text-primary font-mono">&lt;div&gt;</span> to your page where you would like
             the Podverse chat widget to appear:
           </div>
-          <div className="border border-primary rounded-lg p-4 mx-8">
+          <div className="border-primary mx-8 rounded-lg border p-4">
             <SyntaxHighlighter language="xml" style={codeStyle}>
               {divCode}
             </SyntaxHighlighter>
           </div>
           <div>Finally, add the following code to your page to initialize the Podverse chat widget:</div>
-          <div className="border border-primary rounded-lg p-4 mx-8">
+          <div className="border-primary mx-8 rounded-lg border p-4">
             <SyntaxHighlighter language="xml" style={codeStyle}>
               {scriptCode}
             </SyntaxHighlighter>
