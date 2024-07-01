@@ -341,9 +341,13 @@ program
   .description('Step all pending invitations.')
   .option('--stage <stage>', 'Only process invitations at the current stage.')
   .option('--force', 'Force each invite to next stage.')
+  .option('--dry-run', 'Do not make changes, just report what would happen.')
   .action(async (opts) => {
     try {
-      stepInvitations(supabase, opts.stage, opts.force || false);
+      if (opts.dryRun) {
+        term.red('Dry run mode enabled - no changes will be made.\n');
+      }
+      stepInvitations(supabase, opts.stage, opts.force || false, opts.dryRun || false);
     } catch (err) {
       term('Error stepping: ').red(JSON.stringify(err));
     }

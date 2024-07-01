@@ -82,14 +82,14 @@ export async function createInvitation(
 }
 
 /** Step through all existing invitations. */
-export async function stepInvitations(supabase: SupabaseClient, stage?: string, force?: boolean) {
+export async function stepInvitations(supabase: SupabaseClient, stage?: string, force?: boolean, dryRun?: boolean) {
   const { data: invites, error } = await supabase.from('Invitations').select('*');
   if (error) {
     throw error;
   }
   console.log(invites);
   for (const invite of invites) {
-    while (await stepInvitation({ supabase, invite, stage, force })) {
+    while (await stepInvitation({ supabase, invite, stage, force, dryRun })) {
       // Keep stepping until we can't anymore.
     }
   }
@@ -104,11 +104,13 @@ export async function stepInvitation({
   invite,
   stage,
   force,
+  dryRun,
 }: {
   supabase: SupabaseClient;
   invite: Invitation;
   stage?: string;
   force?: boolean;
+  dryRun?: boolean;
 }): Promise<boolean> {
   const podcast = await GetPodcastWithEpisodesByID(supabase, invite.podcast.toString());
   console.log(`Stepping invitation for ${podcast.slug} - status ${invite.status}`);
@@ -136,7 +138,9 @@ export async function stepInvitation({
   if (podcast.owner !== DEFAULT_OWNER) {
     // Podcast has been claimed.
     console.log(`  Podcast ${podcast.slug} has been claimed`);
-    await setStatus(supabase, invite.id, 'claimed');
+    if (!dryRun) {
+      await setStatus(supabase, invite.id, 'claimed');
+    }
     return false;
   }
 
@@ -152,59 +156,76 @@ export async function stepInvitation({
       const numReady = podcast.Episodes.filter(isReady).length;
       if (numReady >= MIN_PROCESSED || force) {
         console.log(`  Setting invite to processed`);
-        await setStatus(supabase, invite.id, 'processed');
+        if (!dryRun) {
+          await setStatus(supabase, invite.id, 'processed');
+        }
         return true;
       }
       // Kick off processing.
       console.log(`  Starting processing`);
-      const eventKey = process.env.INNGEST_EVENT_KEY;
-      const inngest = new Inngest({ id: 'podverse-app', eventKey });
-      const token = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-      console.log(`  Using token ${token.slice(0, 12)}...`);
-      await inngest.send({
-        name: 'process/podcast',
-        data: {
-          podcastId: podcast.id,
-          // Try to avoid processing too many at a time.
-          episodeLimit: NUM_TO_PROCESS,
-          maxEpisodes: NUM_TO_PROCESS,
-          supabaseAccessToken: process.env.SUPABASE_SERVICE_ROLE_KEY,
-        },
-      });
-      await setStatus(supabase, invite.id, 'processing');
+      if (!dryRun) {
+        const eventKey = process.env.INNGEST_EVENT_KEY;
+        const inngest = new Inngest({ id: 'podverse-app', eventKey });
+        const token = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+        console.log(`  Using token ${token.slice(0, 12)}...`);
+        await inngest.send({
+          name: 'process/podcast',
+          data: {
+            podcastId: podcast.id,
+            // Try to avoid processing too many at a time.
+            episodeLimit: NUM_TO_PROCESS,
+            maxEpisodes: NUM_TO_PROCESS,
+            supabaseAccessToken: process.env.SUPABASE_SERVICE_ROLE_KEY,
+          },
+        });
+        await setStatus(supabase, invite.id, 'processing');
+      }
       return false;
     }
     case 'processed': {
       console.log(`  Sending first email`);
-      await sendFirstEmail(invite, podcast);
-      await setStatus(supabase, invite.id, 'first-email-sent');
+      if (!dryRun) {
+        await sendFirstEmail(invite, podcast);
+        await setStatus(supabase, invite.id, 'first-email-sent');
+      }
       return false;
     }
     case 'first-email-sent': {
       if (force || (invite.modified_at && new Date(invite.modified_at).getTime() < Date.now() - FOLLOW_UP_DELAY)) {
         console.log(`  Sending second email`);
-        await sendSecondEmail(invite, podcast);
-        await setStatus(supabase, invite.id, 'second-email-sent');
+        if (!dryRun) {
+          await sendSecondEmail(invite, podcast);
+          await setStatus(supabase, invite.id, 'second-email-sent');
+        }
       }
       return false;
     }
     case 'second-email-sent': {
       if (force || (invite.modified_at && new Date(invite.modified_at).getTime() < Date.now() - FOLLOW_UP_DELAY)) {
         console.log(`  Sending third email`);
-        await sendThirdEmail(invite, podcast);
-        await setStatus(supabase, invite.id, 'third-email-sent');
+        if (!dryRun) {
+          await sendThirdEmail(invite, podcast);
+          await setStatus(supabase, invite.id, 'third-email-sent');
+        }
       }
       return false;
     }
     case 'third-email-sent': {
       if (force || (invite.modified_at && new Date(invite.modified_at).getTime() < Date.now() - FOLLOW_UP_DELAY)) {
         console.log(`  Setting status to no-reply`);
-        await setStatus(supabase, invite.id, 'no-reply');
+        if (!dryRun) {
+          await setStatus(supabase, invite.id, 'no-reply');
+        }
       }
       return false;
     }
+    case 'refused':
+    case 'claimed':
+      console.log(`  Invite ${invite.id} is in final state ${invite.status}`);
+      return false;
     default:
-      throw new Error('Invalid invitation status: ' + invite.status);
+      console.warn('Ignoring invalid invitation status: ' + invite.status);
+      return false;
   }
 }
 
