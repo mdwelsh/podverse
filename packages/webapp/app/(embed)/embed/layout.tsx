@@ -7,6 +7,8 @@ import { TailwindIndicator } from '@/components/tailwind-indicator';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { ClerkProvider } from '@clerk/nextjs';
+import { dark } from '@clerk/themes';
 
 export const metadata: Metadata = {
   title: {
@@ -35,21 +37,35 @@ interface RootLayoutProps {
 export default async function RootLayout({ children }: RootLayoutProps) {
   return (
     <>
-      <html lang="en" suppressHydrationWarning>
-        <head />
-        <body className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
-          <ThemeProvider attribute="class" forcedTheme="dark" defaultTheme="dark">
-            <div className="relative flex min-h-screen flex-col w-full">
-              <>
-                <div className="flex-1">{children}</div>
-              </>
-            </div>
-            <TailwindIndicator />
-          </ThemeProvider>
-          <Analytics />
-        </body>
-      </html>
-      <SpeedInsights />
+      <ClerkProvider
+        appearance={{
+          baseTheme: dark,
+          variables: {
+            colorPrimary: '#f59e0b',
+            colorText: 'white',
+            colorBackground: 'hsl(12, 6.5%, 15.1%)',
+            colorTextOnPrimaryBackground: 'white',
+            colorTextSecondary: 'white',
+            colorNeutral: 'white',
+          },
+        }}
+      >
+        <html lang="en" suppressHydrationWarning>
+          <head />
+          <body className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
+            <ThemeProvider attribute="class" forcedTheme="dark" defaultTheme="dark">
+              <div className="relative flex min-h-screen flex-col w-full">
+                <>
+                  <div className="flex-1">{children}</div>
+                </>
+              </div>
+              <TailwindIndicator />
+            </ThemeProvider>
+            <Analytics />
+          </body>
+        </html>
+        <SpeedInsights />
+      </ClerkProvider>
     </>
   );
 }
