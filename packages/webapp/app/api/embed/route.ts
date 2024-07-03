@@ -4,7 +4,8 @@ export async function GET(req: Request) {
     type: 'rich',
     version: '1.0',
     url: 'https://www.podverse.ai/podcast/omnibus',
-    html: '<iframe src="https://www.podverse.ai/embed/chat/omnibus" width="100%" height="600" frameborder="0" scrolling="no"></iframe>',
+    //    html: '<iframe src="https://www.podverse.ai/embed/chat/omnibus" width="100%" height="600" frameborder="0" scrolling="no"></iframe>',
+    html: '<div>This is a test from Podverse.</div>',
   };
   return new Response(JSON.stringify(response), {
     headers: {
