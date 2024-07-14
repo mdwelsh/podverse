@@ -1,10 +1,9 @@
 import Link from 'next/link';
-import { ManagePodcastDialog } from '@/components/ManagePodcastDialog';
 import { buttonVariants } from '@/components/ui/button';
 import { PodcastStat, isError, isProcessing, isReady } from 'podverse-utils';
 import { Icons } from '@/components/icons';
 import { ExclamationTriangleIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { getPodcastWithEpisodes, getEpisodeLimit } from '@/lib/actions';
+import { getEpisodeLimit } from '@/lib/actions';
 import Image from 'next/image';
 
 export async function PodcastStrip({ podcast }: { podcast: PodcastStat }) {
@@ -75,7 +74,12 @@ export async function PodcastStrip({ podcast }: { podcast: PodcastStat }) {
             <Link className={buttonVariants({ variant: 'default' })} href={`/podcast/${podcastLink}`}>
               View
             </Link>
-            <ManagePodcastDialog podcastSlug={podcast.slug} planLimit={planLimit} />
+            <Link
+              className={buttonVariants({ variant: 'secondary' })}
+              href={`/podcast/${podcast.slug}/manage?uuid=${podcastUuid}`}
+            >
+              Manage
+            </Link>
           </div>
         </div>
       </div>

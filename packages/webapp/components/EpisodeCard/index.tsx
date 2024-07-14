@@ -5,7 +5,7 @@ import Image from 'next/image';
 /** A card showing information about a given episode. */
 export function EpisodeCard({ episode }: { episode: LatestEpisode }) {
   return (
-    <Link href={`/podcast/${episode.podcast.slug}/episode/${episode.slug}`}>
+    <Link target="_parent" href={`/podcast/${episode.podcast.slug}/episode/${episode.slug}`}>
       <div className="hover:ring-primary mx-auto flex h-full w-40 flex-col gap-4 overflow-hidden rounded-lg border bg-gray-700 p-2 text-white hover:ring-4 sm:w-40 md:w-48 md:p-4 dark:bg-gray-700 dark:text-white">
         <div className="flex size-full flex-col">
           <div className="mx-auto flex size-32 flex-col overflow-y-hidden bg-black md:size-40">

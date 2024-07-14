@@ -20,7 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import { search } from '@/lib/actions';
+import { PoweredBy } from '../PoweredBy';
 
 export function ShowAllSwitch({
   checked,
@@ -39,16 +39,24 @@ export function ShowAllSwitch({
   );
 }
 
-export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWithEpisodes; episodes: Episode[] }) {
+export function PodcastEpisodeList({
+  podcast,
+  episodes,
+  entriesPerPage = 10,
+  embed = false,
+}: {
+  podcast: PodcastWithEpisodes;
+  episodes: Episode[];
+  entriesPerPage?: number;
+  embed?: boolean;
+}) {
   const [page, setPage] = useState(1);
-  const [showAll, setShowAll] = useState(episodes.filter(isReady).length === 0);
+  const [showAll, setShowAll] = useState(embed || episodes.filter(isReady).length === 0);
   const searchParams = useSearchParams();
   const maybeSearchParams = searchParams.toString() ? `?${searchParams.toString()}` : '';
 
-  const ENTRIES_PER_PAGE = 10;
-
   const showEpisodes = showAll ? episodes : episodes.filter(isReady);
-  const numPages = Math.ceil(showEpisodes.length / ENTRIES_PER_PAGE);
+  const numPages = Math.ceil(showEpisodes.length / entriesPerPage);
 
   const onPrevious = () => {
     if (page > 1) {
@@ -64,15 +72,20 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
     setPage(value);
   };
 
-  const episodesToShow = showEpisodes.slice((page - 1) * ENTRIES_PER_PAGE, page * ENTRIES_PER_PAGE);
+  const episodesToShow = showEpisodes.slice((page - 1) * entriesPerPage, page * entriesPerPage);
 
   return (
-    <div className="mt-8 flex w-full flex-col gap-2 lg:w-3/5">
-      <div className="flex w-full flex-col items-start md:items-center gap-2 md:flex-row">
-        <div className="mr-4">Episodes</div>
-        <ShowAllSwitch checked={showAll} onCheckedChange={setShowAll} />
+    <div className={`${embed ? 'mt-0' : 'mt-8'} flex w-full flex-col gap-2 lg:w-3/5`}>
+      <div className="flex w-full flex-row items-center gap-2">
+        {!embed && <div className="mr-4">Episodes</div>}
+        {!embed && <ShowAllSwitch checked={showAll} onCheckedChange={setShowAll} />}
+        {embed && (
+          <div className="ml-4">
+            <PoweredBy />
+          </div>
+        )}
         <div className="grow" />
-        <div className="w-fit self-end">
+        <div className={`w-fit ${embed ? 'self-start' : 'self-end'}`}>
           <Pagination>
             <PaginationContent className="gap-0 text-xs">
               <PaginationItem>
@@ -117,11 +130,12 @@ export function PodcastEpisodeList({ podcast, episodes }: { podcast: PodcastWith
       <div className="flex size-full flex-col gap-2 overflow-y-auto p-2 text-xs">
         {episodesToShow.map((episode, index) => (
           <Link
+            target="_parent"
             key={index}
             href={`/podcast/${podcast.slug}/episode/${episode.slug}${maybeSearchParams}`}
             className="hover:ring-primary hover:ring-4"
           >
-            <EpisodeStrip key={index} podcast={podcast} episode={episode} showIndicator={showAll} />
+            <EpisodeStrip key={index} podcast={podcast} episode={episode} showIndicator={showAll && embed === false} />
           </Link>
         ))}
       </div>
@@ -141,7 +155,7 @@ export function EpisodeStrip({
   const { userId } = useAuth();
 
   return (
-    <div className="flex w-full flex-row gap-4 overflow-hidden rounded-lg border bg-gray-700 p-4 font-mono text-white dark:bg-gray-700 dark:text-white">
+    <div className="bg-muted text-foreground flex w-full flex-row gap-4 overflow-hidden rounded-lg border p-4 font-mono">
       <div className="flex size-full flex-row gap-4">
         <div className="w-1/5">
           {episode.imageUrl ? (
@@ -160,7 +174,7 @@ export function EpisodeStrip({
           <div className="text-muted-foreground text-sm">
             Published <span className="text-primary">{moment(episode.pubDate).format('MMMM Do YYYY')}</span>
           </div>
-          {(showIndicator || (userId && userId === podcast.owner)) && <EpisodeTooltip episode={episode} />}
+          {showIndicator && <EpisodeTooltip episode={episode} />}
         </div>
       </div>
     </div>

@@ -13,7 +13,6 @@ import { EpisodeClient } from '@/components/EpisodeClient';
 import Image from 'next/image';
 import { ShareButtons } from '@/components/ShareButtons';
 import { PodcastLinkHeader } from '@/components/PodcastLinkHeader';
-import { EmbedPodcastDialog } from '@/components/EmbedPodcastDialog';
 
 function EpisodeHeader({ episode, uuid }: { episode: EpisodeWithPodcast; uuid?: string }) {
   const episodeWithoutPodcast = { ...episode, podcast: episode.podcast.id };
@@ -62,7 +61,6 @@ function EpisodeHeader({ episode, uuid }: { episode: EpisodeWithPodcast; uuid?: 
                 </div>
               </div>
             </ManageEpisodeDialog>
-            <EmbedPodcastDialog podcastSlug={episode.podcast.slug} episodeSlug={episode.slug} />
           </div>
         </Owner>
         <div className="flex flex-row gap-1 sm:flex-row sm:items-center">

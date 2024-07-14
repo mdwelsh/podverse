@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
@@ -13,13 +13,20 @@ import Image from 'next/image';
 import { useChatContext } from '@/components/ChatContext';
 import { useSearchParams } from 'next/navigation';
 
-export function SearchPanel() {
+export function SearchBox({
+  showCancel,
+  onCancel=()=>{},
+  onLinkClicked=()=>{},
+}: {
+  showCancel: boolean;
+  onCancel?: () => void;
+  onLinkClicked?: () => void;
+}) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [error, setError] = useState<Error | null>(null);
-  const [open, setOpen] = useState(false);
   const { podcast } = useChatContext();
 
   // For now, we don't allow search when we aren't in a podcast context.
@@ -51,6 +58,41 @@ export function SearchPanel() {
     e.preventDefault();
     onSubmit();
   };
+  return (
+    <div className="mx-auto flex max-h-screen w-full flex-col gap-4 rounded-md p-4 md:w-3/5">
+      <div className="flex flex-row items-center gap-2">
+        <form onSubmit={onFormSubmit} className="flex w-full flex-row gap-2">
+          <Input
+            defaultValue={query}
+            onChange={onChange}
+            ref={inputRef}
+            type="text"
+            placeholder={`Search ${podcast.title} episodes`}
+            className="w-full"
+          />
+          <Button type="submit" disabled={query.trim() === ''} variant="default">
+            Search
+          </Button>
+          {showCancel && (
+            <Button onClick={() => onCancel()} variant="outline">
+              Cancel
+            </Button>
+          )}
+        </form>
+      </div>
+      <SearchResults results={results} error={error} busy={busy} onLinkClicked={() => onLinkClicked()} />
+    </div>
+  );
+}
+
+export function SearchPanel() {
+  const [open, setOpen] = useState(false);
+  const { podcast } = useChatContext();
+
+  // For now, we don't allow search when we aren't in a podcast context.
+  if (!podcast) {
+    return null;
+  }
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -61,27 +103,7 @@ export function SearchPanel() {
         </div>
       </SheetTrigger>
       <SheetContent side="top">
-        <div className="mx-auto flex max-h-screen w-full flex-col gap-4 rounded-md p-4 md:w-3/5">
-          <div className="flex flex-row items-center gap-2">
-            <form onSubmit={onFormSubmit} className="flex w-full flex-row gap-2">
-              <Input
-                defaultValue={query}
-                onChange={onChange}
-                ref={inputRef}
-                type="text"
-                placeholder={`Search ${podcast.title} episodes`}
-                className="w-full"
-              />
-              <Button type="submit" disabled={query.trim() === ''} variant="default">
-                Search
-              </Button>
-              <Button onClick={() => setOpen(false)} variant="outline">
-                Cancel
-              </Button>
-            </form>
-          </div>
-          <SearchResults results={results} error={error} busy={busy} onLinkClicked={() => setOpen(false)} />
-        </div>
+        <SearchBox showCancel onCancel={() => setOpen(false)} onLinkClicked={() => setOpen(false)} />
       </SheetContent>
     </Sheet>
   );
@@ -156,7 +178,7 @@ function EpisodeResultCard({ result, onLinkClicked }: { result: SearchResult; on
 
   const imageUrl = result.episode?.imageUrl || result.podcast?.imageUrl;
   return (
-    <Link onClick={onLinkClicked} className="w-full" href={result.sourceUrl + maybeSearchParams}>
+    <Link target="_parent" onClick={onLinkClicked} className="w-full" href={result.sourceUrl + maybeSearchParams}>
       <div className="hover hover:border-primary flex h-[150px] w-full flex-row gap-2 overflow-y-hidden text-ellipsis border border-slate-500 p-4">
         <div className="w-[100px]">
           {imageUrl && <Image src={imageUrl} alt="Episode image" width={100} height={100} />}

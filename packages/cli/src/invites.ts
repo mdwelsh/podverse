@@ -244,6 +244,7 @@ export async function sendEmail({
   text?: string;
   bcc?: string;
 }): Promise<void> {
+  // @ts-ignore
   const mailgun = new Mailgun(FormData);
   const apiKey = process.env.MAILGUN_API_KEY;
   if (!apiKey) {

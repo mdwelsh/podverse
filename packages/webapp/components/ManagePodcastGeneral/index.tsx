@@ -12,7 +12,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button, buttonVariants } from '@/components/ui/button';
-import moment from 'moment';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -32,7 +31,7 @@ import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getPodcastWithEpisodes } from '@/lib/actions';
 
-function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
+export function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
   const router = useRouter();
 
   const handleDelete = () => {
@@ -49,7 +48,7 @@ function DeletePodcastDialog({ podcast }: { podcast: PodcastWithEpisodes }) {
       <DialogTrigger>
         <Button className="font-mono" variant="destructive">
           <TrashIcon className="mr-2 inline size-5" />
-          Delete
+          Delete podcast
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -139,7 +138,7 @@ function ProcessPodcastDialog({ podcast, planLimit }: { podcast: PodcastWithEpis
     <Dialog>
       <DialogTrigger>
         <Button variant="outline" className="font-mono">
-          <BoltIcon className="text-muted-foreground mr-2 size-5" /> Process
+          <BoltIcon className="text-muted-foreground mr-2 size-5" /> Process episodes
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -291,8 +290,13 @@ export function ProcessPodcastSwitch({
   );
 }
 
-export function ManagePodcastDialog({ podcastSlug, planLimit }: { podcastSlug: string; planLimit: EpisodeLimit }) {
-  const [open, setOpen] = useState(false);
+export function ManagePodcastGeneral({
+  podcastSlug,
+  planLimit,
+}: {
+  podcastSlug: string;
+  planLimit: EpisodeLimit | null;
+}) {
   const [podcast, setPodcast] = useState<PodcastWithEpisodes | null>(null);
   const [isPublic, setIsPublic] = useState(false);
   //const [isPublished, setIsPublished] = useState(podcast.published || false);
@@ -375,70 +379,25 @@ export function ManagePodcastDialog({ podcastSlug, planLimit }: { podcastSlug: s
   //     });
   // };
 
-  const mostRecentlyPublished =
-    podcast && podcast.Episodes
-      ? podcast.Episodes.reduce((a, b) => ((a.pubDate || 0) > (b.pubDate || 0) ? a : b))
-      : null;
-
   return (
-    <Dialog onOpenChange={setOpen}>
-      <DialogTrigger>
-        <div className={cn(buttonVariants({ variant: 'outline' }))}>Manage podcast</div>
-      </DialogTrigger>
-      <DialogContent className="max-w-md md:max-w-3xl">
-        {!open || !podcast ? (
-          <div>Loading...</div>
-        ) : (
-          <>
-            <DialogHeader>
-              <DialogTitle className="font-mono">
-                Manage Podcast <span className="text-primary">{podcast.title}</span>
-              </DialogTitle>
-            </DialogHeader>
-            <div>
-              <div className="text-muted-foreground flex flex-col gap-4 font-mono text-sm">
-                {mostRecentlyPublished && (
-                  <div className="flex flex-col gap-2">
-                    <div>
-                      Most recent episode: <span className="text-primary">{mostRecentlyPublished.title}</span>
-                    </div>
-                    <div>
-                      published{' '}
-                      <span className="text-primary">
-                        {moment(mostRecentlyPublished.pubDate).format('MMMM Do YYYY')}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                <div>
-                  <span className="text-primary">{podcast.Episodes.filter((episode) => isReady(episode)).length}</span>{' '}
-                  episodes processed out of <span className="text-primary">{podcast.Episodes.length}</span> total
-                </div>
-              </div>
-              <div className="my-4 flex flex-col items-start gap-2">
-                <PublicPodcastSwitch podcast={podcast} checked={isPublic} onCheckedChange={onPublicChange} />
-                {/* For now, we tie the published state to the private state. At some point we might make these different. */}
-                {/* <PublishPodcastSwitch checked={isPublished} onCheckedChange={onPublishChange} disabled={!isPublic} /> */}
-                <ProcessPodcastSwitch podcast={podcast} checked={processEnabled} onCheckedChange={onProcessChange} />
-              </div>
-            </div>
-            <DialogFooter>
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-row gap-2">
-                  <DialogClose>
-                    <Button className="font-mono" variant="secondary" onClick={doRefresh}>
-                      <ArrowPathIcon className="mr-2 inline size-5" />
-                      Fetch new episodes
-                    </Button>
-                  </DialogClose>
-                  <ProcessPodcastDialog podcast={podcast} planLimit={planLimit} />
-                  <DeletePodcastDialog podcast={podcast} />
-                </div>
-              </div>
-            </DialogFooter>
-          </>
-        )}
-      </DialogContent>
-    </Dialog>
+    <div className="flex flex-col items-start gap-8">
+      {!open || !podcast || planLimit === null ? (
+        <div>Loading...</div>
+      ) : (
+        <>
+          <PublicPodcastSwitch podcast={podcast} checked={isPublic} onCheckedChange={onPublicChange} />
+          {/* For now, we tie the published state to the private state. At some point we might make these different. */}
+          {/* <PublishPodcastSwitch checked={isPublished} onCheckedChange={onPublishChange} disabled={!isPublic} /> */}
+          <ProcessPodcastSwitch podcast={podcast} checked={processEnabled} onCheckedChange={onProcessChange} />
+          <div className="flex flex-row gap-4">
+            <ProcessPodcastDialog podcast={podcast} planLimit={planLimit} />
+            <Button className="font-mono" variant="secondary" onClick={doRefresh}>
+              <ArrowPathIcon className="mr-2 inline size-5" />
+              Fetch new episodes
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
   );
 }

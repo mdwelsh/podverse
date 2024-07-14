@@ -30,7 +30,7 @@ export function SignUpOrActivateButton({ text, uuid }: { text?: string; uuid: st
         <ActivateButton text={text} />
       </SignedIn>
       <SignedOut>
-        <SignInButton redirectUrl={redirectUrl}>
+        <SignInButton forceRedirectUrl={redirectUrl}>
           <Button variant="default" className="font-mono">
             {text || 'Create account'}
           </Button>

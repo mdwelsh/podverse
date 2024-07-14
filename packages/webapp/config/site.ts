@@ -9,7 +9,7 @@ export const siteConfig = {
       href: '/',
     },
     {
-      title: 'Featured',
+      title: 'Podcasts',
       href: '/featured',
     },
     {
