@@ -321,6 +321,7 @@ export async function getEpisodeLimit(podcastId: number): Promise<EpisodeLimit |
   const numToProcess = Math.min(unprocessed, leftOnPlan);
 
   return {
+    plan,
     totalEpisodes: total,
     processedEpisodes: processed,
     unprocessedEpisodes: unprocessed,

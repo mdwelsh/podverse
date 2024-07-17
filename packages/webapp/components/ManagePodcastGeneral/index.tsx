@@ -1,7 +1,7 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
-import { Podcast, PodcastWithEpisodes, isReady } from 'podverse-utils';
+import { useEffect, useState } from 'react';
+import { Podcast, PodcastWithEpisodes } from 'podverse-utils';
 import {
   Dialog,
   DialogClose,
@@ -11,8 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import {
@@ -306,9 +305,6 @@ export function ManagePodcastGeneral({
     if (podcast) {
       return;
     }
-    if (!open) {
-      return;
-    }
     getPodcastWithEpisodes(podcastSlug)
       .then((podcast) => {
         setPodcast(podcast);
@@ -318,7 +314,7 @@ export function ManagePodcastGeneral({
       .catch((e) => {
         toast.error('Failed to fetch podcast: ' + e.message);
       });
-  }, [podcastSlug, open, podcast]);
+  }, [podcastSlug, podcast]);
 
   const doRefresh = () => {
     if (!podcast) {
@@ -381,7 +377,7 @@ export function ManagePodcastGeneral({
 
   return (
     <div className="flex flex-col items-start gap-8">
-      {!open || !podcast || planLimit === null ? (
+      {!podcast || planLimit === null ? (
         <div>Loading...</div>
       ) : (
         <>

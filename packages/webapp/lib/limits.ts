@@ -49,6 +49,7 @@ export function usePodcastLimit(): PodcastLimit | null {
 
 /** The return value of useEpisodeLimit. */
 export interface EpisodeLimit {
+  plan: Plan;
   totalEpisodes: number;
   processedEpisodes: number;
   unprocessedEpisodes: number;
@@ -100,6 +101,7 @@ export function useEpisodeLimit(podcastId: number): EpisodeLimit | null {
   const numToProcess = Math.min(unprocessed, leftOnPlan);
 
   return {
+    plan,
     totalEpisodes: total,
     processedEpisodes: processed,
     unprocessedEpisodes: unprocessed,

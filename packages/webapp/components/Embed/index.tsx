@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { PodcastWithEpisodes } from 'podverse-utils';
+import { PodcastWithEpisodes, EpisodeWithPodcast } from 'podverse-utils';
 import { CompactPicker } from 'react-color';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
@@ -9,9 +9,12 @@ import { Button } from '@/components/ui/button';
 import { ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
 import { toast } from 'sonner';
 
-type EmbedType = 'episodeList' | 'podcastChat' | 'episodeSearch';
+type PodcastEmbedType = 'episodeList' | 'podcastChat' | 'episodeSearch';
+type EpisodeEmbedType = 'episodeSummary' | 'episodeTranscript' | 'episodeChat';
+type EmbedType = PodcastEmbedType | EpisodeEmbedType;
 
 function EmbedControls({
+  podcast,
   embedType,
   bgColor,
   fgColor,
@@ -27,6 +30,7 @@ function EmbedControls({
   setWidth,
   setHeight,
 }: {
+  podcast?: boolean;
   embedType: EmbedType;
   bgColor: string;
   fgColor: string;
@@ -81,9 +85,19 @@ function EmbedControls({
           <SelectValue placeholder="Select embed type" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="episodeList">Episode list</SelectItem>
-          <SelectItem value="episodeSearch">Episode search</SelectItem>
-          <SelectItem value="podcastChat">AI chat</SelectItem>
+          {podcast ? (
+            <>
+              <SelectItem value="episodeList">Episode list</SelectItem>
+              <SelectItem value="episodeSearch">Episode search</SelectItem>
+              <SelectItem value="podcastChat">AI chat</SelectItem>
+            </>
+          ) : (
+            <>
+              <SelectItem value="episodeTranscript">Transcript</SelectItem>
+              <SelectItem value="episodeSummary">Episode summary</SelectItem>
+              <SelectItem value="episodeChat">AI chat</SelectItem>
+            </>
+          )}
         </SelectContent>
       </Select>
       <div className="font-mono text-sm">Theme</div>
@@ -139,6 +153,7 @@ function CopyToClipboard({ text }: { text: string }) {
 
 function EmbedPreview({
   podcastSlug,
+  episodeSlug,
   embedType,
   bgColor,
   fgColor,
@@ -148,6 +163,7 @@ function EmbedPreview({
   height,
 }: {
   podcastSlug: string;
+  episodeSlug?: string;
   embedType?: EmbedType;
   bgColor?: string;
   fgColor?: string;
@@ -169,7 +185,13 @@ function EmbedPreview({
   } else if (embedType === 'episodeSearch') {
     url = `/embed/podcast/${podcastSlug}/search${params ? '?' + params : ''}`;
   } else if (embedType === 'podcastChat') {
-    url = `/embed/chat/${podcastSlug}${params ? '?' + params : ''}`;
+    url = `/embed/podcast/${podcastSlug}/chat${params ? '?' + params : ''}`;
+  } else if (embedType === 'episodeSummary') {
+    url = `/embed/podcast/${podcastSlug}/episode/${episodeSlug}/summary${params ? '?' + params : ''}`;
+  } else if (embedType === 'episodeTranscript') {
+    url = `/embed/podcast/${podcastSlug}/episode/${episodeSlug}/transcript${params ? '?' + params : ''}`;
+  } else if (embedType === 'episodeChat') {
+    url = `/embed/podcast/${podcastSlug}/episode/${episodeSlug}/chat${params ? '?' + params : ''}`;
   } else {
     return <div className="flex flex-col gap-4">{'Invalid embed type ' + embedType}</div>;
   }
@@ -199,6 +221,7 @@ function EmbedCode({ url, width, height }: { url: string; width: number; height:
   );
 }
 
+
 export function EmbedPodcast({ podcast }: { podcast: PodcastWithEpisodes }) {
   const [embedType, setEmbedType] = useState<EmbedType>('episodeList');
   const [bgColor, setBgColor] = useState('#000000');
@@ -213,6 +236,58 @@ export function EmbedPodcast({ podcast }: { podcast: PodcastWithEpisodes }) {
       <div className="font-mono">
         This podcast is private. In order to embed its content on another site, you must set the podcast link to public
         on the General settings tab.
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-row gap-8">
+      <EmbedControls
+        podcast
+        embedType={embedType}
+        bgColor={bgColor}
+        fgColor={fgColor}
+        highlightColor={highlightColor}
+        theme={theme}
+        width={width}
+        height={height}
+        setEmbedType={setEmbedType}
+        setBgColor={setBgColor}
+        setFgColor={setFgColor}
+        setHighlightColor={setHighlightColor}
+        setTheme={setTheme}
+        setWidth={setWidth}
+        setHeight={setHeight}
+      />
+      <EmbedPreview
+        embedType={embedType}
+        podcastSlug={podcast.slug}
+        bgColor={bgColor}
+        fgColor={fgColor}
+        highlightColor={highlightColor}
+        theme={theme}
+        width={width}
+        height={height}
+      />
+    </div>
+  );
+}
+
+
+export function EmbedEpisode({ episode }: { episode: EpisodeWithPodcast }) {
+  const [embedType, setEmbedType] = useState<EmbedType>('episodeTranscript');
+  const [bgColor, setBgColor] = useState('#000000');
+  const [fgColor, setFgColor] = useState('#f0f0f0');
+  const [highlightColor, setHighlightColor] = useState('#f59e0b');
+  const [theme, setTheme] = useState('dark');
+  const [width, setWidth] = useState(400);
+  const [height, setHeight] = useState(600);
+
+  if (episode.podcast.private) {
+    return (
+      <div className="font-mono">
+        This podcast is private. In order to embed its content on another site, you must set the podcast link to public
+        on the Podcast&ldquo;s General settings tab.
       </div>
     );
   }
@@ -237,7 +312,8 @@ export function EmbedPodcast({ podcast }: { podcast: PodcastWithEpisodes }) {
       />
       <EmbedPreview
         embedType={embedType}
-        podcastSlug={podcast.slug}
+        podcastSlug={episode.podcast.slug}
+        episodeSlug={episode.slug}
         bgColor={bgColor}
         fgColor={fgColor}
         highlightColor={highlightColor}

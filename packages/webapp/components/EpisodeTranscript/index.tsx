@@ -5,9 +5,10 @@ import { EpisodeWithPodcast } from 'podverse-utils';
 import { EditSpeakersDialog } from '../EditSpeakersDialog';
 import { useAudioPlayer } from '@/components/AudioPlayer';
 import { PlayCircleIcon } from '@heroicons/react/24/outline';
+import { PoweredBy } from '@/components/PoweredBy';
 
 /** Top level transcript component. Includes the AudioPlayer. */
-export function EpisodeTranscript({ episode }: { episode: EpisodeWithPodcast }) {
+export function EpisodeTranscript({ episode, embed }: { episode: EpisodeWithPodcast; embed?: boolean }) {
   const [transcript, setTranscript] = useState(null);
 
   useEffect(() => {
@@ -23,8 +24,8 @@ export function EpisodeTranscript({ episode }: { episode: EpisodeWithPodcast }) 
   }, [episode]);
 
   if (episode.rawTranscriptUrl === null || transcript === null) {
-    return (
-      <div className="mt-8 flex h-[600px] w-full lg:w-3/5 flex-col gap-2">
+    return embed ? null : (
+      <div className="mt-8 flex h-[600px] w-full flex-col gap-2 lg:w-3/5">
         <div>
           <h1>Transcript</h1>
         </div>
@@ -33,8 +34,13 @@ export function EpisodeTranscript({ episode }: { episode: EpisodeWithPodcast }) 
     );
   }
 
-  return (
-    <div className="mt-8 flex h-[600px] w-full lg:w-3/5 flex-col gap-2">
+  return embed ? (
+    <div className="mt-4 flex flex-col gap-2">
+      <PoweredBy />
+      <TranscriptView transcript={transcript} episode={episode} embed />
+    </div>
+  ) : (
+    <div className="mt-8 flex h-[600px] w-full flex-col gap-2 lg:w-3/5">
       <div>
         <h1>Transcript</h1>
       </div>
@@ -44,7 +50,15 @@ export function EpisodeTranscript({ episode }: { episode: EpisodeWithPodcast }) 
 }
 
 /** Show view of transcript when available. */
-function TranscriptView({ transcript, episode }: { transcript: any; episode: EpisodeWithPodcast }) {
+function TranscriptView({
+  transcript,
+  episode,
+  embed,
+}: {
+  transcript: any;
+  episode: EpisodeWithPodcast;
+  embed?: boolean;
+}) {
   const paragraphs = transcript.results?.channels[0].alternatives[0].paragraphs.paragraphs as any[];
   const itemRefs = useRef(paragraphs.map(() => React.createRef<HTMLDivElement>()));
   const playAnimationRef = useRef<number | undefined>(undefined);
@@ -84,6 +98,7 @@ function TranscriptView({ transcript, episode }: { transcript: any; episode: Epi
         paragraph={paragraph}
         episode={episode}
         key={index}
+        embed={embed}
       />
     );
   });
@@ -101,11 +116,13 @@ function ParagraphView({
   episode,
   selfRef,
   highlight,
+  embed,
 }: {
   paragraph: any;
   episode: EpisodeWithPodcast;
   selfRef: React.Ref<HTMLDivElement>;
   highlight: boolean;
+  embed?: boolean;
 }) {
   const speakerColors = [
     'text-gray-300',
@@ -135,14 +152,16 @@ function ParagraphView({
 
   return (
     <div className={`group flex flex-row items-start gap-2 border-b pb-2 ${highlight && 'bg-secondary'}`} ref={selfRef}>
-      <div className="flex pt-1 w-1/5 flex-col gap-2 overflow-hidden text-wrap text-xs">
+      <div className="flex w-1/5 flex-col gap-2 overflow-hidden text-wrap pt-1 text-xs">
         <div className="text-primary">{speaker}</div>
         <div className="text-muted-foreground">{startString}</div>
-        <div className="hidden text-xs group-hover:block">
-          <EditSpeakersDialog episode={episode} speaker={paragraph.speaker} />
-        </div>
+        {!embed && (
+          <div className="hidden text-xs group-hover:block">
+            <EditSpeakersDialog episode={episode} speaker={paragraph.speaker} />
+          </div>
+        )}
       </div>
-      <ParagraphText startTime={start} sentences={sentences} speakerColor={speakerColor} />
+      <ParagraphText startTime={start} sentences={sentences} speakerColor={speakerColor} embed={embed} />
     </div>
   );
 }
@@ -151,28 +170,34 @@ export function ParagraphText({
   sentences,
   speakerColor,
   startTime,
+  embed,
 }: {
   sentences: any;
   speakerColor: string;
   startTime: number;
+  embed?: boolean;
 }) {
   const audioPlayer = useAudioPlayer();
-  if (!audioPlayer) {
+  if (!embed && !audioPlayer) {
     return null;
   }
-  const { play, seek } = audioPlayer;
+  const { play, seek } = audioPlayer || {};
 
   const doSeek = () => {
-    seek(startTime);
-    play();
+    if (!embed) {
+      seek!(startTime);
+      play!();
+    }
   };
 
   return (
     <div className="flex w-full flex-row justify-between gap-1">
-      <div className={`w-full font-sans text-base ${speakerColor}`}>
-        <div className="text-primary hidden group-hover:block" onClick={doSeek}>
-          <PlayCircleIcon className="size-8 float-right" />
-        </div>
+      <div className={`w-full font-sans text-sm ${speakerColor}`}>
+        {!embed && (
+          <div className="text-primary hidden group-hover:block" onClick={doSeek}>
+            <PlayCircleIcon className="float-right size-8" />
+          </div>
+        )}
         {sentences.map((sentence: any, index: number) => (
           <span key={index}>{sentence.text}&nbsp;&nbsp;</span>
         ))}
