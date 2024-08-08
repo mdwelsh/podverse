@@ -351,18 +351,21 @@ export type Database = {
       }
       Suggestions: {
         Row: {
-          episode: number
+          episode: number | null
           id: number
+          podcast: number | null
           suggestion: string | null
         }
         Insert: {
-          episode: number
+          episode?: number | null
           id?: number
+          podcast?: number | null
           suggestion?: string | null
         }
         Update: {
-          episode?: number
+          episode?: number | null
           id?: number
+          podcast?: number | null
           suggestion?: string | null
         }
         Relationships: [
@@ -378,6 +381,13 @@ export type Database = {
             columns: ["episode"]
             isOneToOne: false
             referencedRelation: "Episodes_with_state"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Suggestions_podcast_fkey"
+            columns: ["podcast"]
+            isOneToOne: false
+            referencedRelation: "Podcasts"
             referencedColumns: ["id"]
           },
         ]
@@ -509,6 +519,19 @@ export type Database = {
         }
         Returns: undefined
       }
+      binary_quantize:
+        | {
+            Args: {
+              "": string
+            }
+            Returns: unknown
+          }
+        | {
+            Args: {
+              "": unknown
+            }
+            Returns: unknown
+          }
       chunk_vector_search: {
         Args: {
           embedding: string
@@ -559,6 +582,7 @@ export type Database = {
       episode_search: {
         Args: {
           query: string
+          podcast_slug: string
           match_count: number
         }
         Returns: {
@@ -587,6 +611,48 @@ export type Database = {
           meta: Json
         }[]
       }
+      halfvec_avg: {
+        Args: {
+          "": number[]
+        }
+        Returns: unknown
+      }
+      halfvec_out: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      halfvec_send: {
+        Args: {
+          "": unknown
+        }
+        Returns: string
+      }
+      halfvec_typmod_in: {
+        Args: {
+          "": unknown[]
+        }
+        Returns: number
+      }
+      hnsw_bit_support: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      hnsw_halfvec_support: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      hnsw_sparsevec_support: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
       hnswhandler: {
         Args: {
           "": unknown
@@ -607,12 +673,56 @@ export type Database = {
         }
         Returns: boolean
       }
+      ivfflat_bit_support: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      ivfflat_halfvec_support: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
       ivfflathandler: {
         Args: {
           "": unknown
         }
         Returns: unknown
       }
+      l2_norm:
+        | {
+            Args: {
+              "": unknown
+            }
+            Returns: number
+          }
+        | {
+            Args: {
+              "": unknown
+            }
+            Returns: number
+          }
+      l2_normalize:
+        | {
+            Args: {
+              "": string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              "": unknown
+            }
+            Returns: unknown
+          }
+        | {
+            Args: {
+              "": unknown
+            }
+            Returns: unknown
+          }
       latest_episodes: {
         Args: {
           limit: number
@@ -1148,11 +1258,32 @@ export type Database = {
           processed: number
           inprogress: number
           errors: number
+          process: boolean
+          private: boolean
+          uuid: string
         }[]
       }
       requesting_user_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      sparsevec_out: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      sparsevec_send: {
+        Args: {
+          "": unknown
+        }
+        Returns: string
+      }
+      sparsevec_typmod_in: {
+        Args: {
+          "": unknown[]
+        }
+        Returns: number
       }
       vector_avg: {
         Args: {
@@ -1160,12 +1291,19 @@ export type Database = {
         }
         Returns: string
       }
-      vector_dims: {
-        Args: {
-          "": string
-        }
-        Returns: number
-      }
+      vector_dims:
+        | {
+            Args: {
+              "": string
+            }
+            Returns: number
+          }
+        | {
+            Args: {
+              "": unknown
+            }
+            Returns: number
+          }
       vector_norm: {
         Args: {
           "": string

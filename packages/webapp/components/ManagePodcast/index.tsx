@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { getEpisodeLimit } from '@/lib/actions';
 import { DeletePodcastDialog, ManagePodcastGeneral } from '../ManagePodcastGeneral';
 import { PodcastHeader } from '@/components/PodcastHeader';
+import { SuggestionsEditor } from '@/components/SuggestionsEditor';
 
 export async function ManagePodcast({ podcastSlug }: { podcastSlug: string }) {
   try {
@@ -18,11 +19,6 @@ export async function ManagePodcast({ podcastSlug }: { podcastSlug: string }) {
     if (podcast.owner !== userId) {
       throw new Error('Unauthorized');
     }
-    const mostRecentlyPublished =
-      podcast && podcast.Episodes
-        ? podcast.Episodes.reduce((a, b) => ((a.pubDate || 0) > (b.pubDate || 0) ? a : b))
-        : null;
-
     const planLimit = await getEpisodeLimit(podcast.id);
 
     return (
@@ -44,6 +40,9 @@ export async function ManagePodcast({ podcastSlug }: { podcastSlug: string }) {
                 <TabsTrigger className="font-normal data-[state=active]:text-primary" value="general">
                   General
                 </TabsTrigger>
+                <TabsTrigger className="font-normal data-[state=active]:text-primary" value="suggestions">
+                  Suggested questions
+                </TabsTrigger>
                 <TabsTrigger className="font-normal data-[state=active]:text-primary" value="embed">
                   Embed
                 </TabsTrigger>
@@ -54,6 +53,9 @@ export async function ManagePodcast({ podcastSlug }: { podcastSlug: string }) {
               </TabsList>
               <TabsContent className="w-60%" value="general">
                 <ManagePodcastGeneral podcastSlug={podcast.slug} planLimit={planLimit} />
+              </TabsContent>
+              <TabsContent className="w-60%" value="suggestions">
+                <SuggestionsEditor podcastId={podcast.id} />
               </TabsContent>
               <TabsContent className="w-60%" value="embed">
                 <EmbedPodcast podcast={podcast} />

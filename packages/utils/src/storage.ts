@@ -183,7 +183,7 @@ export async function GetPodcastWithEpisodes(supabase: SupabaseClient, slug: str
   const podcast = data[0];
   return {
     ...podcast,
-    suggestions: await GetPodcastSuggestions(supabase, podcast.id),
+    suggestions: await GetPodcastSuggestions(supabase, podcast.id, true),
   };
 }
 
@@ -208,7 +208,7 @@ export async function GetPodcastWithEpisodesByID(
   const podcast = data[0];
   return {
     ...podcast,
-    suggestions: await GetPodcastSuggestions(supabase, podcast.id),
+    suggestions: await GetPodcastSuggestions(supabase, podcast.id, true),
   };
 }
 
@@ -239,7 +239,7 @@ export async function GetPodcastWithEpisodesByUUID(
   const podcast = data[0];
   return {
     ...podcast,
-    suggestions: await GetPodcastSuggestions(supabase, podcast.id),
+    suggestions: await GetPodcastSuggestions(supabase, podcast.id, true),
   };
 }
 
@@ -395,17 +395,33 @@ export async function GetSuggestions(supabase: SupabaseClient, episodeId: number
 }
 
 /** Return suggested queries for the given podcast. */
-export async function GetPodcastSuggestions(supabase: SupabaseClient, podcastId: number): Promise<string[]> {
-  const { data, error } = await supabase
-    .from('Suggestions')
-    .select('suggestion, Episodes!inner(podcast)')
-    .eq('Episodes.podcast', podcastId);
+export async function GetPodcastSuggestions(
+  supabase: SupabaseClient,
+  podcastId: number,
+  includeEpisodes: boolean,
+): Promise<string[]> {
+  // First check for suggestions for the podcast.
+  const { data, error } = await supabase.from('Suggestions').select('suggestion').eq('podcast', podcastId);
   if (error) {
     console.error('error', error);
     throw error;
   }
   const result = data.map((row) => row.suggestion);
-  return result;
+  if (result.length > 0 || !includeEpisodes) {
+    return result;
+  }
+
+  // If none exist, return suggestions for episodes of the podcast.
+  const { data: data2, error: error2 } = await supabase
+    .from('Suggestions')
+    .select('suggestion, Episodes!inner(podcast)')
+    .eq('Episodes.podcast', podcastId);
+  if (error2) {
+    console.error('error', error);
+    throw error;
+  }
+  const result2 = data2.map((row) => row.suggestion);
+  return result2;
 }
 
 /** Delete all suggestions for the given episode. */
@@ -417,9 +433,19 @@ export async function DeleteSuggestions(supabase: SupabaseClient, episodeId: num
 }
 
 /** Add a suggestion. */
-export async function AddSuggestion(supabase: SupabaseClient, episodeId: number, suggestion: string) {
-  const entry = { episode: episodeId, suggestion };
-  const { error } = await supabase.from('Suggestions').insert(entry).eq('episode', episodeId);
+export async function AddSuggestion({
+  supabase,
+  podcastId = undefined,
+  episodeId = undefined,
+  suggestion,
+}: {
+  supabase: SupabaseClient;
+  podcastId?: number;
+  episodeId?: number;
+  suggestion: string;
+}) {
+  const entry = { podcast: podcastId, episode: episodeId, suggestion };
+  const { error } = await supabase.from('Suggestions').insert(entry);
   if (error) {
     throw error;
   }

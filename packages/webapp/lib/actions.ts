@@ -65,9 +65,9 @@ export async function getEpisodeWithPodcast(podcastSlug: string, episodeSlug: st
 }
 
 /** Get suggested queries for the given podcast. */
-export async function getPodcastSuggestions(podcastId: number): Promise<string[]> {
+export async function getPodcastSuggestions(podcastId: number, includeEpisodes: boolean): Promise<string[]> {
   const supabase = await getSupabaseClient();
-  return await GetPodcastSuggestions(supabase, podcastId);
+  return await GetPodcastSuggestions(supabase, podcastId, includeEpisodes);
 }
 
 /** Update the given episode. */

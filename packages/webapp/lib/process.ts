@@ -263,7 +263,7 @@ export async function SuggestEpisode({
   // Update Suggestions.
   for (const suggestion of suggestions) {
     console.log(`Adding suggestion for episode ${episode.id}: ${suggestion}`);
-    await AddSuggestion(supabase, episode.id, suggestion);
+    await AddSuggestion({supabase, episodeId: episode.id, suggestion});
   }
   console.log(`Generated ${suggestions.length} suggested queries for episode ${episode.id}`);
   return `Suggested queries for episode ${episode.id} done`;
