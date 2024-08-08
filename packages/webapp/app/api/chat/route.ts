@@ -29,19 +29,33 @@ const PODCAST_ANSWER_PROMPT = {
       The following context is provided to you to help you answer the user's question.
       If you use this information to reply to the user, you should include a
       Markdown link in your reply that contains a link to the podcast episode that corresponds
-      to the context provided. For example, with the input
+      to the context provided.
 
+      Here is an example of context that you might receive:
+
+      "Here is context entry 3. This is a chunk of text from the podcast episode that you should use
+      as context when answering the user's question.
+
+      BEGINNING OF TEXT:
+      bears are very good at foraging for food in the wild. They have a keen
+      sense of smell and can detect food from miles away. They are also very good at climbing trees
+      END OF TEXT.
+
+      AUDIO START TIME: 123.45
       EPISODE LINK: /podcast/foo/episode/123
-      EPISODE TITLE: How come bears eat no food?
+      EPISODE TITLE: How come bears eat no food?"
 
-      your reply should include the following Markdown:
+      Given the example context above, your reply should include the following Markdown - note that
+      the link target has no hostname, and is only a path:
 
-      According to the episode [How come bears eat no food?](/podcast/foo/episode/123), ...
+      "According to the episode [How come bears eat no food?](/podcast/foo/episode/123?seek-123.45),
+      bears are very good at foraging for food in the wild."
 
-      You should only include the link from in the EPISODE LINK, not any other links that
-      you may have.
+      NEVER include a hostname in the EPISODE LINK. You should only include EPISODE LINKS provided
+      by the context, not any other links that you may have. You are encouraged to reference
+      multiple EPISODE LINKS in your reply.
 
-      You may respond in Markdown format. Please remember to keep your answer short.`,
+      You may respond in Markdown format.`,
 };
 
 const EPISODE_ANSWER_PROMPT = {
@@ -187,12 +201,14 @@ export async function POST(req: Request) {
               tool_call_result: chunkResults,
             });
             console.log(`onToolCall: got ${newMessages.length} new messages`);
+            const prompt = [
+              episodeId !== undefined ? EPISODE_ANSWER_PROMPT : PODCAST_ANSWER_PROMPT,
+              ...messages,
+              ...newMessages,
+            ];
+            // console.log(`onToolCall: calling OpenAI with ${JSON.stringify(prompt, null, 2)}`);
             return openai.chat.completions.create({
-              messages: [
-                episodeId !== undefined ? EPISODE_ANSWER_PROMPT : PODCAST_ANSWER_PROMPT,
-                ...messages,
-                ...newMessages,
-              ],
+              messages: prompt,
               model: 'gpt-4o',
               stream: true,
               tools,

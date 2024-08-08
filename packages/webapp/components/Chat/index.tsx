@@ -197,6 +197,16 @@ function BusyMessage() {
   );
 }
 
+function MessageLink({ link }: { link: string }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <a href={link} className="text-[#ff0000] underline">
+        {link}
+      </a>
+    </div>
+  );
+}
+
 function ChatMessage({
   message,
   uuid,
@@ -207,6 +217,7 @@ function ChatMessage({
   uuid?: string;
   append: (m: CreateMessage) => void;
 }) {
+  const [links, setLinks] = useState<Set<string>>(new Set());
   const color = message.role === 'user' ? 'text-sky-200' : 'text-foreground-muted';
   const audioPlayer = useAudioPlayer();
   let play: (() => void) | undefined = undefined;
@@ -266,12 +277,16 @@ function ChatMessage({
               } else if (href?.startsWith('/podcast') && uuid) {
                 // Add the UUID to the link, if it's been provided by the parent component.
                 const link = href + (href.includes('?') ? '&' : '?') + 'uuid=' + uuid;
+                setLinks((prev) => new Set(prev.add(link)));
                 return (
                   <span className="text-primary underline">
                     <a href={link}>{children}</a>
                   </span>
                 );
               } else {
+                if (href) {
+                  setLinks((prev) => new Set(prev.add(href)));
+                }
                 return (
                   <span className="text-primary underline">
                     <a href={href}>{children}</a>
@@ -283,6 +298,7 @@ function ChatMessage({
         >
           {message.content}
         </MemoizedReactMarkdown>
+        { Array.from(links).map((link) => <MessageLink key={link} link={link} />) }
       </div>
     </div>
   );
