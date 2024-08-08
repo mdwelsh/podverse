@@ -23,40 +23,47 @@ export function useChatContext(): ChatContextType {
 
 /** A Context provider that provides the current podcast and episode, if designated by the path. */
 export function ChatContextProvider({
+  podcastSlug,
+  episodeSlug,
   podcast,
   episode,
   children,
 }: {
+  podcastSlug?: string;
+  episodeSlug?: string;
   podcast?: PodcastWithEpisodes;
   episode?: EpisodeWithPodcast;
   children: React.ReactNode;
+
 }) {
   // Here, null means not yet checked, and undefined means we're not in a podcast or episode context.
-  const [currentPodcast, setCurrentPodcast] = useState<PodcastWithEpisodes | null | undefined>(null);
-  const [currentEpisode, setCurrentEpisode] = useState<EpisodeWithPodcast | null | undefined>(null);
-  const { podcastSlug, episodeSlug } = useParams<{ podcastSlug: string; episodeSlug: string }>();
+  const [currentPodcast, setCurrentPodcast] = useState<PodcastWithEpisodes | null | undefined>(podcast || null);
+  const [currentEpisode, setCurrentEpisode] = useState<EpisodeWithPodcast | null | undefined>(episode || null);
+  const params = useParams<{ podcastSlug: string; episodeSlug: string }>();
+
   const searchParams = useSearchParams();
   const uuid = searchParams.get('uuid') || searchParams.get('activationCode') || undefined;
 
   useEffect(() => {
     // Fetch podcast and/or episode if needed.
-    if (podcastSlug) {
-      getPodcastWithEpisodes(podcastSlug).then((podcast) => {
+    const slugs = podcastSlug && episodeSlug ? { podcastSlug, episodeSlug } : params;
+    if (slugs.podcastSlug) {
+      getPodcastWithEpisodes(slugs.podcastSlug).then((podcast) => {
         // Bypass private check if correct UUID is provided.
         if (podcast.private && !uuid && podcast.uuid !== uuid) {
-          console.error(`Podcast ${podcastSlug} is private`);
+          console.error(`Podcast ${slugs.podcastSlug} is private`);
           setCurrentPodcast(undefined);
         } else {
           setCurrentPodcast(podcast);
-          if (episodeSlug) {
-            getEpisodeWithPodcast(podcastSlug, episodeSlug).then(setCurrentEpisode);
+          if (slugs.episodeSlug) {
+            getEpisodeWithPodcast(slugs.podcastSlug, slugs.episodeSlug).then(setCurrentEpisode);
           } else {
             setCurrentEpisode(undefined);
           }
         }
       });
     }
-  }, [podcast, episode, podcastSlug, episodeSlug, uuid]);
+  }, [podcast, episode, podcastSlug, episodeSlug, params, uuid]);
 
   const value: ChatContextType = {
     podcast: currentPodcast,
