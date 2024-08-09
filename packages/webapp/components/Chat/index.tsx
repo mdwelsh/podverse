@@ -8,6 +8,7 @@ import { useEffect, useRef, useState, type RefObject, useCallback } from 'react'
 import Textarea from 'react-textarea-autosize';
 import {
   ArrowDownIcon,
+  ArrowTopRightOnSquareIcon,
   PaperAirplaneIcon,
   UserIcon,
   PlayCircleIcon,
@@ -198,7 +199,7 @@ function BusyMessage() {
   );
 }
 
-function EpisodeLink() {
+function EpisodeLinkCard({ embed, uuid }: { embed?: boolean; uuid?: string }) {
   const { podcast, episode } = useChatContext();
   if (!podcast || !episode) {
     return (
@@ -207,27 +208,30 @@ function EpisodeLink() {
       </div>
     );
   }
+  let link = `/podcast/${episode.podcast.slug}/episode/${episode.slug}` + (uuid ? '?uuid=' + uuid : '');
+  // In an embedded context, we want to link directly to the episode.
+  if (embed) {
+    link = episode.url || episode.podcast.url || link;
+  }
   return (
-    <Link target="_parent" href={`/podcast/${episode.podcast.slug}/episode/${episode.slug}`}>
+    <Link target="_parent" href={link}>
       <div className="hover:border-primary flex w-full flex-row gap-2 rounded-lg bg-gray-700 p-2 text-white hover:border dark:bg-gray-700 dark:text-white">
-        {episode.imageUrl ? (
-          <Image alt="Episode thumbnail" src={episode.imageUrl} width={100} height={100} />
-        ) : (
-          <Image alt="Episode thumbnail" src={episode.podcast.imageUrl || ''} width={100} height={100} />
-        )}
         <div className="line-clamp-2 truncate text-wrap md:line-clamp-3">
-          <p className="my-2 font-[Inter] text-sm md:text-sm">{episode.title}</p>
+          <p className="font-[Inter] text-sm md:text-sm">
+            <ArrowTopRightOnSquareIcon className="text-primary mx-1 inline size-4 align-text-top" />
+            {episode.title}
+          </p>
         </div>
       </div>
     </Link>
   );
 }
 
-function MessageLink({ link }: { link: string }) {
+function MessageLink({ link, embed, uuid }: { link: string; embed?: boolean; uuid?: string }) {
   // Parse the link. If it is of the form /podcast/foo/episode/bar, extract the podcast (foo)
   // and episode (bar).
   const parts = link.split('/');
-  if (parts.length == 5 && parts[1] === 'podcast' && parts[3] === 'episode') {
+  if (parts.length == 5 && parts[0] === '' && parts[1] === 'podcast' && parts[3] === 'episode') {
     const podcastSlug = parts[2];
     const episodeSlug = parts[4];
     // Remove any query parameters from the episode slug.
@@ -236,29 +240,106 @@ function MessageLink({ link }: { link: string }) {
 
     return (
       <ChatContextProvider podcastSlug={podcastSlug} episodeSlug={episodeSlugNoQuery}>
-        <EpisodeLink />
+        <EpisodeLinkCard embed={embed} uuid={uuid} />
       </ChatContextProvider>
     );
   }
 
   return (
     <Link target="_parent" href={link}>
-      <div className="hover:border-primary flex w-full flex-row gap-2 rounded-lg bg-gray-700 p-2 font-mono text-sm text-white hover:border dark:bg-gray-700 dark:text-white">
+      <div className="hover:border-primary flex w-full flex-row gap-2 rounded-lg bg-gray-700 p-2 font-mono text-xs text-white hover:border dark:bg-gray-700 dark:text-white">
         {link}
       </div>
     </Link>
   );
 }
 
+function EpisodeLink({ uuid, children, embed }: { uuid?: string; children: any; embed?: boolean }) {
+  const { podcast, episode } = useChatContext();
+  if (!podcast || !episode) {
+    return <span className="text-muted-foreground underline">{children}</span>;
+  }
+  let link = `/podcast/${episode.podcast.slug}/episode/${episode.slug}` + (uuid ? '?uuid=' + uuid : '');
+  // In an embedded context, we want to link directly to the episode.
+  if (embed) {
+    link = episode.url || episode.podcast.url || link;
+  }
+  return (
+    <span className="text-primary underline">
+      <a target="_parent" href={link}>
+        {children}
+      </a>
+    </span>
+  );
+}
+
+function MagicLink({ href, children, uuid, embed }: { href: string; children: any; uuid?: string; embed?: boolean }) {
+  // Parse the link. If it is of the form /podcast/foo/episode/bar, extract the podcast (foo)
+  // and episode (bar).
+  const parts = href.split('/');
+  if (parts.length == 5 && parts[0] === '' && parts[1] === 'podcast' && parts[3] === 'episode') {
+    const podcastSlug = parts[2];
+    const episodeSlug = parts[4];
+    // Remove any query parameters from the episode slug.
+    const episodeSlugParts = episodeSlug.split('?');
+    const episodeSlugNoQuery = episodeSlugParts[0];
+
+    return (
+      <ChatContextProvider podcastSlug={podcastSlug} episodeSlug={episodeSlugNoQuery}>
+        <EpisodeLink uuid={uuid} embed={embed}>
+          {children}
+        </EpisodeLink>
+      </ChatContextProvider>
+    );
+  }
+
+  return (
+    <span className="text-primary underline">
+      <a target="_parent" href={href}>
+        {children}
+      </a>
+    </span>
+  );
+}
+
+/** Clean up the provided href link, since these can sometimes get mangled by the LLM. */
+function cleanUpLink(href?: string): string | undefined {
+  if (href === undefined) {
+    return undefined;
+  }
+  let url;
+  try {
+    url = new URL(href);
+  } catch (e) {
+    // Try tacking on our hostname and parsing again.
+    try {
+      url = new URL('https://podverse.ai' + href);
+    } catch (e) {
+      // Nope, that didn't work.
+      console.error('cleanUpLink: Failed to parse URL:', href);
+      return href;
+    }
+  }
+
+  // If it matches the pattern /podcast/foo/episode/bar, remove the hostname and return the path only.
+  if (url.pathname.match(/^\/podcast\/[^/]+\/episode\/[^/]+$/)) {
+    return url.pathname + url.search;
+  }
+  // Assume this was a true URL that we should keep as-is.
+  return href;
+}
+
 function ChatMessage({
   message,
   uuid,
   append,
+  embed,
   ...props
 }: {
   message: Message;
   uuid?: string;
   append: (m: CreateMessage) => void;
+  embed?: boolean;
 }) {
   const [links, setLinks] = useState<Set<string>>(new Set());
   const color = message.role === 'user' ? 'text-sky-200' : 'text-foreground-muted';
@@ -311,36 +392,22 @@ function ChatMessage({
               return <code className="mb-2 font-mono last:mb-0">{children}</code>;
             },
             a({ children, href }) {
-              if (href?.indexOf('/podcast/')) {
-                // Assume this is a podcast link generated by the AI.
-                // Remove any hostname that might appear before /podcast.
-                href = href.replace(/.*\/podcast/, '/podcast');
-              }
-
+              href = cleanUpLink(href);
               if (href?.startsWith('/?suggest')) {
                 const suggestion = children as string;
                 return <ChatSuggestion text={suggestion} onClick={() => doQuery(suggestion)} />;
               } else if (href?.startsWith('/?seek=')) {
                 const time = parseFloat(href.split('=')[1]);
                 return <ChatPlay time={time} onClick={() => doPlay(time)} />;
-              } else if (href?.startsWith('/podcast') && uuid) {
-                // Add the UUID to the link, if it's been provided by the parent component.
-                const link = href + (href.includes('?') ? '&' : '?') + 'uuid=' + uuid;
-                setLinks((prev) => new Set(prev.add(link)));
+              } else if (href) {
+                setLinks((prev) => new Set(prev.add(href)));
                 return (
-                  <span className="text-primary underline">
-                    <a href={link}>{children}</a>
-                  </span>
+                  <MagicLink href={href} uuid={uuid} embed={embed}>
+                    {children}
+                  </MagicLink>
                 );
               } else {
-                if (href) {
-                  setLinks((prev) => new Set(prev.add(href)));
-                }
-                return (
-                  <span className="text-primary underline">
-                    <a href={href}>{children}</a>
-                  </span>
-                );
+                return <div>{children}</div>;
               }
             },
           }}
@@ -349,7 +416,7 @@ function ChatMessage({
         </MemoizedReactMarkdown>
         <div className="mt-2 flex flex-col gap-2">
           {Array.from(links).map((link) => (
-            <MessageLink key={link} link={link} />
+            <MessageLink key={link} link={link} embed={embed} uuid={uuid} />
           ))}
         </div>
       </div>
@@ -362,18 +429,20 @@ function ChatList({
   uuid,
   append,
   endRef,
+  embed,
 }: {
   messages: any[];
   uuid?: string;
   append: (m: CreateMessage) => void;
   endRef: any;
+  embed?: boolean;
 }) {
   const lastMessage = messages[messages.length - 1];
 
   return (
     <div className="flex flex-col gap-2 p-4">
       {messages.map((m) => (
-        <ChatMessage key={m.id} message={m} append={append} uuid={uuid} />
+        <ChatMessage key={m.id} message={m} append={append} uuid={uuid} embed={embed} />
       ))}
       {lastMessage.role === 'user' && <BusyMessage />}
       <div className="h-px w-full" ref={endRef} />
@@ -397,12 +466,14 @@ export function Chat({
   episodeId,
   podcastId,
   uuid,
+  embed,
 }: {
   greeting?: string;
   suggestions?: string[];
   episodeId?: number;
   podcastId?: number;
   uuid?: string;
+  embed?: boolean;
 }) {
   const [canScroll, setCanScroll] = useState(false);
   const initialMessages = useMemo(() => {
@@ -467,7 +538,7 @@ export function Chat({
       <div className="overflow-y-auto pb-[100px]" ref={scrollRef}>
         {messages.length ? (
           <>
-            <ChatList messages={messages} append={doAppend} endRef={messagesRef} uuid={uuid} />
+            <ChatList messages={messages} append={doAppend} endRef={messagesRef} uuid={uuid} embed={embed} />
           </>
         ) : (
           <EmptyChat />
@@ -489,7 +560,7 @@ export function Chat({
   );
 }
 
-export function ContextAwareChat() {
+export function ContextAwareChat({ embed }: { embed?: boolean }) {
   const { podcast, episode } = useChatContext();
   if (podcast === null || episode === null) {
     // We're still loading the context.
@@ -500,23 +571,25 @@ export function ContextAwareChat() {
   const suggestions = ['What are some good science podcasts?', 'Are there any episodes about music?', 'Report a bug'];
 
   if (episode) {
-    return <EpisodeContextChat episode={episode} />;
+    return <EpisodeContextChat episode={episode} embed={embed} />;
   } else if (podcast) {
-    return <PodcastContextChat podcast={podcast} />;
+    return <PodcastContextChat podcast={podcast} embed={embed} />;
   } else {
-    return <Chat greeting={greeting} suggestions={suggestions} />;
+    return <Chat greeting={greeting} suggestions={suggestions} embed={embed} />;
   }
 }
 
-export function PodcastContextChat({ podcast }: { podcast: PodcastWithEpisodes }) {
+export function PodcastContextChat({ podcast, embed }: { podcast: PodcastWithEpisodes; embed?: boolean }) {
   // Ensure the chat widget can add UUIDs to outgoing links if we are the owner.
   const { userId } = useAuth();
   const uuid = userId && podcast.owner === userId && podcast.uuid ? podcast.uuid.replace(/-/g, '') : undefined;
   const greeting = `Hi there! I\'m the Podverse AI Bot. You can ask me questions about the **${podcast.title}** podcast.`;
-  return <Chat podcastId={podcast.id} greeting={greeting} suggestions={podcast.suggestions} uuid={uuid} />;
+  return (
+    <Chat podcastId={podcast.id} greeting={greeting} suggestions={podcast.suggestions} uuid={uuid} embed={embed} />
+  );
 }
 
-export function EpisodeContextChat({ episode }: { episode: EpisodeWithPodcast }) {
+export function EpisodeContextChat({ episode, embed }: { episode: EpisodeWithPodcast; embed?: boolean }) {
   // Ensure the chat widget can add UUIDs to outgoing links if we are the owner.
   const { userId } = useAuth();
   const uuid =
@@ -524,5 +597,7 @@ export function EpisodeContextChat({ episode }: { episode: EpisodeWithPodcast })
       ? episode.podcast.uuid.replace(/-/g, '')
       : undefined;
   const greeting = `Hi there! I\'m the Podverse AI Bot. You can ask me questions about **${episode.title}** or the **${episode.podcast.title}** podcast.`;
-  return <Chat episodeId={episode.id} greeting={greeting} suggestions={episode.suggestions} uuid={uuid} />;
+  return (
+    <Chat episodeId={episode.id} greeting={greeting} suggestions={episode.suggestions} uuid={uuid} embed={embed} />
+  );
 }

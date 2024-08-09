@@ -11,7 +11,7 @@ export function ChatEmbed({ podcastSlug, episodeSlug }: { podcastSlug: string; e
         <div className="mx-auto mt-2">
           <PoweredBy />
         </div>
-        <ContextAwareChat />
+        <ContextAwareChat embed={true} />
       </ChatContextProvider>
     </div>
   );

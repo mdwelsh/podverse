@@ -42,16 +42,18 @@ const PODCAST_ANSWER_PROMPT = {
       END OF TEXT.
 
       AUDIO START TIME: 123.45
-      EPISODE LINK: /podcast/foo/episode/123
+      EPISODE LINK: /podcast/amazing-podcast/episode/all-about-bears
       EPISODE TITLE: How come bears eat no food?"
 
       Given the example context above, your reply should include the following Markdown - note that
       the link target has no hostname, and is only a path:
 
-      "According to the episode [How come bears eat no food?](/podcast/foo/episode/123?seek-123.45),
+      "According to the episode [How come bears eat no food?](/podcast/amazing-podcast/episode/all-about-bears?seek-123.45),
       bears are very good at foraging for food in the wild."
 
-      NEVER include a hostname in the EPISODE LINK. You should only include EPISODE LINKS provided
+      Link URLs must ALWAYS be of the form "/podcast/<podcast-name>/episode/<episode-name>".
+
+      NEVER include a hostname in the link URL. You should only include EPISODE LINKS provided
       by the context, not any other links that you may have. You are encouraged to reference
       multiple EPISODE LINKS in your reply.
 
