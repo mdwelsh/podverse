@@ -58,6 +58,11 @@ export default async function Page() {
           easier for listeners to learn more about your podcast.
         </Feature>
 
+        <Feature heading="Embedded on your site" image="/images/podverse-embed-screenshot.png">
+          AI features are fully embedded on your site -- search, chat, and transcripts. Customize the look and feel to
+          match your site.
+        </Feature>
+
         <Feature heading="AI-powered chat" image="/images/podverse-chat-screenshot.png">
           Podverse builds an AI chatbot that knows everything about your podcast and the content of every episode,
           helping listeners dig deeper by asking questions and getting more information about your content. It&apos;s

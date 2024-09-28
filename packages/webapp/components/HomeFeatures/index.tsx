@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { ZoomableImage } from '@/components/ZoomableImage';
 import { auth } from '@clerk/nextjs/server';
@@ -84,6 +83,11 @@ export async function HomeFeatures() {
           <Feature heading="Automatic episode transcripts" image="/images/podverse-transcript-screenshot.png">
             Podverse generates text transcripts of each episode, and automatically identify the names of each speaker in
             the audio. Transcripts are synchronized with audio playback.
+          </Feature>
+
+          <Feature heading="Embedded on your site" image="/images/podverse-embed-screenshot.png">
+            AI features are fully embedded on your site -- search, chat, and transcripts. 
+            Customize the look and feel to match your site.
           </Feature>
 
           <Feature heading="AI-generated episode summaries" image="/images/podverse-summary-screenshot.png">
