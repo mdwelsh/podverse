@@ -100,13 +100,6 @@ export default async function Page() {
 
         <div className="mt-4 font-mono text-3xl">Who made this thing?</div>
         <div className="text-muted-foreground">
-          <Image
-            className="float-right mb-4 ml-8"
-            src="/images/ziggylabs-logo.svg"
-            alt="Ziggylabs logo"
-            width={200}
-            height={200}
-          />
           Podverse is created by{' '}
           <a href="https://ziggylabs.ai" className="text-primary underline">
             Ziggylabs
