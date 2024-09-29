@@ -74,8 +74,8 @@ export async function getPodcastSuggestions(podcastId: number, includeEpisodes: 
 export async function updateEpisode(episode: Episode | EpisodeWithPodcast): Promise<Episode> {
   console.log(`Updating episode: ${episode.id}`);
   const supabase = await getSupabaseClient();
-  revalidatePath('/podcast/[podcastSlug]');
-  revalidatePath('/podcast/[podcastSlug]/episode/[episodeSlug]');
+  revalidatePath('/podcast/[podcastSlug]', 'layout');
+  revalidatePath('/podcast/[podcastSlug]/episode/[episodeSlug]', 'layout');
   return UpdateEpisode(supabase, episode);
 }
 
@@ -105,8 +105,8 @@ export async function processEpisode(episodeId: string, force: boolean): Promise
     },
   });
 
-  revalidatePath('/podcast/[podcastSlug]');
-  revalidatePath('/podcast/[podcastSlug]/episode/[episodeSlug]');
+  revalidatePath('/podcast/[podcastSlug]', 'layout');
+  revalidatePath('/podcast/[podcastSlug]/episode/[episodeSlug]', 'layout');
   revalidatePath('/dashboard');
   return `Processing episode ${episodeId}`;
 }
@@ -173,8 +173,8 @@ export async function updatePodcast(podcast: Podcast): Promise<Podcast> {
   console.log(`Updating podcast: ${podcast.id}`);
   const supabase = await getSupabaseClient();
   revalidatePath('/featured');
-  revalidatePath('/podcast/[podcastSlug]');
-  revalidatePath('/podcast/[podcastSlug]/episode/[episodeSlug]');
+  revalidatePath('/podcast/[podcastSlug]', 'layout');
+  revalidatePath('/podcast/[podcastSlug]/episode/[episodeSlug]', 'layout');
   return SetPodcast(supabase, podcast);
 }
 

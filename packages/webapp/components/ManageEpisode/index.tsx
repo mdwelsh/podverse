@@ -9,7 +9,7 @@ import moment from 'moment';
 import { toast } from 'sonner';
 import { EpisodeIndicator } from '../Indicators';
 import { BoltIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { processEpisode } from '@/lib/actions';
+import { processEpisode, updateEpisode } from '@/lib/actions';
 import { useEpisodeLimit } from '@/lib/limits';
 import { cn } from '@/lib/utils';
 import { getEpisodeWithPodcast } from '@/lib/actions';
@@ -17,6 +17,61 @@ import { EpisodeHeader } from '@/components/EpisodeHeader';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmbedEpisode } from '@/components/Embed';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import Textarea from 'react-textarea-autosize';
+
+function EditableField({
+  label,
+  multiline,
+  text,
+  onChange,
+}: {
+  label: string;
+  multiline?: boolean;
+  text?: string | null;
+  onChange: (text: string) => void;
+}) {
+  const [value, setValue] = useState(text || '');
+  const [edited, setEdited] = useState(false);
+
+  const onTextChanged = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setValue(e.target.value);
+    if (e.target.value !== text) {
+      setEdited(true);
+    }
+  };
+
+  const onSubmit = () => {
+    if (!edited) {
+      return;
+    }
+    onChange(value);
+    setEdited(false);
+  };
+
+  if (multiline) {
+    return (
+      <div className="flex w-full max-w-full flex-col gap-2">
+        {label && <div className="text-muted-foreground text-sm">{label}</div>}
+        <Textarea placeholder={label} value={value} onChange={onTextChanged} className="text-xs" />
+        <Button variant="secondary" disabled={!edited} onClick={onSubmit}>
+          Update
+        </Button>
+      </div>
+    );
+  } else {
+    return (
+      <div className="flex w-full max-w-lg items-center space-x-2">
+        {label && <div className="text-muted-foreground text-sm">{label}</div>}
+        <Input type="text" placeholder={label} value={value} onChange={onTextChanged} />
+        <Button variant="secondary" disabled={!edited} onClick={onSubmit}>
+          Update
+        </Button>
+      </div>
+    );
+  }
+}
 
 export function ManageEpisode({ podcastSlug, episodeSlug }: { podcastSlug: string; episodeSlug: string }) {
   const [episode, setEpisode] = useState<EpisodeWithPodcast | null>(null);
@@ -36,7 +91,7 @@ export function ManageEpisode({ podcastSlug, episodeSlug }: { podcastSlug: strin
 
   if (!episode) {
     return (
-      <div className="mx-auto mt-8 w-full px-2 md:w-4/5 flex flex-col gap-4 h-64">
+      <div className="mx-auto mt-8 flex h-64 w-full flex-col gap-4 px-2 md:w-4/5">
         <Skeleton />
       </div>
     );
@@ -44,8 +99,8 @@ export function ManageEpisode({ podcastSlug, episodeSlug }: { podcastSlug: strin
 
   return (
     <>
-      <div className="mx-auto mt-8 w-full px-2 md:w-4/5 flex flex-col gap-4">
-        <div className="font-mono text-2xl font-bold flex flex-row items-center gap-2">Manage episode</div>
+      <div className="mx-auto mt-8 flex w-full flex-col gap-4 px-2 md:w-4/5">
+        <div className="flex flex-row items-center gap-2 font-mono text-2xl font-bold">Manage episode</div>
         <EpisodeHeader episode={episode} showManage={false} />
         <div className="w-fit">
           <Link
@@ -57,19 +112,19 @@ export function ManageEpisode({ podcastSlug, episodeSlug }: { podcastSlug: strin
         </div>
 
         <Tabs defaultValue="general" className="w-90% mt-8" orientation="vertical">
-          <div className="flex flex-row gap-16">
-            <TabsList className="w-40% flex-col h-max items-start bg-transparent border border-muted">
-              <TabsTrigger className="font-normal data-[state=active]:text-primary" value="general">
-                General
+          <div className="flex flex-row gap-4">
+            <TabsList className="w-40% border-muted h-max flex-col items-start border bg-transparent">
+              <TabsTrigger className="data-[state=active]:text-primary font-normal" value="general">
+                General settings
               </TabsTrigger>
-              <TabsTrigger className="font-normal data-[state=active]:text-primary" value="embed">
-                Embed
+              <TabsTrigger className="data-[state=active]:text-primary font-normal" value="embed">
+                Embed episode
               </TabsTrigger>
             </TabsList>
-            <TabsContent className="w-60%" value="general">
+            <TabsContent className="w-60% border-muted my-0 border p-4" value="general">
               <ManageEpisodeGeneral episode={episode} />
             </TabsContent>
-            <TabsContent className="w-60%" value="embed">
+            <TabsContent className="w-60% border-muted my-0 border p-4" value="embed">
               <EmbedEpisode episode={episode} />
             </TabsContent>
           </div>
@@ -84,7 +139,7 @@ function ManageEpisodeGeneral({ episode }: { episode: EpisodeWithPodcast }) {
   const planLimit = useEpisodeLimit(episode.podcast.id);
   if (!planLimit) {
     return (
-      <div className="mx-auto mt-8 w-full px-2 md:w-4/5 flex flex-col gap-4">
+      <div className="mx-auto mt-8 flex w-full flex-col gap-4 px-2 md:w-4/5">
         <Skeleton />
       </div>
     );
@@ -107,10 +162,8 @@ function ManageEpisodeGeneral({ episode }: { episode: EpisodeWithPodcast }) {
       <ExclamationTriangleIcon className="text-primary size-20" />
       <div>
         You have processed <span className="text-primary">{planLimit.processedEpisodes}</span> out of{' '}
-        <span className="text-primary">{planLimit.maxEpisodesPerPodcast}</span> episodes allowed for this podcast
-        on your {planLimit.plan.displayName} plan.
-         You
-        can{' '}
+        <span className="text-primary">{planLimit.maxEpisodesPerPodcast}</span> episodes allowed for this podcast on
+        your {planLimit.plan.displayName} plan. You can{' '}
         <Link href="/pricing" className="text-primary underline">
           upgrade your plan
         </Link>{' '}
@@ -119,15 +172,49 @@ function ManageEpisodeGeneral({ episode }: { episode: EpisodeWithPodcast }) {
     </div>
   );
 
+  const doUpdateEpisode = async () => {
+    try {
+      await updateEpisode(episode);
+      toast.success('Updated episode');
+    } catch (e) {
+      toast.error(`Failed to update: ${(e as { message: string }).message}`);
+    }
+  };
+
   let statusMessage = status && status.message;
   let errorMessage = episode.error ? JSON.stringify(episode.error, null, 2) : null;
   const processingAllowed = force || canProcess;
 
   return (
     <div className="flex flex-col items-start gap-8">
-      <div className="flex w-auto flex-col gap-2">
+      <div className="flex w-auto flex-col gap-4">
+        <EditableField
+          label="Title"
+          text={episode.title}
+          onChange={(text) => {
+            episode.title = text;
+            doUpdateEpisode();
+          }}
+        />
+        <EditableField
+          label="URL"
+          text={episode.url}
+          onChange={(text) => {
+            episode.url = text;
+            doUpdateEpisode();
+          }}
+        />
+        <EditableField
+          multiline
+          label="Description"
+          text={episode.description}
+          onChange={(text) => {
+            episode.description = text;
+            doUpdateEpisode();
+          }}
+        />
         <div className="flex flex-row justify-between">
-          <div className="flex flex-row gap-2">
+          <div className="mt-4 flex flex-row gap-2">
             <EpisodeIndicator episode={episode} />
             {isPending(episode) && <div>Processing not started</div>}
             {isProcessing(episode) && <div>{statusMessage || 'Processing'}</div>}

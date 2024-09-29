@@ -348,9 +348,11 @@ export async function SetEpisode(supabase: SupabaseClient, episode: Episode): Pr
 /** Update the given Episode. */
 export async function UpdateEpisode(supabase: SupabaseClient, episode: Episode | EpisodeWithPodcast): Promise<Episode> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { podcast, speakers, ...episodeData } = episode as EpisodeWithPodcast;
+  const { podcast, speakers, suggestions, ...episodeData } = episode as EpisodeWithPodcast;
+  console.log('Updating episode:', episodeData);
   const { data, error } = await supabase.from('Episodes').update(episodeData).eq('id', episode.id).select('*');
   if (error) {
+    console.error('Error updating episode: ', error);
     throw error;
   }
   if (data === null) {
