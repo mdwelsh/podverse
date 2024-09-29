@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { EpisodeStatus, isPending, isProcessing, isError, isReady, EpisodeWithPodcast } from 'podverse-utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { buttonVariants } from '@/components/ui/button';
@@ -20,6 +20,7 @@ import { EmbedEpisode } from '@/components/Embed';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Textarea from 'react-textarea-autosize';
+import { useDropzone } from 'react-dropzone';
 
 function EditableField({
   label,
@@ -62,7 +63,7 @@ function EditableField({
     );
   } else {
     return (
-      <div className="flex w-full max-w-lg items-center space-x-2">
+      <div className="flex w-full max-w-xl items-center space-x-2">
         {label && <div className="text-muted-foreground text-sm">{label}</div>}
         <Input type="text" placeholder={label} value={value} onChange={onTextChanged} />
         <Button variant="secondary" disabled={!edited} onClick={onSubmit}>
@@ -71,6 +72,35 @@ function EditableField({
       </div>
     );
   }
+}
+
+function UploadImage() {
+  const onDrop = useCallback((acceptedFiles: any) => {
+    acceptedFiles.forEach((file: any) => {
+      const reader = new FileReader();
+      reader.onabort = () => console.log('file reading was aborted');
+      reader.onerror = () => console.log('file reading has failed');
+      reader.onload = () => {
+        // Do whatever you want with the file contents
+        const binaryStr = reader.result;
+        console.log(binaryStr);
+        toast.info('Value is: ' + binaryStr);
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }, []);
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: { 'image/*': ['.jpeg', '.jpg', '.png'] },
+    multiple: false,
+  });
+
+  return (
+    <div {...getRootProps()}>
+      <input {...getInputProps()} />
+      <p>Drag image here or click to select files</p>
+    </div>
+  );
 }
 
 export function ManageEpisode({ podcastSlug, episodeSlug }: { podcastSlug: string; episodeSlug: string }) {
@@ -204,6 +234,7 @@ function ManageEpisodeGeneral({ episode }: { episode: EpisodeWithPodcast }) {
             doUpdateEpisode();
           }}
         />
+        {/* <UploadImage /> */}
         <EditableField
           multiline
           label="Description"
