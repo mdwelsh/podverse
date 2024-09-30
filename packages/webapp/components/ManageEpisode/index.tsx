@@ -9,7 +9,7 @@ import moment from 'moment';
 import { toast } from 'sonner';
 import { EpisodeIndicator } from '../Indicators';
 import { BoltIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { processEpisode, updateEpisode } from '@/lib/actions';
+import { processEpisode, updateEpisode, uploadCoverImage } from '@/lib/actions';
 import { useEpisodeLimit } from '@/lib/limits';
 import { cn } from '@/lib/utils';
 import { getEpisodeWithPodcast } from '@/lib/actions';
@@ -55,7 +55,12 @@ function EditableField({
     return (
       <div className="flex w-full max-w-full flex-col gap-2">
         {label && <div className="text-muted-foreground text-sm">{label}</div>}
-        <Textarea placeholder={label} value={value} onChange={onTextChanged} className="text-xs" />
+        <Textarea
+          placeholder={label}
+          value={value}
+          onChange={onTextChanged}
+          className="text-xs p-4 border border-muted"
+        />
         <Button variant="secondary" disabled={!edited} onClick={onSubmit}>
           Update
         </Button>
@@ -74,21 +79,28 @@ function EditableField({
   }
 }
 
-function UploadImage() {
+function UploadImage({ episode }: { episode: EpisodeWithPodcast }) {
   const onDrop = useCallback((acceptedFiles: any) => {
     acceptedFiles.forEach((file: any) => {
       const reader = new FileReader();
       reader.onabort = () => console.log('file reading was aborted');
       reader.onerror = () => console.log('file reading has failed');
-      reader.onload = () => {
-        // Do whatever you want with the file contents
-        const binaryStr = reader.result;
-        console.log(binaryStr);
-        toast.info('Value is: ' + binaryStr);
+      reader.onload = async function () {
+        const dataUrl = reader.result as string;
+        const base64String = dataUrl.split(',')[1];
+        try {
+          await uploadCoverImage(episode.id, base64String);
+          toast.info('Updated cover image');
+        } catch (e) {
+          // @ts-ignore
+          toast.error('Failed to upload cover image: ' + e.message);
+          return;
+        }
       };
-      reader.readAsArrayBuffer(file);
+      reader.readAsDataURL(file);
     });
   }, []);
+
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     accept: { 'image/*': ['.jpeg', '.jpg', '.png'] },
@@ -96,9 +108,14 @@ function UploadImage() {
   });
 
   return (
-    <div {...getRootProps()}>
-      <input {...getInputProps()} />
-      <p>Drag image here or click to select files</p>
+    <div className="flex w-full max-w-xl items-center space-x-2">
+      <div className="text-muted-foreground text-sm">Cover image</div>
+      <div className="max-w-lg rounded-lg bg-muted border border-dashed border-muted-foreground text-muted-foreground text-sm font-mono p-4 cursor-pointer">
+        <div {...getRootProps()}>
+          <input {...getInputProps()} />
+          <p>Drag cover image here or click to select file</p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -234,7 +251,7 @@ function ManageEpisodeGeneral({ episode }: { episode: EpisodeWithPodcast }) {
             doUpdateEpisode();
           }}
         />
-        {/* <UploadImage /> */}
+        <UploadImage episode={episode} />
         <EditableField
           multiline
           label="Description"

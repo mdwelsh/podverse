@@ -5,6 +5,7 @@
 import {
   Episode,
   EpisodeWithPodcast,
+  GetEpisode,
   GetEpisodeWithPodcast,
   UpdateEpisode,
   DeletePodcast,
@@ -28,6 +29,7 @@ import {
   GetPodcastStats,
   PLANS,
   SetPodcast,
+  UploadLargeFile
 } from 'podverse-utils';
 import { SubscriptionState } from 'podverse-utils/src/plans';
 import { getSupabaseClient, getSupabaseClientWithToken } from '@/lib/supabase';
@@ -39,6 +41,8 @@ import { Resend } from 'resend';
 import { EpisodeLimit } from '@/lib/limits';
 import { sendEmail } from '@/lib/email';
 import { getUser, userPrimaryEmailAddress } from '@/lib/users';
+import { Readable } from 'stream';
+import { v4 as uuidv4 } from 'uuid';
 
 /** Get the given podcast. */
 export async function getPodcast(podcastId: string): Promise<Podcast> {
@@ -438,4 +442,36 @@ export async function assignPodcastToUser(podcastId: number, userId: string, act
     subject: 'Podcast ownership transfer',
     text: `Podcast ${podcast.slug} ownership transferred to user ${userEmail}`,
   });
+}
+
+export async function uploadCoverImage(episodeId: number, base64Image: string): Promise<void> {
+  console.log(`Got cover image upload for episode: ${episodeId}`);
+  const { getToken } = auth();
+  const supabase = await getSupabaseClient();
+  const supabaseAccessToken = await getToken({ template: 'podverse-supabase' });
+  const episode = await GetEpisode(supabase, episodeId);
+
+  const buffer = Buffer.from(base64Image, 'base64');
+  const readableStream = new Readable();
+  readableStream._read = () => {};
+  readableStream.push(buffer);
+  readableStream.push(null);
+
+  const filename = `cover-${uuidv4()}`;
+
+  const imageUrl = await UploadLargeFile(
+    supabase,
+    supabaseAccessToken,
+    readableStream,
+    'image/jpeg',
+    'covers',
+    `${episode.podcast}/${episode.id}/${filename}`,
+  );
+
+  episode.imageUrl = imageUrl;
+  await UpdateEpisode(supabase, episode);
+  revalidatePath('/podcast/[podcastSlug]', 'layout');
+  revalidatePath('/podcast/[podcastSlug]/episode/[episodeSlug]', 'layout');
+  revalidatePath('/podcast/[podcastSlug]/episode/[episodeSlug]/manage', 'layout');
+  console.log(`Saved cover image for ${episode.id} to: ${imageUrl}`);
 }

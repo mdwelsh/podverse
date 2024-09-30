@@ -550,6 +550,7 @@ export async function UploadLargeFile(
       endpoint: `${supabaseUrl}/storage/v1/upload/resumable`,
       retryDelays: [0, 3000, 5000, 10000, 20000],
       headers,
+      uploadLengthDeferred: true,
       uploadDataDuringCreation: true,
       removeFingerprintOnSuccess: true,
       metadata: {
