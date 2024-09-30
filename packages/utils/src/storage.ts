@@ -550,7 +550,9 @@ export async function UploadLargeFile(
       endpoint: `${supabaseUrl}/storage/v1/upload/resumable`,
       retryDelays: [0, 3000, 5000, 10000, 20000],
       headers,
-      uploadLengthDeferred: true,
+      // XXX MDW - Need to figure out how to get this to work for images
+      // (which requires this field) versus audio (which does not).
+      //uploadLengthDeferred: true,
       uploadDataDuringCreation: true,
       removeFingerprintOnSuccess: true,
       metadata: {
