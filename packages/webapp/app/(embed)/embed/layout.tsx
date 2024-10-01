@@ -9,6 +9,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { ClerkProvider } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
+import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 
 export const metadata: Metadata = {
   title: {
@@ -63,6 +64,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
               </div>
               <TailwindIndicator />
             </ThemeProvider>
+            <GoogleAnalytics />
             <Analytics />
           </body>
         </html>
