@@ -13,7 +13,8 @@ import { FloatingChatPanel } from '@/components/ChatPanel';
 import { dark } from '@clerk/themes';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { GoogleAnalytics } from '@/components/GoogleAnalytics';
+import { GoogleAnalytics } from '@next/third-parties/google'
+ 
 
 export const metadata: Metadata = {
   title: {
@@ -84,9 +85,9 @@ export default async function RootLayout({ children }: RootLayoutProps) {
               </div>
               <TailwindIndicator />
             </ThemeProvider>
-            <GoogleAnalytics />
             <Analytics />
           </body>
+          <GoogleAnalytics gaId="G-F7EJYK1JLV" />
         </html>
       </ClerkProvider>
       <SpeedInsights />

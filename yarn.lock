@@ -1164,6 +1164,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@next/third-parties@npm:^14.2.14":
+  version: 14.2.14
+  resolution: "@next/third-parties@npm:14.2.14"
+  dependencies:
+    third-party-capital: 1.0.20
+  peerDependencies:
+    next: ^13.0.0 || ^14.0.0
+    react: ^18.2.0
+  checksum: e5408084b994d29d949ab0b43fe506b31f084561f9b7b2199c8a1954fb18b2d10c5d0f228396ef8aabbdf5b41a51a3966ed8b46a1f8e237e875058207cf845d6
+  languageName: node
+  linkType: hard
+
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -10955,6 +10967,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"third-party-capital@npm:1.0.20":
+  version: 1.0.20
+  resolution: "third-party-capital@npm:1.0.20"
+  checksum: ef5eae00bdb82b538b9f628a011fc294cd6f4bafdbb46d88f3d1a72e8c3b9e2cc2a547fdb62bc16bdd847e9da3dac2df676b154c64914f6c90ea15aac6ce0a6a
+  languageName: node
+  linkType: hard
+
 "tinycolor2@npm:^1.4.1":
   version: 1.6.0
   resolution: "tinycolor2@npm:1.6.0"
@@ -11753,6 +11772,7 @@ __metadata:
     "@deepgram/sdk": ^3.1.9
     "@heroicons/react": ^2.1.1
     "@ianvs/prettier-plugin-sort-imports": ^3.7.2
+    "@next/third-parties": ^14.2.14
     "@radix-ui/react-checkbox": ^1.0.4
     "@radix-ui/react-dialog": ^1.0.5
     "@radix-ui/react-label": ^2.0.2
