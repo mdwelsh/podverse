@@ -43,6 +43,8 @@ export const PLANS: Record<string, Plan> = {
     description: 'Unlimited power',
     price: 50.0,
     priceId: 'price_1PQuwD1vQbZgOhBPdrBO0xOm',
+    maxPodcasts: Infinity,
+    maxEpisodesPerPodcast: Infinity,
   },
   unlimited: {
     id: 'unlimited',
@@ -50,6 +52,8 @@ export const PLANS: Record<string, Plan> = {
     description: 'Unlimited everything',
     price: 300.0,
     hidden: true,
+    maxPodcasts: Infinity,
+    maxEpisodesPerPodcast: Infinity,
   },
 };
 
