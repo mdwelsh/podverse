@@ -42,12 +42,10 @@ export async function GetPodcasts(
   isPrivate?: boolean,
   isPublished?: boolean,
 ): Promise<PodcastListEntry[]> {
-  // For now, we ignore the isPublished flag and always return all podcasts
-  // subject to the private flag.
   const { data, error } = await supabase.rpc('all_podcasts', {
     limit: limit || 100,
     isPrivate: isPrivate ?? false,
-//    isPublished: isPublished ?? true,
+    isPublished: isPublished ?? true,
   });
   if (error) {
     console.error('error', error);
