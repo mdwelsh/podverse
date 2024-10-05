@@ -37,8 +37,8 @@ export function PodcastCarousel() {
 
   if (podcasts.length === 0) {
     return (
-      <div className="w-full">
-        <Skeleton className="h-48 w-full" />
+      <div className="mx-auto w-1/2">
+        <Skeleton className="h-52 w-full" />
       </div>
     );
   }
