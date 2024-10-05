@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { SignupOrLogin } from '@/components/SignupOrLogin';
+import { PodcastCarousel } from '../PodcastCarousel';
 
 function Feature({ heading, image, children }: { heading: string; image?: string; children: React.ReactNode }) {
   return (
@@ -79,6 +80,10 @@ export async function HomeFeatures() {
             The Podverse episode page, with transcript, summary, and AI chat.
           </ZoomableImage>
         </div>
+        <div className="w-full mx-auto">
+          <div className="font-mono text-lg text-center text-primary p-4">Explore podcasts on Podverse</div>
+          <PodcastCarousel />
+        </div>
         <div className="mx-auto mt-6 w-full md:w-4/5">
           <Feature heading="Automatic episode transcripts" image="/images/podverse-transcript-screenshot.png">
             Podverse generates text transcripts of each episode, and automatically identify the names of each speaker in
@@ -86,8 +91,8 @@ export async function HomeFeatures() {
           </Feature>
 
           <Feature heading="Embedded on your site" image="/images/podverse-embed-screenshot.png">
-            AI features are fully embedded on your site -- search, chat, and transcripts. 
-            Customize the look and feel to match your site.
+            AI features are fully embedded on your site -- search, chat, and transcripts. Customize the look and feel to
+            match your site.
           </Feature>
 
           <Feature heading="AI-generated episode summaries" image="/images/podverse-summary-screenshot.png">
