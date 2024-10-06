@@ -44,7 +44,8 @@ export function PodcastCarousel() {
   }
 
   return (
-    <div className="group relative mx-auto w-full max-w-md md:max-w-xl lg:max-w-2xl">
+    // <div className="group relative mx-auto max-w-md md:max-w-xl lg:max-w-2xl">
+    <div className="mx-auto w-full max-w-sm sm:max-w-md md:max-w-xl lg:max-w-2xl">
       <Carousel
         opts={{
           align: 'center',
