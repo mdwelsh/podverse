@@ -29,7 +29,7 @@ import {
   GetPodcastStats,
   PLANS,
   SetPodcast,
-  UploadLargeFile
+  UploadLargeFile,
 } from 'podverse-utils';
 import { SubscriptionState } from 'podverse-utils/src/plans';
 import { getSupabaseClient, getSupabaseClientWithToken } from '@/lib/supabase';
@@ -474,4 +474,21 @@ export async function uploadCoverImage(episodeId: number, base64Image: string): 
   revalidatePath('/podcast/[podcastSlug]/episode/[episodeSlug]', 'layout');
   revalidatePath('/podcast/[podcastSlug]/episode/[episodeSlug]/manage', 'layout');
   console.log(`Saved cover image for ${episode.id} to: ${imageUrl}`);
+}
+
+/** Send an email. */
+export async function email({
+  subject,
+  text,
+  to,
+  from,
+  bcc,
+}: {
+  subject: string;
+  text: string;
+  to?: string;
+  from?: string;
+  bcc?: string;
+}): Promise<void> {
+  return sendEmail({ subject, text, to, from, bcc });
 }

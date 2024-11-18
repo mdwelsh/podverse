@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuth } from '@clerk/nextjs';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogClose, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -8,9 +9,9 @@ import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Icons } from '@/components/icons';
-import { Episode, Podcast, PodcastWithEpisodes, PodcastWithEpisodesMetadata } from 'podverse-utils';
+import { Episode, PodcastWithEpisodes, PodcastWithEpisodesMetadata } from 'podverse-utils';
 import { EpisodeStrip } from '../PodcastEpisodeList';
-import { readPodcastFeed, importPodcast } from '@/lib/actions';
+import { readPodcastFeed, importPodcast, email } from '@/lib/actions';
 import { usePodcastLimit } from '@/lib/limits';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -23,6 +24,7 @@ enum importStage {
 }
 
 export function NewPodcastDialog() {
+  const { userId } = useAuth();
   const [rssUrl, setRssUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [stage, setStage] = useState<importStage>(importStage.ENTER_URL);
@@ -45,6 +47,13 @@ export function NewPodcastDialog() {
         return;
       }
       setStage(importStage.LOADING);
+
+      email({
+        subject: 'Podcast import',
+        text: `User ${userId} is importing podcast from ${rssUrl}`,
+      }).catch((e) => {
+        console.error(`Error sending email: ${e}`);
+      });
 
       readPodcastFeed(rssUrl)
         .then((data) => {
