@@ -206,6 +206,7 @@ export type Database = {
           description: string | null
           id: number
           imageUrl: string | null
+          language: string | null
           owner: string | null
           private: boolean | null
           process: boolean
@@ -223,6 +224,7 @@ export type Database = {
           description?: string | null
           id?: number
           imageUrl?: string | null
+          language?: string | null
           owner?: string | null
           private?: boolean | null
           process?: boolean
@@ -240,6 +242,7 @@ export type Database = {
           description?: string | null
           id?: number
           imageUrl?: string | null
+          language?: string | null
           owner?: string | null
           private?: boolean | null
           process?: boolean
@@ -495,11 +498,7 @@ export type Database = {
     }
     Functions: {
       all_podcasts: {
-        Args: {
-          limit: number
-          isPrivate: boolean
-          isPublished: boolean
-        }
+        Args: { limit: number; isPrivate: boolean; isPublished: boolean }
         Returns: {
           id: number
           title: string
@@ -512,26 +511,13 @@ export type Database = {
         }[]
       }
       assign_podcast_owner: {
-        Args: {
-          id: number
-          owner: string
-          activation_code: string
-        }
+        Args: { id: number; owner: string; activation_code: string }
         Returns: undefined
       }
-      binary_quantize:
-        | {
-            Args: {
-              "": string
-            }
-            Returns: unknown
-          }
-        | {
-            Args: {
-              "": unknown
-            }
-            Returns: unknown
-          }
+      binary_quantize: {
+        Args: { "": string } | { "": unknown }
+        Returns: unknown
+      }
       chunk_vector_search: {
         Args: {
           embedding: string
@@ -580,11 +566,7 @@ export type Database = {
         }[]
       }
       episode_search: {
-        Args: {
-          query: string
-          podcast_slug: string
-          match_count: number
-        }
+        Args: { query: string; podcast_slug: string; match_count: number }
         Returns: {
           id: number
           title: string
@@ -595,15 +577,11 @@ export type Database = {
         }[]
       }
       episode_state: {
-        Args: {
-          status: Json
-        }
+        Args: { status: Json }
         Returns: string
       }
       get_page_parents: {
-        Args: {
-          page_id: number
-        }
+        Args: { page_id: number }
         Returns: {
           id: number
           parent_page_id: number
@@ -612,121 +590,67 @@ export type Database = {
         }[]
       }
       halfvec_avg: {
-        Args: {
-          "": number[]
-        }
+        Args: { "": number[] }
         Returns: unknown
       }
       halfvec_out: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
       halfvec_send: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: string
       }
       halfvec_typmod_in: {
-        Args: {
-          "": unknown[]
-        }
+        Args: { "": unknown[] }
         Returns: number
       }
       hnsw_bit_support: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
       hnsw_halfvec_support: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
       hnsw_sparsevec_support: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
       hnswhandler: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
       is_podcast_owner: {
-        Args: {
-          episodeid: number
-          userid: string
-        }
+        Args: { episodeid: number; userid: string }
         Returns: boolean
       }
       is_podcast_owner_with_podcast_id: {
-        Args: {
-          podcastId: number
-          userid: string
-        }
+        Args: { podcastId: number; userid: string }
         Returns: boolean
       }
       ivfflat_bit_support: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
       ivfflat_halfvec_support: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
       ivfflathandler: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
-      l2_norm:
-        | {
-            Args: {
-              "": unknown
-            }
-            Returns: number
-          }
-        | {
-            Args: {
-              "": unknown
-            }
-            Returns: number
-          }
-      l2_normalize:
-        | {
-            Args: {
-              "": string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              "": unknown
-            }
-            Returns: unknown
-          }
-        | {
-            Args: {
-              "": unknown
-            }
-            Returns: unknown
-          }
+      l2_norm: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: number
+      }
+      l2_normalize: {
+        Args: { "": string } | { "": unknown } | { "": unknown }
+        Returns: unknown
+      }
       latest_episodes: {
-        Args: {
-          limit: number
-        }
+        Args: { limit: number }
         Returns: {
           id: number
           title: string
@@ -739,45 +663,26 @@ export type Database = {
           podcastImageUrl: string
         }[]
       }
-      pgroonga_command:
-        | {
-            Args: {
-              groongacommand: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              groongacommand: string
-              arguments: string[]
-            }
-            Returns: string
-          }
+      pgroonga_command: {
+        Args:
+          | { groongacommand: string }
+          | { groongacommand: string; arguments: string[] }
+        Returns: string
+      }
       pgroonga_command_escape_value: {
-        Args: {
-          value: string
-        }
+        Args: { value: string }
         Returns: string
       }
       pgroonga_equal_query_text_array: {
-        Args: {
-          targets: string[]
-          query: string
-        }
+        Args: { targets: string[]; query: string }
         Returns: boolean
       }
       pgroonga_equal_query_varchar_array: {
-        Args: {
-          targets: string[]
-          query: string
-        }
+        Args: { targets: string[]; query: string }
         Returns: boolean
       }
       pgroonga_equal_text: {
-        Args: {
-          target: string
-          other: string
-        }
+        Args: { target: string; other: string }
         Returns: boolean
       }
       pgroonga_equal_text_condition: {
@@ -788,10 +693,7 @@ export type Database = {
         Returns: boolean
       }
       pgroonga_equal_varchar: {
-        Args: {
-          target: string
-          other: string
-        }
+        Args: { target: string; other: string }
         Returns: boolean
       }
       pgroonga_equal_varchar_condition: {
@@ -801,191 +703,66 @@ export type Database = {
         }
         Returns: boolean
       }
-      pgroonga_escape:
-        | {
-            Args: {
-              value: boolean
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              value: number
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              value: number
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              value: number
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              value: number
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              value: number
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              value: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              value: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              value: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              value: string
-              special_characters: string
-            }
-            Returns: string
-          }
+      pgroonga_escape: {
+        Args:
+          | { value: boolean }
+          | { value: number }
+          | { value: number }
+          | { value: number }
+          | { value: number }
+          | { value: number }
+          | { value: string }
+          | { value: string }
+          | { value: string }
+          | { value: string; special_characters: string }
+        Returns: string
+      }
       pgroonga_flush: {
-        Args: {
-          indexname: unknown
-        }
+        Args: { indexname: unknown }
         Returns: boolean
       }
       pgroonga_handler: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
-      pgroonga_highlight_html:
-        | {
-            Args: {
-              target: string
-              keywords: string[]
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              target: string
-              keywords: string[]
-              indexname: unknown
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              targets: string[]
-              keywords: string[]
-            }
-            Returns: string[]
-          }
-        | {
-            Args: {
-              targets: string[]
-              keywords: string[]
-              indexname: unknown
-            }
-            Returns: string[]
-          }
-      pgroonga_index_column_name:
-        | {
-            Args: {
-              indexname: unknown
-              columnindex: number
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              indexname: unknown
-              columnname: string
-            }
-            Returns: string
-          }
+      pgroonga_highlight_html: {
+        Args:
+          | { target: string; keywords: string[] }
+          | { target: string; keywords: string[]; indexname: unknown }
+          | { targets: string[]; keywords: string[] }
+          | { targets: string[]; keywords: string[]; indexname: unknown }
+        Returns: string[]
+      }
+      pgroonga_index_column_name: {
+        Args:
+          | { indexname: unknown; columnindex: number }
+          | { indexname: unknown; columnname: string }
+        Returns: string
+      }
       pgroonga_is_writable: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      pgroonga_match_positions_byte:
-        | {
-            Args: {
-              target: string
-              keywords: string[]
-            }
-            Returns: number[]
-          }
-        | {
-            Args: {
-              target: string
-              keywords: string[]
-              indexname: unknown
-            }
-            Returns: number[]
-          }
-      pgroonga_match_positions_character:
-        | {
-            Args: {
-              target: string
-              keywords: string[]
-            }
-            Returns: number[]
-          }
-        | {
-            Args: {
-              target: string
-              keywords: string[]
-              indexname: unknown
-            }
-            Returns: number[]
-          }
-      pgroonga_match_term:
-        | {
-            Args: {
-              target: string[]
-              term: string
-            }
-            Returns: boolean
-          }
-        | {
-            Args: {
-              target: string[]
-              term: string
-            }
-            Returns: boolean
-          }
-        | {
-            Args: {
-              target: string
-              term: string
-            }
-            Returns: boolean
-          }
-        | {
-            Args: {
-              target: string
-              term: string
-            }
-            Returns: boolean
-          }
+      pgroonga_match_positions_byte: {
+        Args:
+          | { target: string; keywords: string[] }
+          | { target: string; keywords: string[]; indexname: unknown }
+        Returns: number[]
+      }
+      pgroonga_match_positions_character: {
+        Args:
+          | { target: string; keywords: string[] }
+          | { target: string; keywords: string[]; indexname: unknown }
+        Returns: number[]
+      }
+      pgroonga_match_term: {
+        Args:
+          | { target: string[]; term: string }
+          | { target: string[]; term: string }
+          | { target: string; term: string }
+          | { target: string; term: string }
+        Returns: boolean
+      }
       pgroonga_match_text_array_condition: {
         Args: {
           target: string[]
@@ -1028,20 +805,10 @@ export type Database = {
         }
         Returns: boolean
       }
-      pgroonga_normalize:
-        | {
-            Args: {
-              target: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              target: string
-              normalizername: string
-            }
-            Returns: string
-          }
+      pgroonga_normalize: {
+        Args: { target: string } | { target: string; normalizername: string }
+        Returns: string
+      }
       pgroonga_prefix_varchar_condition: {
         Args: {
           target: string
@@ -1050,9 +817,7 @@ export type Database = {
         Returns: boolean
       }
       pgroonga_query_escape: {
-        Args: {
-          query: string
-        }
+        Args: { query: string }
         Returns: string
       }
       pgroonga_query_expand: {
@@ -1065,10 +830,7 @@ export type Database = {
         Returns: string
       }
       pgroonga_query_extract_keywords: {
-        Args: {
-          query: string
-          index_name?: string
-        }
+        Args: { query: string; index_name?: string }
         Returns: string[]
       }
       pgroonga_query_text_array_condition: {
@@ -1114,98 +876,51 @@ export type Database = {
         Returns: boolean
       }
       pgroonga_result_to_jsonb_objects: {
-        Args: {
-          result: Json
-        }
+        Args: { result: Json }
         Returns: Json
       }
       pgroonga_result_to_recordset: {
-        Args: {
-          result: Json
-        }
+        Args: { result: Json }
         Returns: Record<string, unknown>[]
       }
-      pgroonga_score:
-        | {
-            Args: {
-              row: Record<string, unknown>
-            }
-            Returns: number
-          }
-        | {
-            Args: {
-              tableoid: unknown
-              ctid: unknown
-            }
-            Returns: number
-          }
+      pgroonga_score: {
+        Args:
+          | { row: Record<string, unknown> }
+          | { tableoid: unknown; ctid: unknown }
+        Returns: number
+      }
       pgroonga_set_writable: {
-        Args: {
-          newwritable: boolean
-        }
+        Args: { newwritable: boolean }
         Returns: boolean
       }
       pgroonga_snippet_html: {
-        Args: {
-          target: string
-          keywords: string[]
-          width?: number
-        }
+        Args: { target: string; keywords: string[]; width?: number }
         Returns: string[]
       }
       pgroonga_table_name: {
-        Args: {
-          indexname: unknown
-        }
+        Args: { indexname: unknown }
         Returns: string
       }
       pgroonga_tokenize: {
-        Args: {
-          target: string
-        }
+        Args: { target: string }
         Returns: Json[]
       }
       pgroonga_vacuum: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      pgroonga_wal_apply:
-        | {
-            Args: Record<PropertyKey, never>
-            Returns: number
-          }
-        | {
-            Args: {
-              indexname: unknown
-            }
-            Returns: number
-          }
-      pgroonga_wal_set_applied_position:
-        | {
-            Args: Record<PropertyKey, never>
-            Returns: boolean
-          }
-        | {
-            Args: {
-              block: number
-              offset: number
-            }
-            Returns: boolean
-          }
-        | {
-            Args: {
-              indexname: unknown
-            }
-            Returns: boolean
-          }
-        | {
-            Args: {
-              indexname: unknown
-              block: number
-              offset: number
-            }
-            Returns: boolean
-          }
+      pgroonga_wal_apply: {
+        Args: Record<PropertyKey, never> | { indexname: unknown }
+        Returns: number
+      }
+      pgroonga_wal_set_applied_position: {
+        Args:
+          | Record<PropertyKey, never>
+          | { block: number; offset: number }
+          | { indexname: unknown }
+          | { indexname: unknown; block: number; offset: number }
+        Returns: boolean
+      }
       pgroonga_wal_status: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1219,22 +934,12 @@ export type Database = {
           last_size: number
         }[]
       }
-      pgroonga_wal_truncate:
-        | {
-            Args: Record<PropertyKey, never>
-            Returns: number
-          }
-        | {
-            Args: {
-              indexname: unknown
-            }
-            Returns: number
-          }
+      pgroonga_wal_truncate: {
+        Args: Record<PropertyKey, never> | { indexname: unknown }
+        Returns: number
+      }
       podcast_search: {
-        Args: {
-          query: string
-          match_count: number
-        }
+        Args: { query: string; match_count: number }
         Returns: {
           id: number
           title: string
@@ -1268,64 +973,39 @@ export type Database = {
         Returns: string
       }
       sparsevec_out: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
       sparsevec_send: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: string
       }
       sparsevec_typmod_in: {
-        Args: {
-          "": unknown[]
-        }
+        Args: { "": unknown[] }
         Returns: number
       }
       vector_avg: {
-        Args: {
-          "": number[]
-        }
+        Args: { "": number[] }
         Returns: string
       }
-      vector_dims:
-        | {
-            Args: {
-              "": string
-            }
-            Returns: number
-          }
-        | {
-            Args: {
-              "": unknown
-            }
-            Returns: number
-          }
+      vector_dims: {
+        Args: { "": string } | { "": unknown }
+        Returns: number
+      }
       vector_norm: {
-        Args: {
-          "": string
-        }
+        Args: { "": string }
         Returns: number
       }
       vector_out: {
-        Args: {
-          "": string
-        }
+        Args: { "": string }
         Returns: unknown
       }
       vector_send: {
-        Args: {
-          "": string
-        }
+        Args: { "": string }
         Returns: string
       }
       vector_typmod_in: {
-        Args: {
-          "": unknown[]
-        }
+        Args: { "": unknown[] }
         Returns: number
       }
     }
@@ -1348,27 +1028,29 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -1376,20 +1058,22 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -1397,20 +1081,22 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -1418,14 +1104,37 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const

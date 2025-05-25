@@ -31,7 +31,7 @@ export async function Transcribe(audioUrl: string): Promise<SyncPrerecordedRespo
 }
 
 /** Transcribe the given audio file. The given callback URL will be invoked when complete. */
-export async function TranscribeAsync(audioUrl: string, callbackUrl: string): Promise<AsyncPrerecordedResponse> {
+export async function TranscribeAsync(audioUrl: string, callbackUrl: string, language?: string): Promise<AsyncPrerecordedResponse> {
   console.log(`Starting async audio transcription from ${audioUrl}`);
   console.log(`Callback URL is ${callbackUrl}`);
   const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY || '';
@@ -51,6 +51,7 @@ export async function TranscribeAsync(audioUrl: string, callbackUrl: string): Pr
       paragraphs: true,
       speaker_labels: true,
       smart_format: true,
+      language: language,
     }
   );
   if (error) {
