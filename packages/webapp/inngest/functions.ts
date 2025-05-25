@@ -62,6 +62,7 @@ export const processEpisode = inngest.createFunction(
     console.log(`process/episode event received for episodeId ${episodeId}`, event);
     const supabase = await getSupabaseClientWithToken(supabaseAccessToken);
     let episodeWithPodcast = await GetEpisodeWithPodcast(supabase, episodeId);
+    let podcast = episodeWithPodcast.podcast;
     let episode = EpisodeWithPodcastToEpisode(episodeWithPodcast);
 
     // Check plan limit and bail out if we've hit it.
@@ -109,6 +110,7 @@ export const processEpisode = inngest.createFunction(
           supabase,
           supabaseToken: supabaseAccessToken,
           episode,
+          podcast,
           callbackUrl,
           force,
         });

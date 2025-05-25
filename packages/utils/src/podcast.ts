@@ -141,6 +141,7 @@ export async function ReadPodcastFeed(podcastUrl: string, podcastSlug?: string):
     published: false,
     process: true,
     uuid: uuidv4(),
+    language: feed.language || null,
   };
   return newPodcast;
 }

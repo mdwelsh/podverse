@@ -19,6 +19,7 @@ import {
   EmbedTranscript,
   Episode,
   EpisodeStatus,
+  Podcast,
 } from 'podverse-utils';
 import { createReadStream, createWriteStream } from 'fs';
 import { withFile } from 'tmp-promise';
@@ -49,12 +50,14 @@ export async function TranscribeEpisode({
   supabase,
   supabaseToken,
   episode,
+  podcast,
   callbackUrl,
   force,
 }: {
   supabase: SupabaseClient;
   supabaseToken: string | null;
   episode: Episode;
+  podcast: Podcast;
   callbackUrl: string;
   force: boolean;
 }): Promise<string> {
@@ -112,7 +115,7 @@ export async function TranscribeEpisode({
   episode.audioUrl = audioUrl;
   await UpdateEpisode(supabase, episode);
 
-  const result = await TranscribeAsync(audioUrl, callbackUrl + `?supabaseAccessToken=${supabaseToken}`);
+  const result = await TranscribeAsync(audioUrl, callbackUrl + `?supabaseAccessToken=${supabaseToken}`, podcast.language || undefined);
   console.log(`Starting transcription for episode ${episode.id}: ${JSON.stringify(result, null, 2)}`);
   return 'Transcription started';
 }
