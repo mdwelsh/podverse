@@ -58,7 +58,7 @@ function CallToActionButtons() {
 
 export async function HomeFeatures() {
   return (
-    <section className="container grid w-full items-center gap-6 p-4 pb-8 pt-6 md:p-4 md:py-10">
+    <section className="container mx-auto grid w-11/12 items-center gap-6 p-4 pb-8 pt-6 md:p-4 md:py-10">
       <div className="flex w-full flex-col gap-4">
         <h1 className="mt-4 text-pretty font-mono text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
           AI superpowers for your podcast.
