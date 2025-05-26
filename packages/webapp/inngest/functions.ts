@@ -50,7 +50,7 @@ export const processEpisode = inngest.createFunction(
     retries: 0,
     concurrency: {
       // Limit number of concurrent calls to Deepgram to avoid hitting API limit.
-      limit: 10,
+      limit: 5,
     },
   },
   { event: 'process/episode' },
@@ -221,7 +221,7 @@ export const processPodcast = inngest.createFunction(
     retries: 0,
     concurrency: {
       // Limit number of concurrent calls to Deepgram to avoid hitting API limit.
-      limit: 10,
+      limit: 5,
     },
   },
   { event: 'process/podcast' },
