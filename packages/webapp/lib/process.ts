@@ -115,9 +115,10 @@ export async function TranscribeEpisode({
   episode.audioUrl = audioUrl;
   await UpdateEpisode(supabase, episode);
 
+  console.log(`Transcribing episode ${episode.id} from podcast ${podcast.title} with language ${podcast.language}`);
   const result = await TranscribeAsync(audioUrl, callbackUrl + `?supabaseAccessToken=${supabaseToken}`, podcast.language || undefined);
   console.log(`Starting transcription for episode ${episode.id}: ${JSON.stringify(result, null, 2)}`);
-  return 'Transcription started';
+  return `Transcription started for episode ${episode.id} with language ${podcast.language}`;
 }
 
 /** Called when the transcript is received. */
