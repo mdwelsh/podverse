@@ -3,7 +3,6 @@
 <img src="./packages/webapp/public/images/podverse-episode-screenshot.png" alt="drawing" width="400"/>
 
 Podverse is a web app that brings AI superpowers to podcasts.
-Check out the live site at [https://podverse.ai](https://podverse.ai)!
 
 This project is meant as a demonstration of a full-stack webapp that leverages AI capabilities.
 

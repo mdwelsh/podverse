@@ -34,6 +34,7 @@ export async function Transcribe(audioUrl: string): Promise<SyncPrerecordedRespo
 export async function TranscribeAsync(audioUrl: string, callbackUrl: string, language?: string): Promise<AsyncPrerecordedResponse> {
   console.log(`Starting async audio transcription from ${audioUrl}`);
   console.log(`Callback URL is ${callbackUrl}`);
+  console.log(`Language is ${callbackUrl}`);
   const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY || '';
   if (!DEEPGRAM_API_KEY) {
     throw new Error('Missing DEEPGRAM_API_KEY environment variable.');
